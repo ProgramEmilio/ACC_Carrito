@@ -1,0 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap');
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background: url('../Imagenes/fondo2.jpg') no-repeat center center; /* Si 'Imagenes' está en el mismo nivel que tu archivo CSS */
+    background-size: cover; /* Asegura que la imagen cubra todo el fondo */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: white; /* Asegura que el texto sea legible sobre la imagen */
+}
+
+form {
+    background-color: rgba(255, 255, 255, 0.85); /* Fondo blanco semitransparente para el formulario */
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.2);
+    width: 350px;
+    text-align: center;
+}
+
+form h2 {
+    margin-bottom: 20px;
+    font-weight: 500;
+    color: #333;
+}
+
+.form-group {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 45px;
+    border: 1px solid #ccc;
+    border-radius: 30px;
+    font-size: 16px;
+    outline: none;
+}
+
+.form-group i {
+    position: absolute;
+    top: 12px;
+    left: 15px;
+    font-size: 18px;
+    color: #888;
+}
+
+input[type="submit"] {
+    background-color: #1c157e;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 18px;
+    width: 100%;
+    transition: background-color 0.3s;
+}
+
+input[type="submit"]:hover {
+    background-color: #1c157e;
+}
+
+form p {
+    margin-top: 15px;
+}
+
+form p a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+form p a:hover {
+    text-decoration: underline;
+}

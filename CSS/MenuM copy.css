@@ -1,0 +1,71 @@
+
+
+/* Contenedor principal */
+.cuerpo {
+    max-width: 800px;
+    text-align: left;
+    padding: 30px;
+    background-color: white;
+    border-radius: 8px;
+    color: black;
+}
+
+/* Estilos para encabezados */
+.cuerpo h3 {
+    font-size: 18px;
+    margin: 0;
+    color: black;
+}
+
+.cuerpo h1 {
+    font-size: 36px;
+    color: #0d1146;
+    margin-bottom: 20px;
+}
+
+.cuerpo h2 {
+    font-size: 20px;
+    margin-bottom: 40px;
+}
+
+/* Estilo del botón */
+.boton {
+    background-color: #2ab140;
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.boton:hover {
+    background-color: #007bff;
+}
+
+
+
+.imagen {
+    flex: 0 0 auto; 
+    text-align: right;
+}
+
+.imagen img {
+    max-width: 100%; 
+    height: auto;
+    border-radius: 8px;
+    max-height: 300px; 
+}
+
+
+
+.contenedor {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start; /* Alinea al principio del contenedor */
+    max-width: 1200px;
+    width: 100%; /* Ocupa el 100% del ancho disponible */
+    padding: 20px;
+    box-sizing: border-box;
+}

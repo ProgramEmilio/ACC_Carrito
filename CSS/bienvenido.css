@@ -1,0 +1,13 @@
+.bienvenida-container {
+    position: absolute; /* Posiciona el contenedor de manera absoluta */
+    top: 30px; /* En la parte superior */
+    left: 890px; /* Ajusta la distancia desde la izquierda */
+    padding: 10px; /* Espaciado alrededor del texto */
+}
+
+.bienvenida-container a {
+    text-decoration: none; /* Quita el subrayado del enlace */
+    color: #000000; /* Color del texto */
+    font-size: 20px; /* Tamaño de fuente */
+    font-weight: bold;
+}

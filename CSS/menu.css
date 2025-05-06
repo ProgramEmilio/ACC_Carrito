@@ -1,0 +1,63 @@
+* {
+    padding: 0px;
+    margin: 0px;
+}
+
+.header {
+    margin: auto;
+    width: 100%;
+    background-color: #2f5f98;
+}
+
+.header .nom_sis{
+    font-size: 30px;
+    margin-left: 20px;
+}
+
+ul, ol {
+    list-style: none;
+}
+
+.nav {
+    display: flex;
+    margin-left: 20%;
+    
+}
+
+.nav > li {
+    position: relative;
+    float: left;
+}
+
+.nav li a {
+    background-color: #2f5f98;
+    color: #fff;
+    text-decoration: none;
+    padding: 10px 20px;
+    display: block;
+}
+
+.nav li a:hover {
+    background-color: rgb(6, 46, 80);
+}
+
+.submenu {
+    display: none;
+    position: absolute;
+    background-color: rgb(84, 119, 119);
+    top: 100%;
+    left: 0;
+}
+
+.nav li:hover .submenu {
+    display: block;
+}
+
+.submenu li {
+    float: none;
+}
+
+.submenu li a {
+    padding: 10px 20px;
+    white-space: nowrap;
+}

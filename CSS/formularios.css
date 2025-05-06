@@ -1,0 +1,760 @@
+.titulo{
+    background-color: #5492cc;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    margin-left: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-right: 20px;
+}
+
+.sub_titulo{
+    background-color: #8cb8e0;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    margin-left: 20px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    margin-right: 20px;
+}
+
+.form_edi_usuario {
+    max-width: 100%;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f6fbff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0);
+    font-family: 'Poppins', sans-serif;
+    max-width: 95%; /* Controla el ancho máximo del formulario */
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin: 0 auto; /* Centra el formulario en la pantalla */
+    padding: 20px;
+}
+
+/* Estilos para los campos de texto y áreas de entrada */
+.form_edi_usuario input[type="text"],
+.form_edi_usuario input[type="password"],
+.form_edi_usuario input[type="number"],
+.form_edi_usuario input[type="datetime-local"],
+.form_edi_usuario input[type="option"]
+.form_edi_usuario select {
+    width: calc(100% - 20px); 
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #5492cc; /* Bordes azul medio */
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+}
+
+/* Estilo para el botón de envío */
+.form_edi_usuario input[type="submit"] {
+    background-color: #5492cc;
+    color: white;
+    padding: 15px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+.form_edi_usuario input[type="submit"]:hover {
+    background-color: #417fb3; /* Azul un poco más oscuro al pasar el cursor */
+}
+
+.regresar {
+    background-color: #80b3e2;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    margin-top: 20px; /* Espacio entre el formulario y el botón */
+    margin-bottom: 10px; /* Espacio entre el botón y el pie de página */
+    display: inline-block; /* Asegura que el botón mantenga su posición en el flujo del documento */
+    margin-left: 20px;
+}
+
+/* Hover para el botón de regresar */
+.regresar:hover {
+    background-color: #417fb3;
+}
+
+/* Estilos para las etiquetas */
+.form_edi_usuario label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #030f1a; 
+    font-size: 20px;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* General */
+* {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+/*FORMULARIO DE REGISTRO USUARIO*/
+.form_reg_usuario {
+    max-width: 100%;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f6fbff; 
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(70, 196, 255, 0);
+    font-family: 'Poppins', sans-serif;
+    max-width: 95%; /* Controla el ancho máximo del formulario */
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin: 0 auto; /* Centra el formulario en la pantalla */
+    padding: 20px;
+}
+
+/* Estilos para los campos de texto y áreas de entrada */
+.form_reg_usuario input[type="text"],
+.form_reg_usuario input[type="number"],
+.form_reg_usuario input[type="password"],
+.form_reg_usuario input[type="date"],
+.form_reg_usuario input[type="email"],
+.form_reg_usuario textarea,
+.form_reg_usuario select {
+    width: calc(100% - 20px); 
+    padding: 15px;
+    margin-bottom: 5px;
+    border: 1px solid #5492cc; /* Bordes azul medio */
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+}
+
+/* Estilo para el botón de envío */
+.form_reg_usuario input[type="submit"] {
+    background-color: #5492cc;
+    color: white;
+    padding: 15px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+/* Hover para el botón */
+.form_reg_usuario input[type="submit"]:hover {
+    background-color: #417fb3; /* Azul un poco más oscuro al pasar el cursor */
+}
+
+/* Estilos para las etiquetas */
+.form_reg_usuario label {
+    display: block;
+    margin-bottom: 2px;
+    font-weight: bold;
+    color: #030f1a; 
+    font-family: 'Poppins', sans-serif;
+    font-size: 20px;
+}
+
+/* General */
+* {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+/*FORMULARIO DE REGISTRO SALON*/
+.form_reg_salon {
+    max-width: 100%;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f6fbff; 
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(70, 196, 255, 0);
+    font-family: 'Poppins', sans-serif;
+    max-width: 95%; /* Controla el ancho máximo del formulario */
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin: 0 auto; /* Centra el formulario en la pantalla */
+    padding: 20px;
+}
+
+/* Estilos para los campos de texto y áreas de entrada */
+.form_reg_salon input[type="text"],
+.form_reg_salon input[type="password"],
+.form_reg_salon select {
+    width: calc(100% - 20px); 
+    padding: 15px;
+    margin-bottom: 5px;
+    border: 1px solid #5492cc; /* Bordes azul medio */
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+}
+
+/* Estilo para el botón de envío */
+.form_reg_salon input[type="submit"] {
+    background-color: #5492cc;
+    color: white;
+    padding: 15px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+/* Hover para el botón */
+.form_reg_salon input[type="submit"]:hover {
+    background-color: #417fb3; /* Azul un poco más oscuro al pasar el cursor */
+}
+
+/* Estilos para las etiquetas */
+.form_reg_salon label {
+    display: block;
+    margin-bottom: 2px;
+    font-weight: bold;
+    color: #030f1a; 
+    font-family: 'Poppins', sans-serif;
+    font-size: 20px;
+}
+
+/*FORMULARIO DE MODIFICACION SALON*/
+.form_edi_salon {
+    max-width: 100%;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f6fbff; 
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(70, 196, 255, 0);
+    font-family: 'Poppins', sans-serif;
+    max-width: 95%; 
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin: 0 auto; 
+    padding: 20px;
+}
+
+.form_edi_salon input[type="text"],
+.form_edi_salon input[type="password"],
+.form_edi_salon select {
+    width: calc(100% - 20px); 
+    padding: 15px;
+    margin-bottom: 5px;
+    border: 1px solid #5492cc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+}
+
+.form_edi_salon input[type="submit"] {
+    background-color: #5492cc;
+    color: white;
+    padding: 15px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+
+.form_edi_salon input[type="submit"]:hover {
+    background-color: #417fb3;
+}
+
+
+.form_edi_salon label {
+    display: block;
+    margin-bottom: 2px;
+    font-weight: bold;
+    color: #030f1a; 
+    font-family: 'Poppins', sans-serif;
+    font-size: 20px;
+}
+
+#descripcion{
+    padding: 30px;
+}
+
+/*FORMULARIO DE REGISTRAR EDIFICIO*/
+.form_reg_edificio {
+    max-width: 100%;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f6fbff; 
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(70, 196, 255, 0);
+    font-family: 'Poppins', sans-serif;
+    max-width: 95%; 
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin: 0 auto; 
+    padding: 20px;
+}
+
+.form_reg_edificio input[type="text"],
+.form_reg_edificio input[type="password"],
+.form_reg_edificio select {
+    width: calc(100% - 20px); 
+    padding: 15px;
+    margin-bottom: 5px;
+    border: 1px solid #5492cc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+}
+
+.form_reg_edificio input[type="submit"] {
+    background-color: #5492cc;
+    color: white;
+    padding: 15px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+
+.form_reg_edificio input[type="submit"]:hover {
+    background-color: #417fb3;
+}
+
+
+.form_reg_edificio label {
+    display: block;
+    margin-bottom: 2px;
+    font-weight: bold;
+    color: #030f1a; 
+    font-family: 'Poppins', sans-serif;
+    font-size: 20px;
+}
+
+/*FORMULARIO EDITAR EDIFICIO*/
+.form_edi_edificio {
+    max-width: 100%;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f6fbff; 
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(70, 196, 255, 0);
+    font-family: 'Poppins', sans-serif;
+    max-width: 95%; 
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin: 0 auto; 
+    padding: 20px;
+}
+
+.form_edi_edificio input[type="text"],
+.form_edi_edificio input[type="password"],
+.form_edi_edificio select {
+    width: calc(100% - 20px); 
+    padding: 15px;
+    margin-bottom: 5px;
+    border: 1px solid #5492cc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+}
+
+.form_edi_edificio input[type="submit"] {
+    background-color: #5492cc;
+    color: white;
+    padding: 15px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+
+.form_edi_edificio input[type="submit"]:hover {
+    background-color: #417fb3;
+}
+
+
+.form_edi_edificio label {
+    display: block;
+    margin-bottom: 2px;
+    font-weight: bold;
+    color: #030f1a; 
+    font-family: 'Poppins', sans-serif;
+    font-size: 20px;
+}
+
+/*FORMULARIO DE REGISTRAR DEPARTAMENTO*/
+.form_reg_departamento {
+    max-width: 100%;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f6fbff; 
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(70, 196, 255, 0);
+    font-family: 'Poppins', sans-serif;
+    max-width: 95%; 
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin: 0 auto; 
+    padding: 20px;
+}
+
+.form_reg_departamento input[type="text"],
+.form_reg_departamento input[type="password"],
+.form_reg_departamento select {
+    width: calc(100% - 20px); 
+    padding: 15px;
+    margin-bottom: 5px;
+    border: 1px solid #5492cc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+}
+
+.form_reg_departamento input[type="submit"] {
+    background-color: #5492cc;
+    color: white;
+    padding: 15px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+
+.form_reg_departamento input[type="submit"]:hover {
+    background-color: #417fb3;
+}
+
+
+.form_reg_departamento label {
+    display: block;
+    margin-bottom: 2px;
+    font-weight: bold;
+    color: #030f1a; 
+    font-family: 'Poppins', sans-serif;
+    font-size: 20px;
+}
+
+/*FORMULARIO EDITAR DEPARTAMENTO*/
+.form_edi_departamento {
+    max-width: 100%;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f6fbff; 
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(70, 196, 255, 0);
+    font-family: 'Poppins', sans-serif;
+    max-width: 95%; 
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin: 0 auto; 
+    padding: 20px;
+}
+
+.form_edi_departamento input[type="text"],
+.form_edi_departamento input[type="password"],
+.form_edi_departamento select {
+    width: calc(100% - 20px); 
+    padding: 15px;
+    margin-bottom: 5px;
+    border: 1px solid #5492cc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+}
+
+.form_edi_departamento input[type="submit"] {
+    background-color: #5492cc;
+    color: white;
+    padding: 15px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+
+.form_edi_departamento input[type="submit"]:hover {
+    background-color: #417fb3;
+}
+
+
+.form_edi_departamento label {
+    display: block;
+    margin-bottom: 2px;
+    font-weight: bold;
+    color: #030f1a; 
+    font-family: 'Poppins', sans-serif;
+    font-size: 20px;
+}
+
+/*FORMULARIO PARA SOLICITUD*/
+.form_solicitud
+ {
+    max-width: 100%;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f6fbff; 
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(70, 196, 255, 0);
+    font-family: 'Poppins', sans-serif;
+    max-width: 95%; 
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin: 0 auto; 
+    padding: 20px;
+}
+
+.form_solicitud input[type="text"],
+.form_solicitud input[type="password"],
+.form_solicitud select {
+    width: calc(100% - 20px); 
+    padding: 15px;
+    margin-bottom: 5px;
+    border: 1px solid #5492cc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+}
+
+.form_solicitud input[type="submit"] {
+    background-color: #5492cc;
+    color: white;
+    padding: 15px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+
+.form_solicitud input[type="submit"]:hover {
+    background-color: #417fb3;
+}
+
+
+.form_solicitud label {
+    display: block;
+    margin-bottom: 2px;
+    font-weight: bold;
+    color: #030f1a; 
+    font-family: 'Poppins', sans-serif;
+    font-size: 20px;
+}
+
+
+/*FORMULARIO DE REGISTRO TIPO USUARIO*/
+.form_tipoUsuario {
+    max-width: 100%;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f6fbff; 
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(70, 196, 255, 0);
+    font-family: 'Poppins', sans-serif;
+    max-width: 95%; /* Controla el ancho máximo del formulario */
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin: 0 auto; /* Centra el formulario en la pantalla */
+    padding: 20px;
+}
+
+/* Estilos para los campos de texto y áreas de entrada */
+.form_tipoUsuario input[type="text"],
+.form_tipoUsuario input[type="password"],
+.form_tipoUsuario select {
+    width: calc(100% - 20px); 
+    padding: 15px;
+    margin-bottom: 5px;
+    border: 1px solid #5492cc; /* Bordes azul medio */
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+}
+
+/* Estilo para el botón de envío */
+.form_tipoUsuario input[type="submit"] {
+    background-color: #5492cc;
+    color: white;
+    padding: 15px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+/* Hover para el botón */
+.form_tipoUsuario input[type="submit"]:hover {
+    background-color: #417fb3; /* Azul un poco más oscuro al pasar el cursor */
+}
+
+/* Estilos para las etiquetas */
+.form_tipoUsuario label {
+    display: block;
+    margin-bottom: 2px;
+    font-weight: bold;
+    color: #030f1a; 
+    font-family: 'Poppins', sans-serif;
+    font-size: 20px;
+}
+
+/*FORMULARIO DE REGISTRO TIPO SERVICIO*/
+.form_reg_servicio {
+    max-width: 100%;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f6fbff; 
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(70, 196, 255, 0);
+    font-family: 'Poppins', sans-serif;
+    max-width: 95%; /* Controla el ancho máximo del formulario */
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin: 0 auto; /* Centra el formulario en la pantalla */
+    padding: 20px;
+}
+
+/* Estilos para los campos de texto y áreas de entrada */
+.form_reg_servicio input[type="text"],
+.form_reg_servicio input[type="password"],
+.form_reg_servicio select {
+    width: calc(100% - 20px); 
+    padding: 15px;
+    margin-bottom: 5px;
+    border: 1px solid #5492cc; /* Bordes azul medio */
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+}
+
+/* Estilo para el botón de envío */
+.form_reg_servicio input[type="submit"] {
+    background-color: #5492cc;
+    color: white;
+    padding: 15px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+/* Hover para el botón */
+.form_reg_servicio input[type="submit"]:hover {
+    background-color: #417fb3; /* Azul un poco más oscuro al pasar el cursor */
+}
+
+/* Estilos para las etiquetas */
+.form_reg_servicio label {
+    display: block;
+    margin-bottom: 2px;
+    font-weight: bold;
+    color: #030f1a; 
+    font-family: 'Poppins', sans-serif;
+    font-size: 20px;
+}
+
+
+/*FORMULARIO DE PROBLEMAS*/
+.form_problema {
+    max-width: 100%;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f6fbff; 
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(70, 196, 255, 0);
+    font-family: 'Poppins', sans-serif;
+    max-width: 95%; /* Controla el ancho máximo del formulario */
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin: 0 auto; /* Centra el formulario en la pantalla */
+    padding: 20px;
+}
+
+/* Estilos para los campos de texto y áreas de entrada */
+.form_problema input[type="text"],
+.form_problema input[type="password"],
+.form_problema select {
+    width: calc(100% - 20px); 
+    padding: 15px;
+    margin-bottom: 5px;
+    border: 1px solid #5492cc; /* Bordes azul medio */
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+}
+
+/* Estilo para el botón de envío */
+.form_problema input[type="submit"] {
+    background-color: #5492cc;
+    color: white;
+    padding: 15px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+/* Hover para el botón */
+.form_problema input[type="submit"]:hover {
+    background-color: #417fb3; /* Azul un poco más oscuro al pasar el cursor */
+}
+
+/* Estilos para las etiquetas */
+.form_problema label {
+    display: block;
+    margin-bottom: 2px;
+    font-weight: bold;
+    color: #030f1a; 
+    font-family: 'Poppins', sans-serif;
+    font-size: 20px;
+}

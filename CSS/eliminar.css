@@ -1,0 +1,165 @@
+.titulo{
+    background-color: #5492cc;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    margin-left: 20px;
+    margin-top: 20px;
+    margin-right: 20px;
+}
+
+.sub_titulo h3{
+    background-color: #5c8cb9;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    margin-left: 20px;
+    margin-top: 20px;
+    margin-right: 20px;
+}
+
+.txt{
+    text-align: left;
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-top: 20px;
+    color: black;
+}
+
+.info{
+    background-color: #f6fbff;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    margin-left: 20px;
+    margin-top: 20px;
+    margin-right: 20px;
+}
+
+.info p {
+    margin-top: 15px;
+    margin-bottom: 10px;
+    font-size: 20px;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.Eliminar_U input[type="submit"] {
+    background-color: #5492cc;
+    color: white;
+    padding: 15px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    margin-top: 20px;
+    margin-bottom: 40px;
+    font-weight: bold;
+    margin-left: 20px;
+}
+
+.Eliminar_Salon input[type="submit"] {
+    background-color: #5492cc;
+    color: white;
+    padding: 15px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    margin-top: 20px;
+    margin-bottom: 40px;
+    font-weight: bold;
+    margin-left: 20px;
+}
+
+.Eliminar_Edificio input[type="submit"] {
+    background-color: #5492cc;
+    color: white;
+    padding: 15px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    margin-top: 20px;
+    margin-bottom: 40px;
+    font-weight: bold;
+    margin-left: 20px;
+}
+
+.Eliminar_Departamento input[type="submit"] {
+    background-color: #5492cc;
+    color: white;
+    padding: 15px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    margin-top: 20px;
+    margin-bottom: 40px;
+    font-weight: bold;
+    margin-left: 20px;
+}
+
+.regresar {
+    background-color: #80b3e2;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    margin-top: 20px; 
+    margin-bottom: 10px; 
+    display: inline-block; 
+    margin-left: 20px;
+}
+
+.regresar:hover {
+    background-color: #417fb3;
+}
+
+h1, h2 {
+    color: #000000;
+}
+table {
+    width: 100%;
+    margin-bottom: 20px;
+    border-collapse: collapse;
+}
+table, th, td {
+    border: 1px solid #ddd;
+}
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+.form-section {
+    margin-bottom: 30px;
+}
+.form-section input, .form-section select {
+    padding: 8px;
+    width: 100%;
+    margin-bottom: 10px;
+}
+.form-section button {
+    padding: 10px 20px;
+    background-color:rgb(69, 131, 160);
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+.form-section button:hover {
+    background-color:rgb(91, 161, 194);
+}
+.error-message {
+    color: red;
+}
+.success-message {
+    color: green;
+}

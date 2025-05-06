@@ -1,0 +1,213 @@
+* {
+    padding: 0px;
+    margin: 0px;
+}
+
+.header {
+    margin: auto;
+    width: 100%;
+    background-color: #2f5f98;
+}
+
+.header .nom_sis {
+    font-size: 30px;
+    margin-left: 20px;
+    color: #fff;
+}
+
+ul, ol {
+    list-style: none;
+}
+
+.nav {
+    display: flex;
+    margin-left: 20%;
+}
+
+.nav > li {
+    position: relative;
+    float: left;
+}
+
+.nav li a {
+    background-color: #2f5f98;
+    color: #fff;
+    text-decoration: none;
+    padding: 10px 20px;
+    display: block;
+}
+
+.nav li a:hover {
+    background-color: rgb(6, 46, 80);
+}
+
+.submenu {
+    display: none;
+    position: absolute;
+    background-color: #2f5f98;
+    top: 100%;
+    left: 0;
+}
+
+.nav li:hover .submenu {
+    display: block;
+}
+
+.submenu li {
+    float: none;
+}
+
+.submenu li a {
+    background-color: #2f5f98;
+    color: #fff;
+    padding: 10px 20px;
+    white-space: nowrap;
+    display: block;
+}
+
+.submenu li a:hover {
+    background-color: rgb(6, 46, 80);
+}
+.body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+h1, h2 {
+    color: #000000;
+}
+table {
+    width: 100%;
+    margin-bottom: 20px;
+    border-collapse: collapse;
+}
+table, th, td {
+    border: 1px solid #ddd;
+}
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+.form-section {
+    margin-bottom: 30px;
+}
+.form-section input, .form-section select {
+    padding: 8px;
+    width: 100%;
+    margin-bottom: 10px;
+}
+.form-section button {
+    padding: 10px 20px;
+    background-color:rgb(69, 131, 160);
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+.form-section button:hover {
+    background-color:rgb(91, 161, 194);
+}
+.error-message {
+    color: red;
+}
+.success-message {
+    color: green;
+}
+
+.estatus {
+    font-weight: bold;
+    padding: 5px 15px;
+    border-radius: 15px;
+    text-transform: capitalize;
+    color: #fff;
+    display: inline-block;
+    text-align: center;
+    margin-right: 10px;
+    width: auto;
+}
+
+.estatus-generado { background-color: #9E9E9E; }
+.estatus-en-preparacion { background-color: #FF9800; }
+.estatus-a-enviar { background-color: #FFEB3B; }
+.estatus-en-distribucion { background-color: #4CAF50; }
+.estatus-en-camino { background-color: #2196F3; }
+.estatus-entregado { background-color: #e0620d; }
+.estatus-devolucion { background-color: #DC3545; }
+
+@media (max-width: 768px) {
+    .estatus {
+        font-size: 14px;
+        padding: 5px 10px;
+    }
+}
+
+.logout-container {
+    position: absolute;
+    top: 30px;
+    right: 20px;
+}
+
+.btn_logout {
+    background-color: #d9534f; /* Rojo */
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-left: 10px;
+}
+
+.btn_logout:hover {
+    background-color: #c9302c; /* Rojo más oscuro */
+    transform: scale(1.05);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn_logout:active {
+    transform: scale(0.98);
+}
+.body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+h1, h2 {
+    color: #000000;
+}
+table {
+    width: 100%;
+    margin-bottom: 20px;
+    border-collapse: collapse;
+}
+table, th, td {
+    border: 1px solid #ddd;
+}
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+.form-section {
+    margin-bottom: 30px;
+}
+.form-section input, .form-section select {
+    padding: 8px;
+    width: 100%;
+    margin-bottom: 10px;
+}
+.form-section button {
+    padding: 10px 20px;
+    background-color:rgb(69, 131, 160);
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+.form-section button:hover {
+    background-color:rgb(91, 161, 194);
+}
+.error-message {
+    color: red;
+}
+.success-message {
+    color: green;
+}

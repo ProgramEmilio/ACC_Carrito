@@ -1,0 +1,33 @@
+.html {
+    font-size: 20px;
+    overflow-y: auto;
+}
+
+.cabecera{
+    height: 100px;
+    width: 100%;
+    background-color: rgb(255, 255, 255);
+    border: 0.5px solid rgb(255, 255, 255);
+}
+
+.nom_sis{
+    position: absolute;
+    margin-top: 20px;
+    margin-left: 30%;
+}
+
+/* Estilos para la imagen */
+.img-logo{
+    height: 90px;
+    width: 100px;
+    float: left;
+    margin-left: 50px; 
+    margin-top: 5px;
+}
+
+.img-avatar{
+    height: 100px;
+    width: 100px;
+    float: right;
+    margin-right: 30px;
+}

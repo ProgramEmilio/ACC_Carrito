@@ -1,0 +1,74 @@
+.contenedor {
+    padding: 20px;
+    background-color: #cbdef0;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 20px auto;
+    border-radius: 10px;
+    max-width: 1200px;
+    border: 1px solid #98afc5;
+}
+
+.c1 {
+    background-color: #5492cc;
+    border: none;
+    margin: 15px;
+    width: 250px;
+    height: 200px;
+    border-radius: 15px; 
+    box-shadow: 0 8px 16px rgba(54, 53, 53, 0.2); 
+    transition: transform 0.3s, box-shadow 0.3s; /* Efecto suave al pasar el mouse */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.c1:hover {
+    transform: scale(1.05); 
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3); 
+}
+
+.txt {
+    text-align: center;
+    font-size: 22px;
+    font-weight: bold;
+    color: white;
+    transition: color 0.3s ease;
+}
+
+.c1:hover .txt {
+    color: #0d2030; /* Color más claro al hover */
+}
+
+a {
+    text-decoration: underline;
+    color: purple;
+}
+
+.btn_edi {
+    background-color: #6dade9;
+    border: none;
+    margin: 15px;
+    width: 90px;
+    height: 60px;
+    border-radius: 15px; 
+    box-shadow: 0 8px 16px rgba(54, 53, 53, 0.2); 
+    transition: transform 0.3s, box-shadow 0.3s; /* Efecto suave al pasar el mouse */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.botones {
+    display: flex;
+    margin-left: 20px;
+} 
+
+.tx {
+    font-size: 15px;
+    font-weight: bold;
+    color: rgb(0, 0, 0);
+}

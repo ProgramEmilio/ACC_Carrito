@@ -1,0 +1,97 @@
+/* Estilos principales */
+.cuerpo {
+    font-family: 'Roboto', sans-serif;
+    padding: 20px;
+    background-color: #f4f4f4;
+    max-width: 1000px; /* Define un ancho máximo para centrarlo mejor */
+    margin: 0 auto;   /* Centra el contenido horizontalmente */
+    text-align: center; /* Centra el texto dentro del contenedor */
+}
+
+/* Botón centrado */
+.div_boton {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+/* Estilo del botón */
+.button {
+    background-color: #007bff;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.button:hover {
+    background-color: #0056b3;
+}
+
+/* Estilo para los contenedores de reportes */
+.reporte-container {
+    display: flex;
+    justify-content: space-between;
+    background-color: white;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.reporte-info {
+    flex: 1;
+    padding-right: 20px;
+}
+
+.reporte-info p {
+    margin: 5px 0;
+}
+
+.reporte-accion {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.reporte-accion p {
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.reporte-accion form {
+    margin-bottom: 10px;
+}
+
+.reporte-accion button {
+    background-color: #28a745;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.reporte-accion button:hover {
+    background-color: #218838;
+}
+
+/* Media queries para pantallas pequeñas */
+@media (max-width: 768px) {
+    .reporte-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .reporte-info {
+        padding-right: 0;
+        margin-bottom: 15px;
+    }
+}

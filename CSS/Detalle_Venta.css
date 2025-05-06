@@ -1,0 +1,74 @@
+/* Contenedor principal para centrar las tarjetas */
+.listado-pedidos {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+}
+
+/* Tarjeta del pedido */
+.reporte-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    padding: 30px;
+    width: 80%;
+    max-width: 900px;
+    text-align: center;
+}
+
+/* Encabezado del pedido */
+.reporte-container h2 {
+    background-color: #007bff;
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+/* Contenedor flexible para imagen e información */
+.product-details {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    justify-content: center;
+}
+
+/* Estilo de la imagen */
+.product-image-venta img {
+    width: 200px;
+    height: 200px;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+/* Información del producto */
+.product-info {
+    flex: 1;
+    text-align: left;
+}
+
+.product-info p {
+    font-size: 18px;
+    margin: 8px 0;
+    color: #333;
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+    .product-details {
+        flex-direction: column;
+    }
+
+    .product-image img {
+        width: 100%;
+        max-width: 300px;
+        height: auto;
+    }
+
+    .product-info {
+        text-align: center;
+    }
+}
