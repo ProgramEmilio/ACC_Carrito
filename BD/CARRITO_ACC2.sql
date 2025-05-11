@@ -10,7 +10,7 @@ roles VARCHAR(20) NOT NULL
 CREATE TABLE usuario (
 id_usuario INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 nombre_usuario VARCHAR(50) NOT NULL,
-correo TEXT NOT NULL,
+correo VARCHAR(100) NOT NULL,
 contraseña VARCHAR(25) NOT NULL,
 id_rol INT NOT NULL, 
 CONSTRAINT fk_usuario_roles FOREIGN KEY (id_rol) REFERENCES Roles(id_rol)
@@ -73,23 +73,24 @@ CONSTRAINT fk_art_com FOREIGN KEY (id_articulo) REFERENCES articulos(id_articulo
 CONSTRAINT fk_atri_com FOREIGN KEY (id_atributo) REFERENCES atributos(id_atributo)
 );
 
-CREATE TABLE detalle_carrito(
+CREATE TABLE carrito(
 id_carrito INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 id_cliente INT NOT NULL,
-id_articulo VARCHAR(5) NOT NULL,
 fecha DATETIME NOT NULL,
-cantidad DECIMAL(6,2) NOT NULL,
-precio DECIMAL(6,2) NOT NULL,
-importe DECIMAL(6,2) NOT NULL,
-CONSTRAINT fk_cliente_carrito FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente),
-CONSTRAINT fk_articulo_carrito FOREIGN KEY (id_articulo) REFERENCES articulos(id_articulo)
+total DECIMAL(10,2) DEFAULT 0,
+CONSTRAINT fk_cliente_carrito FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente)
 );
 
-CREATE TABLE listado_carrito(
-id_listado_carrito INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+CREATE TABLE detalle_carrito(
+id_detalle_carrito INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 id_carrito INT NOT NULL,
-total DECIMAL(6,2) NOT NULL,
-CONSTRAINT fk_listado_carrito FOREIGN KEY (id_carrito) REFERENCES detalle_carrito(id_carrito)
+id_articulo VARCHAR(5) NOT NULL,
+cantidad DECIMAL(6,2) NOT NULL,
+precio DECIMAL(6,2) NOT NULL,
+importe DECIMAL(10,2) NOT NULL,
+personalizacion ENUM('Icono','Texto','Imagen'),
+CONSTRAINT fk_detalle_carrito FOREIGN KEY (id_carrito) REFERENCES carrito(id_carrito),
+CONSTRAINT fk_articulo_carrito FOREIGN KEY (id_articulo) REFERENCES articulos(id_articulo)
 );
 
 CREATE TABLE paqueteria(
@@ -119,11 +120,11 @@ CREATE TABLE pedido(
 id_pedido INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 id_envio INT NOT NULL,
 id_paqueteria INT NOT NULL,
-id_listado_carrito INT NOT NULL,
+id_carrito INT NOT NULL,
 precio_total_pedido DECIMAL(6,2) NOT NULL,
 CONSTRAINT fk_pedido_envio FOREIGN KEY (id_envio) REFERENCES envio(id_envio),
 CONSTRAINT fk_pedido_paqueteria FOREIGN KEY (id_paqueteria) REFERENCES paqueteria(id_paqueteria),
-CONSTRAINT fk_pedido_carrito FOREIGN KEY (id_listado_carrito) REFERENCES listado_carrito(id_listado_carrito)
+CONSTRAINT fk_pedido_carrito FOREIGN KEY (id_carrito) REFERENCES arrito(id_carrito)
 );
 
 CREATE TABLE pago(
