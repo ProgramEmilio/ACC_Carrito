@@ -8,7 +8,7 @@
 <body>
     <?php
     $_servername='localhost:3307';
-    $database='ERP_ACC';
+    $database='CARRITO_ACC';
     $username='root';
     $password='';
     //create connection

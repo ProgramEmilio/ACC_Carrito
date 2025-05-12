@@ -15,12 +15,12 @@ $menus = [
             "Usuario" => "../Usuarios/usuario.php",
             "Registro" => "../Usuarios/Registro/Registro_Usuario.php"
         ],
-        "Incapacidad" =>[
+        "Catalogo" =>[
             "Incapacidad" => "../Incapacidad/incapacidades.php",
             "Registro" => "../Incapacidad/Registro/Registro_Incapacidades.php"
         ],
-        "Nomina" =>[
-            "Nomina" => "../Nomina/Nomina.php",
+        "Carrito" =>[
+            "Nomina" => "../Carrito/carrito.php",
             "Registro" => "../Nomina/Registro_N/Registro_Nomina.php"
         ]
     ]
