@@ -1,21 +1,13 @@
-// usuarios/index.php
 <?php
-include('../BD/ConexionBD.php');
-include('../Nav/header.php');
-session_start();
-
-if (!isset($_SESSION['id_rol'])) {
-    header("Location: ../Login/login.php");
-    exit();
-}
+include('../BD/ConexionBDB.php');
+include('../Nav/header_Banco.php');
 
 $query = "SELECT * FROM usuario";
 $resultado = $conn->query($query);
 ?>
-
-<h2>Lista de Usuarios</h2>
-<a href="crear.php" class="btn">Agregar Usuario</a>
-<table>
+<h1 class="titulo">Lista de Usuarios</h1>
+<a href="Registro_U\Registro_Usuario.php" class="button">Agregar Usuario</a>
+<table class='tabla'>
   <tr>
     <th>ID</th>
     <th>Nombre</th>
@@ -28,8 +20,8 @@ $resultado = $conn->query($query);
     <td><?= $row['nombre_usuario'] ?></td>
     <td><?= $row['correo'] ?></td>
     <td>
-      <a href="editar.php?id=<?= $row['id_usuario'] ?>">Editar</a> |
-      <a href="eliminar.php?id=<?= $row['id_usuario'] ?>" onclick="return confirm('¿Eliminar usuario?')">Eliminar</a>
+      <a href="Editar_U/Modificar.php?id=<?= $row['id_usuario'] ?>" class="button">Editar</a> |
+      <a href="Eliminar_U\Eliminar_U.php?id=<?= $row['id_usuario'] ?>" onclick="return confirm('¿Eliminar usuario?')" class="button">Eliminar</a>
     </td>
   </tr>
   <?php endwhile; ?>

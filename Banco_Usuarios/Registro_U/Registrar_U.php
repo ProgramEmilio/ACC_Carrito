@@ -1,76 +1,41 @@
 <?php
-include('../../BD/ConexionBD.php');
+include('../../BD/ConexionBDB.php');
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    date_default_timezone_set('America/Mazatlan');
-
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $nombre_usuario = $_POST['nombre_usuario'];
     $correo = $_POST['correo'];
-    $contraseña = $_POST['contraseña'];
-    $id_rol = $_POST['id_rol'];
-    $id_departamento = $_POST['id_departamento'];
-    $fecha_ingreso = date("Y-m-d H:i:s");
+    $clave = $_POST['contraseña'];
 
-    $nom_persona = $_POST['nom_persona'];
+    $nombre_cliente = $_POST['nombre_cliente'];
     $apellido_paterno = $_POST['apellido_paterno'];
     $apellido_materno = $_POST['apellido_materno'];
-    $curp = $_POST['curp'];
-    $rfc = $_POST['rfc'];
-    $telefono = $_POST['telefono'];
-    $modo_pago = $_POST['modo_pago'];
-    $sueldo = $_POST['sueldo'];
-
     $codigo_postal = $_POST['codigo_postal'];
     $calle = $_POST['calle'];
     $num_ext = $_POST['num_ext'];
     $colonia = $_POST['colonia'];
     $ciudad = $_POST['ciudad'];
+    $telefono = $_POST['telefono'];
 
+    $conn->begin_transaction();
 
-    // Insertar en la tabla usuario
-    $sql_usuario = "INSERT INTO usuario (nombre_usuario, correo, contraseña, id_rol, id_departamento, fecha_ingreso)
-                    VALUES (?, ?, ?, ?, ?, ?)";
-    $stmt_usuario = $conn->prepare($sql_usuario);
-    $stmt_usuario->bind_param("sssiss", $nombre_usuario, $correo, $contraseña, $id_rol, $id_departamento, $fecha_ingreso);
+    try {
+        $query = "INSERT INTO usuario (nombre_usuario, correo, contraseña) VALUES (?, ?, ?)";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("sss", $nombre_usuario, $correo, $clave);
+        $stmt->execute();
+        $id_usuario = $stmt->insert_id;
 
-    if ($stmt_usuario->execute()) {
-        $id_usuario = $stmt_usuario->insert_id;
+        $query_cliente = "INSERT INTO cliente (id_usuario, nombre_cliente, apellido_paterno, apellido_materno, codigo_postal, calle, num_ext, colonia, ciudad, telefono) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $stmt = $conn->prepare($query_cliente);
+        $stmt->bind_param("isssssssss", $id_usuario, $nombre_cliente, $apellido_paterno, $apellido_materno, $codigo_postal, $calle, $num_ext, $colonia, $ciudad, $telefono);
+        $stmt->execute();
 
-        // Insertar en la tabla persona
-        $sql_persona = "INSERT INTO persona (
-            id_usuario, nom_persona, apellido_paterno, apellido_materno, curp, rfc,
-            telefono, sueldo, modo_Pago
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        $stmt_persona = $conn->prepare($sql_persona);
-        $stmt_persona->bind_param("issssssds", $id_usuario, $nom_persona, $apellido_paterno, $apellido_materno, $curp, $rfc, $telefono, $sueldo, $modo_pago);
-
-        $sql_persona = "INSERT INTO persona (
-            id_usuario, nom_persona, apellido_paterno, apellido_materno, curp, rfc,
-            codigo_postal, calle, num_ext, colonia, ciudad,
-            telefono, sueldo, modo_Pago
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        
-        $stmt_persona = $conn->prepare($sql_persona);
-        $stmt_persona->bind_param("isssssssisssds", $id_usuario, $nom_persona, $apellido_paterno, $apellido_materno, $curp, $rfc, $codigo_postal,
-        $calle, $num_ext, $colonia, $ciudad,
-            $telefono, $sueldo, $modo_pago);
-        
-
-        if ($stmt_persona->execute()) {
-            echo "<script>
-                alert('Usuario registrado correctamente.');
-                window.location.href = '../Usuario.php';
-            </script>";
-        } else {
-            echo "Error al insertar en persona: " . $stmt_persona->error;
-        }
-
-        $stmt_persona->close();
-    } else {
-        echo "Error al insertar en usuario: " . $stmt_usuario->error;
+        $conn->commit();
+        header("Location: ../Usuarios_B.php");
+        exit();
+    } catch (Exception $e) {
+        $conn->rollback();
+        echo "Error al insertar: " . $e->getMessage();
     }
-
-    $stmt_usuario->close();
-    $conn->close();
 }
 ?>
