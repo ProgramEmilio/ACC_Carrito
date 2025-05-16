@@ -1,117 +1,63 @@
 <?php
-include('../../BD/ConexionBD.php');
-include('../../Nav/header2.php');
+include('../../BD/ConexionBDB.php');
+include('../../Nav/header_Banco2.php');
 
-if (!$conn) {
-    die("Error de conexión: " . mysqli_connect_error());
-}
+// Obtener el ID de la tarjeta a modificar
+$id_tarjeta = $_GET['id_tarjeta'];
+$id_banco = $_GET['id_banco'];
 
-$id_usuario = $_GET['id_usuario'];
+// Consultar los datos de la tarjeta actual
+$query_tarjeta = "SELECT * FROM tarjeta WHERE id_tarjeta = ?";
+$stmt_tarjeta = $conn->prepare($query_tarjeta);
+$stmt_tarjeta->bind_param('i', $id_tarjeta);
+$stmt_tarjeta->execute();
+$resultado_tarjeta = $stmt_tarjeta->get_result();
+$tarjeta = $resultado_tarjeta->fetch_assoc();
 
-$query = "SELECT u.*, p.*
-          FROM usuario u
-          JOIN persona p ON u.id_usuario = p.id_usuario
-          WHERE u.id_usuario = ?";
-$stmt = $conn->prepare($query);
-$stmt->bind_param("i", $id_usuario);
-$stmt->execute();
-$result = $stmt->get_result();
-$datos = $result->fetch_assoc();
-
-$roles = $conn->query("SELECT id_rol, roles FROM roles");
-$departamentos = $conn->query("SELECT id_departamento, nombre_departamento FROM departamento");
-$modos_pago = ['Efectivo', 'Tarjeta', 'Cheque'];
+// Obtener lista de clientes para el select
+$clientes = $conn->query("SELECT * FROM cliente");
 ?>
 
-<body>
-<h1 class="titulo">Modificar Usuario</h1>
+<h1 class="titulo">Modificar Tarjeta</h1>
+<form class="form_reg_usuario" action="Editar_T.php" method="POST">
+  <input type="hidden" name="id_tarjeta" value="<?= $id_tarjeta ?>">
+  <input type="hidden" name="id_banco" value="<?= $id_banco ?>">
+  
+  <label>Número de Tarjeta:</label><br>
+  <input type="text" name="numero_tarjeta" required maxlength="16" pattern="\d{16}" inputmode="numeric" value="<?= $tarjeta['numero_tarjeta'] ?>"><br>
+  
+  <label>CVV:</label><br>
+  <input type="text" name="cvv" required maxlength="3" pattern="\d{3}" inputmode="numeric" value="<?= $tarjeta['cvv'] ?>"><br>
+  
+  <label>Fecha de Vencimiento:</label><br>
+  <input type="date" name="fecha_vencimiento" required value="<?= date('Y-m-d', strtotime($tarjeta['fecha_vencimiento'])) ?>"><br>
+  
+  <label>Saldo:</label><br>
+  <input type="number" step="0.01" name="saldo" required value="<?= $tarjeta['saldo'] ?>"><br>
+  
+  <label>Tipo de Tarjeta:</label><br>
+  <select name="tipo_tarjeta" required>
+    <option value="Debito" <?= ($tarjeta['tipo_tarjeta'] == 'Debito') ? 'selected' : '' ?>>Débito</option>
+    <option value="Credito" <?= ($tarjeta['tipo_tarjeta'] == 'Credito') ? 'selected' : '' ?>>Crédito</option>
+  </select><br>
+  
+  <label>Red de Pago:</label><br>
+  <select name="red_pago" required>
+    <option value="VISA" <?= ($tarjeta['red_pago'] == 'VISA') ? 'selected' : '' ?>>VISA</option>
+    <option value="MASTERCARD" <?= ($tarjeta['red_pago'] == 'MASTERCARD') ? 'selected' : '' ?>>MASTERCARD</option>
+  </select><br>
+  
+  <label>Titular (Cliente):</label><br>
+  <select name="titular" required>
+    <?php while ($c = $clientes->fetch_assoc()): ?>
+      <option value="<?= $c['id_cliente'] ?>" <?= ($tarjeta['titular'] == $c['id_cliente']) ? 'selected' : '' ?>>
+        <?= $c['nombre_cliente'] . " " . $c['apellido_paterno'] ?>
+      </option>
+    <?php endwhile; ?>
+  </select><br><br>
 
-<form class="form_reg_usuario" action="Editar_U.php" method="POST">
-    <input type="hidden" name="id_usuario" value="<?= $datos['id_usuario'] ?>">
-    <input type="hidden" name="id_persona" value="<?= $datos['id_persona'] ?>">
-
-    <!-- Usuario -->
-    <label>Nombre de Usuario:</label>
-    <input type="text" name="nombre_usuario" value="<?= $datos['nombre_usuario'] ?>" required><br><br>
-
-    <label>Correo Electrónico:</label>
-    <input type="email" name="correo" value="<?= $datos['correo'] ?>" required><br><br>
-
-    <label>Contraseña:</label>
-    <input type="password" name="contraseña" value="<?= $datos['contraseña'] ?>" required><br><br>
-
-    <!-- Rol -->
-    <label>Rol:</label>
-    <select name="id_rol" required>
-        <option value="">Seleccionar rol</option>
-        <?php while ($rol = $roles->fetch_assoc()): ?>
-            <option value="<?= $rol['id_rol'] ?>" <?= ($rol['id_rol'] == $datos['id_rol']) ? 'selected' : '' ?>>
-                <?= $rol['roles'] ?>
-            </option>
-        <?php endwhile; ?>
-    </select><br><br>
-
-    <!-- Departamento -->
-    <label>Departamento:</label>
-    <select name="id_departamento" required>
-        <option value="">Seleccionar departamento</option>
-        <?php while ($dep = $departamentos->fetch_assoc()): ?>
-            <option value="<?= $dep['id_departamento'] ?>" <?= ($dep['id_departamento'] == $datos['id_departamento']) ? 'selected' : '' ?>>
-                <?= $dep['nombre_departamento'] ?>
-            </option>
-        <?php endwhile; ?>
-    </select><br><br>
-
-    <!-- Persona -->
-    <label>Nombre(s):</label>
-    <input type="text" name="nom_persona" value="<?= $datos['nom_persona'] ?>" required><br><br>
-
-    <label>Apellido Paterno:</label>
-    <input type="text" name="apellido_paterno" value="<?= $datos['apellido_paterno'] ?>" required><br><br>
-
-    <label>Apellido Materno:</label>
-    <input type="text" name="apellido_materno" value="<?= $datos['apellido_materno'] ?>" required><br><br>
-
-    <label>CURP:</label>
-    <input type="text" name="curp" value="<?= $datos['curp'] ?>" required><br><br>
-
-    <label>RFC:</label>
-    <input type="text" name="rfc" value="<?= $datos['rfc'] ?>" required><br><br>
-
-    <label>Teléfono:</label>
-    <input type="text" name="telefono" value="<?= $datos['telefono'] ?>" required><br><br>
-
-    <label>Código Postal:</label>
-    <input type="text" name="codigo_postal" value="<?= $datos['codigo_postal'] ?>" required><br><br>
-
-    <label>Calle:</label>
-    <input type="text" name="calle" value="<?= $datos['calle'] ?>" required><br><br>
-
-    <label>Número Exterior:</label>
-    <input type="number" name="num_ext" value="<?= $datos['num_ext'] ?>" required><br><br>
-
-    <label>Colonia:</label>
-    <input type="text" name="colonia" value="<?= $datos['colonia'] ?>" required><br><br>
-
-    <label>Ciudad:</label>
-    <input type="text" name="ciudad" value="<?= $datos['ciudad'] ?>" required><br><br>
-
-    <label>Modo de Pago:</label>
-    <select name="modo_pago" required>
-        <option value="">Seleccionar forma de pago</option>
-        <?php foreach ($modos_pago as $modo): ?>
-            <option value="<?= $modo ?>" <?= ($modo == $datos['modo_Pago']) ? 'selected' : '' ?>><?= $modo ?></option>
-        <?php endforeach; ?>
-    </select><br><br>
-
-    <label>Sueldo:</label>
-    <input type="number" step="0.01" name="sueldo" value="<?= $datos['sueldo'] ?>" required><br><br>
-
-    <input type="submit" value="Guardar Cambios">
+  <input type="submit" value="Actualizar Tarjeta">
 </form>
 
-<a href="../Usuario.php" class="regresar">Regresar</a>
-
-</body>
+<a href="../DetalleBanco.php?id=<?= $id_banco ?>" class="regresar">Regresar</a>
 <?php include('../../Nav/footer.php'); ?>
-</html>
