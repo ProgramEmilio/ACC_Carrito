@@ -33,12 +33,12 @@ id_tarjeta INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 numero_tarjeta VARCHAR(16),
 cvv VARCHAR(3) NOT NULL,
 fecha_vencimiento DATETIME NOT NULL, 
-saldo DECIMAL(10,2) NOT NULL,
+saldo DECIMAL(2) NOT NULL,
 tipo_tarjeta ENUM('Debito','Credito'),
 red_pago ENUM('VISA','MASTERCARD'),
 titular INT NOT NULL,
 id_banco INT NOT NULL,
-CONSTRAINT fk_usuario_tarjeta FOREIGN KEY (titular) REFERENCES cliente(id_cliente) ON DELETE CASCADE,
-CONSTRAINT fk_usuario_banco FOREIGN KEY (id_banco) REFERENCES banco(id_banco) ON DELETE CASCADE
+CONSTRAINT fk_usuario_tarjeta FOREIGN KEY (titular) REFERENCES cliente(id_cliente),
+CONSTRAINT fk_usuario_banco FOREIGN KEY (id_banco) REFERENCES banco(id_banco)
 );
 

@@ -1,0 +1,83 @@
+body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { color: #444; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { padding: 10px; border: 1px solid #ddd; text-align: left; vertical-align: middle; }
+    th { background-color: #f0f0f0; }
+    .total { text-align: right; font-weight: bold; margin-top: 15px; }
+    .btn { padding: 10px 20px; background: #4CAF50; color: white; border: none; cursor: pointer; }
+    .btn:disabled { background: #ccc; cursor: not-allowed; }
+    img { width: 80px; height: auto; }
+
+    .continuar-compra {
+      margin-top: 20px;
+      text-align: right;
+    }
+
+    .continuar-compra button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .continuar-compra button:hover {
+      background-color: #45a049;
+    }
+
+    .mensaje-alerta {
+      display: none;
+      color: red;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    
+.resumen-titulo {
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 30px;
+}
+.resumen-compra {
+  max-width: 400px;
+  border: 1px solid #ccc;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+.resumen-linea {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.total-final {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.continuar-compra {
+      margin-top: 20px;
+      text-align: right;
+    }
+
+    .continuar-compra button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .continuar-compra button:hover {
+      background-color: #45a049;
+    }
+
+    .mensaje-alerta {
+      display: none;
+      color: red;
+      font-weight: bold;
+      margin-top: 10px;
+    }

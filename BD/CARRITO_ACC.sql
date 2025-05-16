@@ -31,11 +31,23 @@ CREATE TABLE direccion(
 id_direccion INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 codigo_postal VARCHAR(5),
 calle VARCHAR(20),
-num_ext TINYINT,
+num_ext INT,
 colonia VARCHAR(50),
 ciudad VARCHAR(20),
+estado VARCHAR(50),
 id_cliente INT NOT NULL,
 CONSTRAINT fk_cliente_direccion FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente)
+);
+
+CREATE TABLE tarjeta (
+id_tarjeta INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+numero_tarjeta VARCHAR(16),
+cvv VARCHAR(3) NOT NULL,
+fecha_vencimiento DATETIME NOT NULL, 
+tipo_tarjeta ENUM('Debito','Credito'),
+red_pago ENUM('VISA','MASTERCARD'),
+titular INT NOT NULL,
+CONSTRAINT fk_usuario_tarjeta FOREIGN KEY (titular) REFERENCES cliente(id_cliente)
 );
 
 CREATE TABLE detalle_articulos(
@@ -97,8 +109,7 @@ CREATE TABLE paqueteria(
 id_paqueteria INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 nombre_paqueteria VARCHAR(50) NOT NULL,
 descripcion VARCHAR(50) NOT NULL,
-fecha DATETIME NOT NULL,
-costo DECIMAL(6,2) NOT NULL
+fecha DATETIME NOT NULL
 );
 
 CREATE TABLE envio(
@@ -135,3 +146,65 @@ fecha_pago DATETIME NOT NULL,
 CONSTRAINT fk_forma_pago FOREIGN KEY (id_forma_pago) REFERENCES formas_pago(id_forma_pago),
 CONSTRAINT fk_pedido_pago FOREIGN KEY (id_pedido) REFERENCES pedido(id_pedido)
 );
+
+INSERT INTO roles (roles) VALUES
+('Administrador'),               
+('Cliente'),             
+('Proveedor');
+
+INSERT INTO usuario (nombre_usuario, correo, contraseña, id_rol) VALUES
+('admin', 'admin@ACC.com', '12', 1),
+('cliente', 'cliente@ACC.com', '12', 2),
+('proveedor', 'proveedor@ACC.com', '12', 3);
+
+INSERT INTO cliente (id_usuario, nom_persona, apellido_paterno, apellido_materno, telefono, monedero) VALUES
+(8, 'Juan', 'Pérez', 'Gómez', '6123456789', 50.00);
+
+-- Insertando detalle de productos personalizados
+INSERT INTO detalle_articulos (existencia, costo, precio, id_proveedor, estatus, iva) VALUES
+(50, 120.00, 250.00, 9, 'Disponible', 40.00),
+(30, 150.00, 300.00, 9, 'Disponible', 48.00),
+(40, 100.00, 200.00, 9, 'Disponible', 32.00);
+
+-- Insertando productos personalizados en la tabla articulos
+INSERT INTO articulos (id_articulo, descripcion, id_detalle_articulo) VALUES
+('P001', 'Playera personalizada con diseño a elección.', 10),
+('P002', 'Termo de acero inoxidable con grabado personalizado.', 11),
+('P003', 'Agenda con portada personalizada.', 12);
+
+-- Insertando atributos generales de productos
+INSERT INTO atributos (nombre) VALUES 
+('Color'), 
+('Tamaño'), 
+('Imagen'),
+('Video'),
+('Dimensiones'),
+('Peso');
+
+-- Relacionando productos con atributos
+INSERT INTO articulo_completo (id_articulo, id_atributo, valor) VALUES 
+('P001', 1, 'Negro'),
+('P001', 2, 'M'),
+('P001', 3, 'playera2.png'),
+('P002', 1, 'Azul'),
+('P002', 2, '750ml'),
+('P002', 3, 'termo3.png'),
+('P003', 1, 'Verde'),
+('P003', 2, 'A5'),
+('P003', 3, 'agenda1.png');
+
+INSERT INTO carrito (id_cliente, fecha) VALUES
+(1, NOW());
+
+INSERT INTO detalle_carrito (id_carrito, id_articulo, cantidad, precio, importe, personalizacion) VALUES
+(1, 'P001', 2, 250.00, 500.00, 'Texto'),   -- Playera personalizada, 2 unidades
+(1, 'P002', 1, 300.00, 300.00, 'Imagen');
+
+INSERT INTO paqueteria (nombre_paqueteria, descripcion, fecha, costo) VALUES
+('Estafeta', 'Sucursal Culiacán Centro', NOW(), 50.00),
+('FedEx', 'Sucursal Culiacán Sur', NOW(), 45.00),
+('DHL', 'Sucursal Culiacán Norte', NOW(), 60.00);
+
+INSERT INTO envio (tipo_envio, costo, fecha_estimada) VALUES
+('Domicilio', 80.00, DATE_ADD(NOW(), INTERVAL 3 DAY)),
+('Punto de Entrega', 40.00, DATE_ADD(NOW(), INTERVAL 2 DAY));

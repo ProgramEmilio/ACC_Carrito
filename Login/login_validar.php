@@ -13,74 +13,54 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = trim($_POST['password']);
 
     // Consulta para verificar el usuario (incluyendo id_rol)
-    $sql = "SELECT id_usuario, nombre_usuario, contraseña, id_rol FROM usuario WHERE correo = ?";
-    $stmt = $conn->prepare($sql);
+    $sql = "SELECT u.id_usuario, u.nombre_usuario, u.contraseña, u.id_rol, c.id_cliente 
+        FROM usuario u 
+        LEFT JOIN cliente c ON u.id_usuario = c.id_usuario 
+        WHERE u.correo = ?";
+$stmt = $conn->prepare($sql);
+
+if ($stmt) {
+    $stmt->bind_param("s", $correo);
+    $stmt->execute();
+    $stmt->store_result();
     
-    if ($stmt) {
-        $stmt->bind_param("s", $correo);
-        $stmt->execute();
-        $stmt->store_result(); // Almacenar resultado para verificar si hay datos
-        
-        if ($stmt->num_rows > 0) {
-            $stmt->bind_result($id_usuario, $nombre_usuario, $hash_password, $id_rol);
-            $stmt->fetch();
-            
-            // DEBUG: Ver valores en consola del navegador
-            echo "<script>console.log('Usuario: ID = $id_usuario, Nombre = $nombre_usuario, Rol = $id_rol');</script>";
+    if ($stmt->num_rows > 0) {
+        $stmt->bind_result($id_usuario, $nombre_usuario, $hash_password, $id_rol, $id_cliente);
+        $stmt->fetch();
 
-            // Verificar si la contraseña es correcta
-            if (password_verify($password, $hash_password) || $password === $hash_password) {
-                // Guardar datos en sesión
-                $_SESSION['id_usuario'] = $id_usuario;
-                $_SESSION['nombre_usuario'] = $nombre_usuario;
-                $_SESSION['id_rol'] = $id_rol;
+        // Verificar la contraseña
+        if (password_verify($password, $hash_password) || $password === $hash_password) {
+            $_SESSION['id_usuario'] = $id_usuario;
+            $_SESSION['nombre_usuario'] = $nombre_usuario;
+            $_SESSION['id_rol'] = $id_rol;
+            $_SESSION['id_cliente'] = $id_cliente;
 
-                // Redirigir según el rol del usuario
-                switch ($id_rol) {
-                    case 1: // Administrador
-                        header("Location: ../Nomina/Nomina.php");
-                        break;
-                    case 2: // Cliente
-                        header("Location: ../Nomina/Nomina.php");
-                        break;
-                    case 3: // Proveedor
-                        header("Location: ../Compras/Cotizacion/Cotizar.php");
-                        break;
-                    case 4: // Comprador
-                        header("Location: ../Compras/Aprobar/Aprobar_Compra.php");
-                        break;
-                    case 5: // Vendedor
-                        header("Location: ../Venta/Detalle_venta.php");
-                        break;
-                    case 6: // Producción
-                        header("Location: ../Produccion/pro.php");
-                        break;
-                    case 7: // Distribuidor
-                        header("Location: ../Distribucion/Distribucion.php");
-                        break;
-                    case 8: // Responsable stock
-                        header("Location: ../Inventario/Inventario.php");
-                        break;
-                    default:
-                        header("Location: ../Nomina/Nomina.php"); // Si el rol no existe, ir a una página por defecto
-                        break;
-                }
-                exit();
-            } else {
-                echo "<script>
-                        alert('Contraseña incorrecta.');
-                        window.location.href='login.php';
-                      </script>";
+            // Redirección según el rol
+            switch ($id_rol) {
+                case 1:
+                case 2:
+                    header("Location: ../Carrito/carrito.php");
+                    break;
+                default:
+                    header("Location: ../Carrito/carrito.php");
+                    break;
             }
+            exit();
         } else {
             echo "<script>
-                    alert('No se encontró el usuario con el correo ingresado.');
+                    alert('Contraseña incorrecta.');
                     window.location.href='login.php';
                   </script>";
         }
-
-        $stmt->close();
     } else {
+        echo "<script>
+                alert('No se encontró el usuario con el correo ingresado.');
+                window.location.href='login.php';
+              </script>";
+    }
+
+    $stmt->close();
+} else {
         echo "<script>alert('Error en la consulta SQL.');</script>";
     }
 }

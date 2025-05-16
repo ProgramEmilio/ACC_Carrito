@@ -1,0 +1,165 @@
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .left-section, .right-section {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    .left-section {
+      flex: 2;
+    }
+
+    .right-section {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .direccion {
+      margin-bottom: 15px;
+      padding: 10px;
+      background: #f9f9f9;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .boton {
+      display: inline-block;
+      margin-top: 5px;
+      padding: 8px 12px;
+      background-color: #4CAF50;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+    }
+
+    .btn-editar {
+      background-color: #2196F3;
+      margin-right: 10px;
+    }
+
+    .resumen-titulo {
+      font-size: 20px;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 10px;
+    }
+
+    th, td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .total {
+      margin-top: 10px;
+      font-size: 16px;
+    }
+
+    .botones {
+      margin-top: 20px;
+    }
+
+    .forma-entrega {
+      margin-top: 20px;
+    }
+
+    .forma-entrega label {
+      display: block;
+      margin: 5px 0;
+    }
+
+    .total-envio {
+      font-weight: bold;
+    }
+
+    #direcciones-container {
+    transition: visibility 0.3s, opacity 0.3s ease-in-out;
+}
+
+#direcciones-container[style*="visibility: hidden"] {
+    opacity: 0;
+}
+label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+input[type="radio"] {
+    transform: scale(1.2);
+    margin: 0;
+    cursor: pointer;
+}
+
+/* Opciones dentro de paquetería */
+#paqueteria-container label {
+    font-weight: normal;
+    font-size: 15px;
+    gap: 8px;
+}
+
+/* Opciones de dirección */
+#direcciones-container .direccion {
+    border: 1px solid #ddd;
+    padding: 8px;
+    margin: 8px 0;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#direcciones-container .direccion input[type="radio"] {
+    margin-left: 10px;
+}
+
+/* Estilo general de las opciones de entrega */
+label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+input[type="radio"] {
+    transform: scale(1.2);
+    margin: 0;
+    cursor: pointer;
+}
+
+/* Opciones dentro de paquetería */
+#paqueteria-container label {
+    font-weight: normal;
+    font-size: 15px;
+    gap: 8px;
+}
+
+/* Opciones de dirección */
+#direcciones-container .direccion {
+    border: 1px solid #ddd;
+    padding: 8px;
+    margin: 8px 0;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#direcciones-container .direccion input[type="radio"] {
+    margin-left: 10px;
+}
