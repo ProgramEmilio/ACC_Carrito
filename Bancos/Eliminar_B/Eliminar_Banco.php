@@ -1,51 +1,29 @@
 <?php
-include('../../BD/ConexionBD.php');
+include('../../BD/ConexionBDB.php');
+session_start();
 
-// Verificar si se recibió el ID del usuario
-if (isset($_GET['id_usuario'])) {
-    $id_usuario = intval($_GET['id_usuario']); // Asegura que sea número entero
+$id_banco = $_GET['id'];
 
-    // Eliminar primero de la tabla 'persona'
-    $sql_delete_persona = "DELETE FROM persona WHERE id_usuario = ?";
-    $stmt_persona = $conn->prepare($sql_delete_persona);
-    $stmt_persona->bind_param("i", $id_usuario);
+$conn->begin_transaction();
 
-    // Verificar si se eliminó correctamente en persona
-    if ($stmt_persona->execute()) {
+try {
+    // Eliminar tarjetas relacionadas
+    $query_tarjetas = "DELETE FROM tarjeta WHERE id_banco = ?";
+    $stmt = $conn->prepare($query_tarjetas);
+    $stmt->bind_param("i", $id_banco);
+    $stmt->execute();
 
-        // Ahora eliminar el usuario
-        $sql_delete_usuario = "DELETE FROM usuario WHERE id_usuario = ?";
-        $stmt_usuario = $conn->prepare($sql_delete_usuario);
-        $stmt_usuario->bind_param("i", $id_usuario);
+    // Eliminar el banco
+    $query_banco = "DELETE FROM banco WHERE id_banco = ?";
+    $stmt = $conn->prepare($query_banco);
+    $stmt->bind_param("i", $id_banco);
+    $stmt->execute();
 
-        if ($stmt_usuario->execute()) {
-            echo "<script>
-                alert('Usuario eliminado correctamente.');
-                window.location.href = '../Usuario.php'; // Cambia a tu vista de usuarios
-            </script>";
-        } else {
-            echo "<script>
-                alert('Error al eliminar el usuario.');
-                window.history.back();
-            </script>";
-        }
-
-        $stmt_usuario->close();
-
-    } else {
-        echo "<script>
-            alert('Error al eliminar los datos de persona.');
-            window.history.back();
-        </script>";
-    }
-
-    $stmt_persona->close();
-} else {
-    echo "<script>
-        alert('ID de usuario no recibido.');
-        window.history.back();
-    </script>";
+    $conn->commit();
+    header("Location: ../Bancos.php"); // o donde tengas tu lista de bancos
+    exit();
+} catch (Exception $e) {
+    $conn->rollback();
+    echo "Error al eliminar banco: " . $e->getMessage();
 }
-
-$conn->close();
 ?>
