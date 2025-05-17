@@ -3,7 +3,7 @@ include('../BD/ConexionBDB.php');
 include('../Nav/header_Banco.php');
 
 $query = "SELECT * FROM usuario";
-$resultado = $conn->query($query);
+$resultado = $conn2->query($query);
 ?>
 <h1 class="titulo">Lista de Usuarios</h1>
 <a href="Registro_U\Registro_Usuario.php" class="button">Agregar Usuario</a>

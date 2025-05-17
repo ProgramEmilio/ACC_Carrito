@@ -2,12 +2,12 @@
 include('../../BD/ConexionBDB.php');
 include('../../Nav/header_Banco2.php');
 
-if (!$conn) {
-    die("Error de conexión: " . mysqli_connect_error());
+if (!$conn2) {
+    die("Error de conexión: " . mysqli_conn2ect_error());
 }
 $id_banco = $_GET['id'];
 $query = "SELECT * FROM banco WHERE id_banco = ?";
-$stmt = $conn->prepare($query);
+$stmt = $conn2->prepare($query);
 $stmt->bind_param("i", $id_banco);
 $stmt->execute();
 $result = $stmt->get_result();
