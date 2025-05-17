@@ -7,12 +7,14 @@ if (!isset($_GET['id'])) {
     exit;
 }
 
-$id = intval($_GET['id']);
+$id = $_GET['id'];  // sin convertir a entero
+
 
 $sql = "SELECT a.nombre_articulo, a.descripcion, a.imagen, d.precio
         FROM articulos a
         INNER JOIN detalle_articulos d ON a.id_detalle_articulo = d.id_detalle_articulo
-        WHERE a.id_articulo = $id";
+        WHERE a.id_articulo = '$id'";
+
 
 $resultado = $conn->query($sql);
 
@@ -49,7 +51,7 @@ if ($resultado->num_rows > 0) {
             let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
             carrito.push({ nombre, precio });
             localStorage.setItem('carrito', JSON.stringify(carrito));
-            alert('Producto agregado al carrito');
+            
         }
     </script>
 </body>
