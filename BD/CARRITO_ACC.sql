@@ -1,3 +1,4 @@
+
 CREATE DATABASE CARRITO_ACC;
 USE CARRITO_ACC;
 
@@ -109,6 +110,7 @@ CREATE TABLE paqueteria(
 id_paqueteria INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 nombre_paqueteria VARCHAR(50) NOT NULL,
 descripcion VARCHAR(50) NOT NULL,
+costo DECIMAL(6,2) NOT NULL,
 fecha DATETIME NOT NULL
 );
 
@@ -147,32 +149,44 @@ CONSTRAINT fk_forma_pago FOREIGN KEY (id_forma_pago) REFERENCES formas_pago(id_f
 CONSTRAINT fk_pedido_pago FOREIGN KEY (id_pedido) REFERENCES pedido(id_pedido)
 );
 
+
+-- Roles
 INSERT INTO roles (roles) VALUES
 ('Administrador'),               
 ('Cliente'),             
 ('Proveedor');
 
+-- Usuarios
 INSERT INTO usuario (nombre_usuario, correo, contraseña, id_rol) VALUES
 ('admin', 'admin@ACC.com', '12', 1),
 ('cliente', 'cliente@ACC.com', '12', 2),
 ('proveedor', 'proveedor@ACC.com', '12', 3);
 
+-- Cliente
 INSERT INTO cliente (id_usuario, nom_persona, apellido_paterno, apellido_materno, telefono, monedero) VALUES
-(8, 'Juan', 'Pérez', 'Gómez', '6123456789', 50.00);
+(2, 'Juan', 'Pérez', 'Gómez', '6123456789', 50.00);
 
--- Insertando detalle de productos personalizados
+-- Dirección del cliente
+INSERT INTO direccion(codigo_postal, calle, num_ext, colonia, ciudad, estado, id_cliente) VALUES
+('80100', 'Av. Revolución', 123, 'Centro', 'Culiacán', 'Sinaloa', 1);
+
+-- Tarjeta del cliente
+INSERT INTO tarjeta (numero_tarjeta, cvv, fecha_vencimiento, tipo_tarjeta, red_pago, titular) VALUES
+('1234567890123456', '123', '2026-12-31', 'Credito', 'VISA', 1);
+
+-- Detalle de artículos
 INSERT INTO detalle_articulos (existencia, costo, precio, id_proveedor, estatus, iva) VALUES
-(50, 120.00, 250.00, 9, 'Disponible', 40.00),
-(30, 150.00, 300.00, 9, 'Disponible', 48.00),
-(40, 100.00, 200.00, 9, 'Disponible', 32.00);
+(50, 120.00, 250.00, 3, 'Disponible', 40.00),
+(30, 150.00, 300.00, 3, 'Disponible', 48.00),
+(40, 100.00, 200.00, 3, 'Disponible', 32.00);
 
--- Insertando productos personalizados en la tabla articulos
+-- Artículos
 INSERT INTO articulos (id_articulo, descripcion, id_detalle_articulo) VALUES
-('P001', 'Playera personalizada con diseño a elección.', 10),
-('P002', 'Termo de acero inoxidable con grabado personalizado.', 11),
-('P003', 'Agenda con portada personalizada.', 12);
+('P001', 'Playera personalizada con diseño a elección.', 1),
+('P002', 'Termo de acero inoxidable con grabado personalizado.', 2),
+('P003', 'Agenda con portada personalizada.', 3);
 
--- Insertando atributos generales de productos
+-- Atributos
 INSERT INTO atributos (nombre) VALUES 
 ('Color'), 
 ('Tamaño'), 
@@ -181,7 +195,7 @@ INSERT INTO atributos (nombre) VALUES
 ('Dimensiones'),
 ('Peso');
 
--- Relacionando productos con atributos
+-- Relación artículo-atributo
 INSERT INTO articulo_completo (id_articulo, id_atributo, valor) VALUES 
 ('P001', 1, 'Negro'),
 ('P001', 2, 'M'),
@@ -193,18 +207,36 @@ INSERT INTO articulo_completo (id_articulo, id_atributo, valor) VALUES
 ('P003', 2, 'A5'),
 ('P003', 3, 'agenda1.png');
 
-INSERT INTO carrito (id_cliente, fecha) VALUES
-(1, NOW());
+-- Carrito del cliente
+INSERT INTO carrito (id_cliente, fecha, total) VALUES
+(1, NOW(), 800.00);
 
+-- Detalles del carrito
 INSERT INTO detalle_carrito (id_carrito, id_articulo, cantidad, precio, importe, personalizacion) VALUES
-(1, 'P001', 2, 250.00, 500.00, 'Texto'),   -- Playera personalizada, 2 unidades
+(1, 'P001', 2, 250.00, 500.00, 'Texto'),
 (1, 'P002', 1, 300.00, 300.00, 'Imagen');
 
-INSERT INTO paqueteria (nombre_paqueteria, descripcion, fecha, costo) VALUES
-('Estafeta', 'Sucursal Culiacán Centro', NOW(), 50.00),
-('FedEx', 'Sucursal Culiacán Sur', NOW(), 45.00),
-('DHL', 'Sucursal Culiacán Norte', NOW(), 60.00);
+-- Paquetería
+INSERT INTO paqueteria (nombre_paqueteria, descripcion, costo, fecha) VALUES
+('Estafeta', 'Sucursal Culiacán Centro', 250.00, NOW()),
+('FedEx', 'Sucursal Culiacán Sur', 250.00, NOW()),
+('DHL', 'Sucursal Culiacán Norte', 250.00, NOW());
 
+-- Envíos
 INSERT INTO envio (tipo_envio, costo, fecha_estimada) VALUES
 ('Domicilio', 80.00, DATE_ADD(NOW(), INTERVAL 3 DAY)),
 ('Punto de Entrega', 40.00, DATE_ADD(NOW(), INTERVAL 2 DAY));
+
+-- Formas de pago
+INSERT INTO formas_pago (forma, folio, estado) VALUES
+('Tarjeta', 'A001', 'Activo'),
+('Monedero', 'A002', 'Usado'),
+('Sucursal', 'A003', 'Activo');
+
+-- Pedido
+INSERT INTO pedido (id_envio, id_paqueteria, id_carrito, precio_total_pedido) VALUES
+(1, 1, 1, 880.00);
+
+-- Pago
+INSERT INTO pago (id_forma_pago, id_pedido, fecha_pago) VALUES
+(1, 1, NOW());
