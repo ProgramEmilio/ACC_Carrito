@@ -14,21 +14,52 @@ if (!isset($_SESSION['id_rol'])) {
 $id_rol = $_SESSION['id_rol'];
 
 $menus = [
+    // Rol 1: Administrador
     1 => [
-        "Usuario" => [
-            "Usuario" => "../Usuarios/usuario.php",
-            "Registro" => "../Usuarios/Registro/Registro_Usuario.php"
+        "Usuarios" => [
+            "Ver Usuarios" => "../Usuarios/usuario.php",
+            "Registrar Usuario" => "../Usuarios/Registro/Registro_Usuario.php"
         ],
-        "Catalogo" => [
-            "Incapacidad" => "../Incapacidad/incapacidades.php",
-            "Registro" => "../Incapacidad/Registro/Registro_Incapacidades.php"
+        "Catálogo" => [
+            "Incapacidades" => "../Incapacidad/incapacidades.php",
+            "Registrar Incapacidad" => "../Incapacidad/Registro/Registro_Incapacidades.php"
+        ],
+        "Nómina" => [
+            "Ver Nómina" => "../Carrito/carrito.php",
+            "Registrar Nómina" => "../Nomina/Registro_N/Registro_Nomina.php"
+        ]
+    ],
+
+    // Rol 2: CLIENTE
+    2 => [
+        
+        "Mis datos" => [
+            "Direcciones" => "../Perfil/Perfil.php",
+           "Tarjetas" => "../Perfil/Formas_pago.php"
+        ]
+        
+        
+    ],
+
+    // Rol 3: PROVEEDOR
+    3 => [
+        "Tienda" => [
+            "Ver Productos" => "../Catalogo/catalogo.php",
+            "Promociones" => "../Catalogo/promociones.php"
+        ],
+        "Mis Compras" => [
+            "Historial" => "../Cliente/historial_compras.php"
         ],
         "Carrito" => [
-            "Nomina" => "../Carrito/carrito.php",
-            "Registro" => "../Nomina/Registro_N/Registro_Nomina.php"
+            "Ver Carrito" => "../Carrito/carrito.php"
+        ],
+        "Perfil" => [
+            "Perfil" => "../Perfil/Perfil.php"
         ]
     ]
 ];
+
+
 
 include('CerrarSesion.php');
 ?>
@@ -59,7 +90,7 @@ include('CerrarSesion.php');
 
         <!-- Logo + Nombre del sistema -->
         <div class="logo-nombre">
-            <a href="../Inicio/inicio.php">
+            <a href="../Home/Home.php">
                 <img src="../Imagenes/acc_logo.png" class="img-logo" alt="Logo">
             </a>
             <h1 class="nom_sis">Aplica Central Creativa</h1>
@@ -71,7 +102,7 @@ include('CerrarSesion.php');
                 <img src="../Imagenes/carrito.png" alt="Carrito" class="carrito-img">
                 <span id="contador-carrito">0</span>
             </div>
-             <a href="../Perfil/Perfil.php" class="btn-ver-perfil">Perfil</a>
+           
         </div>
 
         <!-- Botón cerrar sesión -->
