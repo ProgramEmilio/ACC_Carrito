@@ -1,5 +1,5 @@
 <?php
-include('../Nav.php');
+include('../Nav/header.php');
 include('../Footer.php');
 ?>
 
