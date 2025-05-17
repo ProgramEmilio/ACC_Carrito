@@ -1,17 +1,16 @@
 <?php
-include '../BD/ConexionBDB.php';  // $conn2 -> Base banco_acc (tarjeta)
 include '../BD/ConexionBD.php';     // $conn  -> Base principal (cliente)
 
 
 // Procesar eliminación si se recibe eliminar_id
 if (isset($_GET['eliminar_id'])) {
     $eliminar_id = intval($_GET['eliminar_id']);
-    $stmtEliminar = $conn2->prepare("DELETE FROM tarjeta WHERE id_tarjeta = ?");
+    $stmtEliminar = $conn->prepare("DELETE FROM tarjeta WHERE id_tarjeta = ?");
     $stmtEliminar->bind_param("i", $eliminar_id);
     if ($stmtEliminar->execute()) {
-        echo "<p style='color:green;'>Tarjeta eliminada correctamente.</p>";
+      
     } else {
-        echo "<p style='color:red;'>Error al eliminar la tarjeta: " . $stmtEliminar->error . "</p>";
+       
     }
 }
 
@@ -20,18 +19,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $numero_tarjeta = $_POST['numero_tarjeta'] ?? '';
     $cvv = $_POST['cvv'] ?? '';
     $fecha_vencimiento = ($_POST['fecha_vencimiento'] ?? '') . "-01 00:00:00";
-    $saldo = $_POST['saldo'] ?? 0;
     $tipo_tarjeta = $_POST['tipo_tarjeta'] ?? '';
     $red_pago = $_POST['red_pago'] ?? '';
-    $nombre_titular = isset($_POST['nombre_titular']) ? trim($_POST['nombre_titular']) : '';
-    $id_banco = $_POST['id_banco'] ?? 0;
+    $titular = isset($_POST['titular']) ? trim($_POST['titular']) : '';  // corregido typo
+    
 
-    if (empty($nombre_titular)) {
+    if (empty($titular)) {
         echo "<p style='color:red;'>El nombre del titular es obligatorio.</p>";
     } else {
         // Buscar id_cliente correspondiente al nombre completo en la base principal ($conn)
         $buscar_cliente = $conn->prepare("SELECT id_cliente FROM cliente WHERE CONCAT(nom_persona, ' ', apellido_paterno, ' ', apellido_materno) = ?");
-        $buscar_cliente->bind_param("s", $nombre_titular);
+        $buscar_cliente->bind_param("s", $titular);
         $buscar_cliente->execute();
         $res = $buscar_cliente->get_result();
 
@@ -42,35 +40,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $titular = $cliente['id_cliente'];
 
             // Insertar tarjeta en base banco_acc ($conn2)
-            $stmt = $conn2->prepare("INSERT INTO tarjeta (numero_tarjeta, cvv, fecha_vencimiento, saldo, tipo_tarjeta, red_pago, titular, id_banco) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("sssdssii", $numero_tarjeta, $cvv, $fecha_vencimiento, $saldo, $tipo_tarjeta, $red_pago, $titular, $id_banco);
+            $stmt = $conn->prepare("INSERT INTO tarjeta (numero_tarjeta, cvv, fecha_vencimiento, tipo_tarjeta, red_pago, titular) VALUES (?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("sssssi", $numero_tarjeta, $cvv, $fecha_vencimiento, $tipo_tarjeta, $red_pago, $titular); // corregido bind_param
 
             if ($stmt->execute()) {
-                echo "<p style='color:green;'>Tarjeta registrada correctamente.</p>";
+                
             } else {
-                echo "<p style='color:red;'>Error al registrar la tarjeta: " . $stmt->error . "</p>";
+                
             }
         }
     }
 }
 
-// Obtener bancos de base banco_acc
-$bancos = $conn2->query("SELECT id_banco, nombre_banco FROM banco");
+
 
 // Obtener tarjetas de base banco_acc
-$tarjetas = $conn2->query("
+$tarjetas = $conn->query("
     SELECT 
         t.id_tarjeta, 
         t.numero_tarjeta, 
         t.cvv, 
         t.fecha_vencimiento, 
-        t.saldo, 
         t.tipo_tarjeta, 
         t.red_pago, 
-        t.titular,
-        b.nombre_banco
+        t.titular
     FROM tarjeta t
-    JOIN banco b ON t.id_banco = b.id_banco
 ");
 
 // Obtener clientes para mostrar nombres (base principal)
@@ -80,8 +74,6 @@ while ($row = $clientes_result->fetch_assoc()) {
     $clientes_array[$row['id_cliente']] = $row['nombre'];
 }
 ?>
-
-
 
 <!DOCTYPE html>
 <html lang="es">
@@ -93,11 +85,9 @@ while ($row = $clientes_result->fetch_assoc()) {
 
 <title>Registrar Tarjeta</title>
 <!-- Incluir CSS externo -->
-<link rel="stylesheet" href="Tarjetas.css" />
+
 </head>
 <body>
-  
-
 
 <br></br>
 <h2>Registrar nueva tarjeta</h2>
@@ -112,9 +102,6 @@ while ($row = $clientes_result->fetch_assoc()) {
     <label>Fecha de vencimiento:</label>
     <input type="month" name="fecha_vencimiento" required>
 
-    <label>Saldo:</label>
-    <input type="number" name="saldo" step="0.01" min="0" required>
-
     <label>Tipo de tarjeta:</label>
     <select name="tipo_tarjeta" required>
         <option value="Debito">Débito</option>
@@ -128,21 +115,7 @@ while ($row = $clientes_result->fetch_assoc()) {
     </select>
 
     <label>Nombre del titular (exacto como está registrado):</label>
-    <input type="text" name="nombre_titular" placeholder="Ej. Juan Pérez López" required>
-
-    <label>Banco:</label>
-    <select name="id_banco" required>
-        <option value="">-- Selecciona un banco --</option>
-        <?php
-        if ($bancos->num_rows > 0) {
-            while ($banco = $bancos->fetch_assoc()) {
-                echo "<option value='{$banco['id_banco']}'>{$banco['nombre_banco']}</option>";
-            }
-        } else {
-            echo "<option value=''>No hay bancos disponibles</option>";
-        }
-        ?>
-    </select>
+    <input type="text" name="titular" placeholder="Ej. Juan Pérez López" required>
 
     <button type="submit">Registrar Tarjeta</button>
 </form>
@@ -156,11 +129,9 @@ while ($row = $clientes_result->fetch_assoc()) {
             <th>Número</th>
             <th>CVV</th>
             <th>Fecha Vencimiento</th>
-            <th>Saldo</th>
             <th>Tipo</th>
             <th>Red</th>
             <th>Titular</th>
-            <th>Banco</th>
             <th>Acciones</th> <!-- Nueva columna -->
         </tr>
     </thead>
@@ -168,26 +139,153 @@ while ($row = $clientes_result->fetch_assoc()) {
         <?php
         if ($tarjetas->num_rows > 0) {
             while ($t = $tarjetas->fetch_assoc()) {
-                $nombre_titular = $clientes_array[$t['titular']] ?? 'Desconocido';
+                $nombre_titular = $clientes_array[$t['titular']] ?? 'Desconocido';  // corregido variable
                 echo "<tr>
                     <td>{$t['id_tarjeta']}</td>
                     <td>{$t['numero_tarjeta']}</td>
                     <td>{$t['cvv']}</td>
                     <td>" . date('Y-m', strtotime($t['fecha_vencimiento'])) . "</td>
-                    <td>{$t['saldo']}</td>
                     <td>{$t['tipo_tarjeta']}</td>
                     <td>{$t['red_pago']}</td>
                     <td>{$nombre_titular}</td>
-                    <td>{$t['nombre_banco']}</td>
                     <td><a href='?eliminar_id={$t['id_tarjeta']}' onclick='return confirm(\"¿Seguro que quieres eliminar esta tarjeta?\");'>Eliminar</a></td>
                 </tr>";
             }
         } else {
-            echo "<tr><td colspan='10'>No hay tarjetas registradas.</td></tr>";
+            echo "<tr><td colspan='8'>No hay tarjetas registradas.</td></tr>";
         }
         ?>
     </tbody>
 </table>
 
 </body>
+
+<style>
+/* estilos_tarjeta.css */
+
+.form-container {
+  max-width: 500px;
+  margin: 20px auto 40px auto;
+  padding: 20px 30px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  font-family: Arial, sans-serif;
+}
+.form-container h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #333;
+}
+.form-container label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #444;
+}
+.form-container input[type="text"],
+.form-container input[type="month"],
+.form-container input[type="number"],
+.form-container select {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 18px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  transition: border-color 0.3s;
+}
+.form-container input[type="text"]:focus,
+.form-container input[type="month"]:focus,
+.form-container input[type="number"]:focus,
+.form-container select:focus {
+  border-color: #007bff;
+  outline: none;
+}
+.form-container button {
+  width: 100%;
+  padding: 12px 0;
+  background-color: #007bff;
+  border: none;
+  color: white;
+  font-size: 1.1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+.form-container button:hover {
+  background-color: #0056b3;
+}
+/* Mensajes */
+.form-container p {
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Tabla */
+table {
+  width: 95%;
+  margin: 0 auto 40px auto;
+  border-collapse: collapse;
+  font-family: Arial, sans-serif;
+}
+table thead {
+  background-color: #007bff;
+  color: white;
+}
+table th, table td {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  text-align: center;
+  font-size: 0.9rem;
+}
+table tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+table a {
+  color: #d9534f;
+  text-decoration: none;
+  font-weight: bold;
+}
+table a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive tabla */
+@media (max-width: 600px) {
+  table, thead, tbody, th, td, tr {
+    display: block;
+  }
+  table thead tr {
+    display: none;
+  }
+  table tbody tr {
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
+  }
+  table tbody td {
+    border: none;
+    padding: 6px 10px;
+    text-align: right;
+    position: relative;
+    padding-left: 50%;
+    font-size: 0.9rem;
+  }
+  table tbody td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 15px;
+    width: 45%;
+    padding-left: 5px;
+    font-weight: 700;
+    text-align: left;
+    color: #333;
+  }
+}
+
+</style>
 </html>

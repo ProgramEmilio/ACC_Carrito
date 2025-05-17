@@ -7,15 +7,12 @@ if (!isset($_GET['id'])) {
     exit;
 }
 
-$id = $_GET['id'];  // sin convertir a entero
+$id = $_GET['id'];
 
-
-$sql = "SELECT a.nombre_articulo, a.descripcion, a.imagen, d.precio
+$sql = "SELECT a.nombre_articulo, a.descripcion, d.precio
         FROM articulos a
         INNER JOIN detalle_articulos d ON a.id_detalle_articulo = d.id_detalle_articulo
         WHERE a.id_articulo = '$id'";
-
-
 $resultado = $conn->query($sql);
 
 if ($resultado->num_rows > 0) {
@@ -24,6 +21,16 @@ if ($resultado->num_rows > 0) {
     echo "Producto no encontrado.";
     exit;
 }
+
+$sql_imagenes = "SELECT nombre_imagen FROM imagenes_articulo WHERE id_articulo = '$id'";
+$res_imagenes = $conn->query($sql_imagenes);
+
+$imagenes = [];
+if ($res_imagenes->num_rows > 0) {
+    while ($img = $res_imagenes->fetch_assoc()) {
+        $imagenes[] = $img['nombre_imagen'];
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -31,10 +38,28 @@ if ($resultado->num_rows > 0) {
 <head>
     <meta charset="UTF-8">
     <title>Detalle del producto</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+    
 </head>
 <body>
+
 <div class="detalle-producto">
-    <img src="../Imagenes/<?php echo $producto['imagen']; ?>" alt="<?php echo htmlspecialchars($producto['nombre_articulo']); ?>">
+
+    <!-- Carrusel con Swiper -->
+    <div class="swiper-container galeria-imagenes">
+        <div class="swiper-wrapper">
+            <?php foreach ($imagenes as $img): ?>
+                <div class="swiper-slide">
+                    <img src="../Imagenes/<?php echo $img; ?>" alt="Imagen del producto">
+                </div>
+            <?php endforeach; ?>
+        </div>
+        <!-- Controles -->
+        <div class="swiper-button-prev"></div>
+        <div class="swiper-button-next"></div>
+        <div class="swiper-pagination"></div>
+    </div>
+
     <div class="detalle-detalles">
         <h1><?php echo htmlspecialchars($producto['nombre_articulo']); ?></h1>
         <p><?php echo htmlspecialchars($producto['descripcion']); ?></p>
@@ -45,24 +70,35 @@ if ($resultado->num_rows > 0) {
     </div>
 </div>
 
-
-    <script>
-        function agregarAlCarrito(nombre, precio) {
-            let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
-            carrito.push({ nombre, precio });
-            localStorage.setItem('carrito', JSON.stringify(carrito));
-            
+<script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+<script>
+    var swiper = new Swiper('.swiper-container', {
+        loop: true,
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev'
+        },
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true
         }
-    </script>
+    });
+
+    function agregarAlCarrito(nombre, precio) {
+        let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+        carrito.push({ nombre, precio });
+        localStorage.setItem('carrito', JSON.stringify(carrito));
+    }
+</script>
+
+<?php include('../Nav/footer.php'); ?>
 </body>
 
 
-
-
 <style>
-    
-    .detalle-producto {
-  max-width: 900px;
+ 
+.detalle-producto {
+  max-width: 1000px;
   margin: 40px auto;
   padding: 20px;
   border: 1px solid #ddd;
@@ -75,13 +111,51 @@ if ($resultado->num_rows > 0) {
 }
 
 
-.detalle-producto img {
+.galeria-imagenes {
   width: 45%;
-  height: auto;
-  border-radius: 8px;
-  object-fit: contain;
+  position: relative;
 }
 
+.swiper-container {
+  width: 100%;
+  height: 400px;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.swiper-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+
+.swiper-button-prev,
+.swiper-button-next {
+  color: #333;
+  width: 30px;
+  height: 30px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.15);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.swiper-button-prev {
+  left: 10px;
+}
+
+.swiper-button-next {
+  right: 10px;
+}
+
+/* Paginación activa del carrusel */
+.swiper-pagination-bullet-active {
+  background: #007bff;
+}
 
 .detalle-detalles {
   width: 55%;
@@ -89,13 +163,11 @@ if ($resultado->num_rows > 0) {
   flex-direction: column;
 }
 
-
 .detalle-detalles h1 {
   font-size: 2rem;
   margin-bottom: 15px;
   color: #333;
 }
-
 
 .detalle-detalles p {
   font-size: 1rem;
@@ -103,7 +175,6 @@ if ($resultado->num_rows > 0) {
   margin-bottom: 15px;
   line-height: 1.4;
 }
-
 
 .detalle-detalles p strong {
   font-weight: 700;
@@ -142,10 +213,5 @@ if ($resultado->num_rows > 0) {
   text-decoration: underline;
 }
 
-
-    </style>
-
-<?php
-include('../Nav/footer.php');
-?>
+  </style>
 </html>
