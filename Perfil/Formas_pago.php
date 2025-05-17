@@ -1,7 +1,7 @@
 <?php
-include '../BD/ConexionBanco.php';  // $conn2 -> Base banco_acc (tarjeta)
+include '../BD/ConexionBDB.php';  // $conn2 -> Base banco_acc (tarjeta)
 include '../BD/ConexionBD.php';     // $conn  -> Base principal (cliente)
-include('../Nav/header.php');
+
 
 // Procesar eliminación si se recibe eliminar_id
 if (isset($_GET['eliminar_id'])) {
@@ -81,16 +81,23 @@ while ($row = $clientes_result->fetch_assoc()) {
 }
 ?>
 
+
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<?php include('../Nav/header.php'); ?>
+
 <title>Registrar Tarjeta</title>
 <!-- Incluir CSS externo -->
 <link rel="stylesheet" href="Tarjetas.css" />
 </head>
 <body>
+  
+
 
 <br></br>
 <h2>Registrar nueva tarjeta</h2>

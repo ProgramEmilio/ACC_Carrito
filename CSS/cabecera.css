@@ -1,37 +1,50 @@
-.html {
+/* Reset y fuente base */
+html {
     font-size: 20px;
     overflow-y: auto;
+    font-family: 'Poppins', sans-serif;
 }
 
-.cabecera{
+/* Cabecera principal */
+.cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     height: 100px;
     width: 100%;
-    background-color: rgb(255, 255, 255);
-    border: 0.5px solid rgb(255, 255, 255);
+    background-color: #ffffff;
+    padding: 0 30px;
+    position: relative;
 }
 
-.nom_sis{
-    position: absolute;
-    margin-top: 20px;
-    margin-left: 30%;
+/* Logo + nombre */
+.logo-nombre {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-/* Estilos para la imagen */
-.img-logo{
+.img-logo {
     height: 90px;
     width: 100px;
-    float: left;
-    margin-left: 50px; 
-    margin-top: 5px;
 }
 
-.img-avatar{
-    height: 100px;
-    width: 100px;
-    float: right;
-    margin-right: 30px;
+.nom_sis {
+    font-size: 22px;
+    font-weight: bold;
+    color: #333;
+    margin: 0;
 }
 
+/* Carrito + botón perfil centrados */
+.centro-cabecera {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
 
 .carrito-icono {
     position: relative;
@@ -53,6 +66,7 @@
     padding: 2px 6px;
 }
 
+/* Botón perfil */
 .btn-ver-perfil {
     background-color: white;
     color: #ee22a0;
@@ -63,3 +77,19 @@
     cursor: pointer;
     font-size: 14px;
 }
+
+/* Botón cerrar sesión */
+.logout-container {
+    margin-left: auto;
+}
+
+.btn_logout {
+    background-color: #ee22a0;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
