@@ -7,14 +7,14 @@
 </head>
 <body>
     <?php
-    $_servername='localhost:3307';
+    $_servername='localhost:3306';
     $database='BANCO_ACC';
     $username='root';
     $password='';
     //create connection
-    $conn=mysqli_connect($_servername,$username,$password,$database);
+    $conn2=mysqli_connect($_servername,$username,$password,$database);
     //check connection
-    if(!$conn){
+    if(!$conn2){
         die("Connection failed: ".mysqli_connect_error());
     }
     //echo "connected succesfully";

@@ -1,75 +1,86 @@
 <?php
 include('../Nav/header.php');
-include('../Footer.php');
+include('../BD/ConexionBD.php');
+
+// Conexión a la base de datos
+$_servername = 'localhost:3306';
+$database = 'CARRITO_ACC';
+$username = 'root';
+$password = '';
+$conn = mysqli_connect($_servername, $username, $password, $database);
+
+if (!$conn) {
+    die("Connection failed: " . mysqli_connect_error());
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="es">
-  
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <link rel="stylesheet" href="Home.css">
-  
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="Home.css" />
+  <title>Inicio</title>
 </head>
 <body>
 
+<div class="container">
+  <?php
+  $sql = "SELECT a.id_articulo, a.nombre_articulo, a.descripcion, a.imagen, d.precio
+          FROM articulos a
+          INNER JOIN detalle_articulos d ON a.id_detalle_articulo = d.id_detalle_articulo
+          WHERE d.estatus = 'Disponible'";
+  $resultado = $conn->query($sql);
 
-
-  <div class="container">
-    <div class="product">
-      <img src="Imagenes/playera2.png" alt="Producto 1">
-      <h3>Playera con logo</h3>
-      <p>Descripción breve del producto número 1.</p>
-      <p class="price">$250.00 MXN</p>
-      <button class="btn" onclick="agregarAlCarrito('Playera con logo', '$250.00 MXN')">Agregar al carrito</button>
-    </div>
-
-    <div class="product">
-      <img src="Imagenes/agenda1.png" alt="Producto 2">
-      <h3>Agenda 2025</h3>
-      <p>Este producto es excelente para el uso diario.</p>
-      <p class="price">$150.00 MXN</p>
-      <button class="btn" onclick="agregarAlCarrito('Agenda 2025', '$150.00 MXN')">Agregar al carrito</button>
-    </div>
-
-    <div class="product">
-      <img src="Imagenes/termo3.png" alt="Producto 3">
-      <h3>Termo YETI</h3>
-      <p>La mejor calidad y precio.</p>
-      <p class="price">$300.00 MXN</p>
-      <button class="btn" onclick="agregarAlCarrito('Termo YETI', '$300.00 MXN')">Agregar al carrito</button>
-    </div>
-  </div>
-
-  <script>
-    let contador = 0;
-    let carrito = [];
-
-    // Cargar estado inicial del carrito desde localStorage
-    window.onload = () => {
-      const datosGuardados = localStorage.getItem('carrito');
-      if (datosGuardados) {
-        carrito = JSON.parse(datosGuardados);
-        contador = carrito.length;
-        document.getElementById('contador-carrito').textContent = contador;
+  if ($resultado->num_rows > 0) {
+      while ($row = $resultado->fetch_assoc()) {
+          echo '<div class="product">';
+          echo '<a href="detalle_producto.php?id=' . $row["id_articulo"] . '">';
+          echo '<img src="../Imagenes/' . $row["imagen"] . '" alt="' . htmlspecialchars($row["nombre_articulo"]) . '">';
+          echo '<h3>' . htmlspecialchars($row["nombre_articulo"]) . '</h3>';
+          echo '</a>';
+          echo '<p>' . htmlspecialchars($row["descripcion"]) . '</p>';
+          echo '<p class="price">$' . number_format($row["precio"], 2) . ' MXN</p>';
+          echo '<button class="btn" onclick="agregarAlCarrito(\'' . htmlspecialchars($row["nombre_articulo"]) . '\', \'$' . number_format($row["precio"], 2) . ' MXN\')">Agregar al carrito</button>';
+          echo '</div>';
       }
-    };
+  } else {
+      echo "<p>No hay productos disponibles.</p>";
+  }
 
-    function agregarAlCarrito(nombre, precio) {
-      carrito.push({ nombre, precio });
-      contador++;
-      document.getElementById('contador-carrito').textContent = contador;
+  $conn->close();
+  ?>
+</div>
 
-      // Guardar en localStorage
-      localStorage.setItem('carrito', JSON.stringify(carrito));
+<script>
+  let contador = 0;
+  let carrito = [];
+
+  window.onload = () => {
+    const datosGuardados = localStorage.getItem('carrito');
+    if (datosGuardados) {
+      carrito = JSON.parse(datosGuardados);
+      contador = carrito.length;
+      const contadorCarrito = document.getElementById('contador-carrito');
+      if (contadorCarrito) contadorCarrito.textContent = contador;
     }
+  };
 
-    function irAlCarrito() {
-      window.location.href = 'carrito.php';
-    }
-  </script>
+  function agregarAlCarrito(nombre, precio) {
+    carrito.push({ nombre, precio });
+    contador++;
+    const contadorCarrito = document.getElementById('contador-carrito');
+    if (contadorCarrito) contadorCarrito.textContent = contador;
+    localStorage.setItem('carrito', JSON.stringify(carrito));
+  }
+
+  function irAlCarrito() {
+    window.location.href = 'carrito.php';
+  }
+</script>
 
 </body>
+<?php
+include ('../Nav/footer.php');
+?>
 </html>

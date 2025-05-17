@@ -1,11 +1,15 @@
 <?php
 include('../BD/ConexionBD.php');
-session_start();
+
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
 if (!isset($_SESSION['id_rol'])) {
     header("Location: ../Login/login.php");
     exit();
 }
+
 
 $id_rol = $_SESSION['id_rol'];
 
@@ -67,7 +71,7 @@ include('CerrarSesion.php');
                 <img src="../Imagenes/carrito.png" alt="Carrito" class="carrito-img">
                 <span id="contador-carrito">0</span>
             </div>
-            <a href="../Perfil/Perfil.php" class="btn-ver-perfil">Perfil</a>
+             <a href="../Perfil/Perfil.php" class="btn-ver-perfil">Perfil</a>
         </div>
 
         <!-- Botón cerrar sesión -->
@@ -98,6 +102,8 @@ include('CerrarSesion.php');
                 echo "<li><a href='#'>Acceso Denegado</a></li>";
             }
             ?>
+
+            
         </ul>
     </div>
 </header>
