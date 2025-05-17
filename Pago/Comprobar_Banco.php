@@ -1,223 +1,236 @@
 <?php
 session_start();
 
-// Configurar headers para JSON y CORS
-header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Allow-Headers: Content-Type');
-
-// Función para enviar respuesta JSON y terminar
-function sendJsonResponse($data) {
-    echo json_encode($data);
+// Verificar método POST
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header("Location: Pagos.php?resultado=Método no permitido&tipo=error");
     exit();
 }
 
-// Función para logging de debug
-function logDebug($message, $data = null) {
-    error_log("DEBUG PAGO: " . $message . ($data ? " - " . print_r($data, true) : ""));
-}
-
-// Log de todos los datos recibidos
-logDebug("POST recibido", $_POST);
-logDebug("REQUEST_METHOD", $_SERVER['REQUEST_METHOD']);
-
-// Verificar método
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    logDebug("Método no permitido: " . $_SERVER['REQUEST_METHOD']);
-    sendJsonResponse(['success' => false, 'message' => 'Método no permitido']);
-}
-
-// Debug: mostrar todos los datos recibidos
-$debug_info = [
-    'metodo_pago' => $_POST['metodo_pago'] ?? 'NO_ENVIADO',
-    'monto' => $_POST['monto'] ?? 'NO_ENVIADO',
-    'id_cliente' => $_POST['id_cliente'] ?? 'NO_ENVIADO',
-    'id_tarjeta' => $_POST['id_tarjeta'] ?? 'NO_ENVIADO',
-    'all_post' => $_POST
-];
-logDebug("Datos debug", $debug_info);
-
 // Verificar que existan los datos necesarios
-if (!isset($_POST['metodo_pago'])) {
-    sendJsonResponse(['success' => false, 'message' => 'Falta método de pago', 'debug' => $debug_info]);
-}
-
-if (!isset($_POST['monto'])) {
-    sendJsonResponse(['success' => false, 'message' => 'Falta monto', 'debug' => $debug_info]);
-}
-
-if (!isset($_POST['id_cliente'])) {
-    sendJsonResponse(['success' => false, 'message' => 'Falta ID cliente', 'debug' => $debug_info]);
+if (!isset($_POST['metodo_pago']) || !isset($_POST['monto']) || !isset($_POST['id_cliente']) || !isset($_POST['id_pedido'])) {
+    header("Location: Pagos.php?resultado=Faltan datos del pago&tipo=error");
+    exit();
 }
 
 $metodo_pago = $_POST['metodo_pago'];
-$monto = $_POST['monto'];
-$id_cliente = $_POST['id_cliente'];
+$monto = floatval($_POST['monto']);
+$id_cliente = intval($_POST['id_cliente']);
+$id_pedido = intval($_POST['id_pedido']);
 
-// Log valores antes de convertir
-logDebug("Valores recibidos", [
-    'metodo_pago' => $metodo_pago,
-    'monto_raw' => $monto,
-    'id_cliente_raw' => $id_cliente
-]);
-
-// Convertir y validar
-$monto_float = floatval($monto);
-$id_cliente_int = intval($id_cliente);
-
-logDebug("Valores convertidos", [
-    'monto_float' => $monto_float,
-    'id_cliente_int' => $id_cliente_int
-]);
-
-// Validar datos con más detalle
-if ($monto_float <= 0) {
-    sendJsonResponse([
-        'success' => false, 
-        'message' => 'Monto inválido: ' . $monto_float, 
-        'debug' => ['monto_original' => $monto, 'monto_convertido' => $monto_float]
-    ]);
+// Validar datos
+if ($monto <= 0) {
+    header("Location: Pagos.php?resultado=Monto inválido&tipo=error&monto=$monto&id_pedido=$id_pedido");
+    exit();
 }
 
-if ($id_cliente_int <= 0) {
-    sendJsonResponse([
-        'success' => false, 
-        'message' => 'ID cliente inválido: ' . $id_cliente_int, 
-        'debug' => ['id_cliente_original' => $id_cliente, 'id_cliente_convertido' => $id_cliente_int]
-    ]);
+if ($id_cliente <= 0) {
+    header("Location: Pagos.php?resultado=Cliente inválido&tipo=error&monto=$monto&id_pedido=$id_pedido");
+    exit();
 }
 
-// Si llegamos aquí, los datos básicos son válidos
-logDebug("Validación básica exitosa", [
-    'metodo_pago' => $metodo_pago,
-    'monto_total' => $monto_float + 50,
-    'id_cliente' => $id_cliente_int
-]);
+if ($id_pedido <= 0) {
+    header("Location: Pagos.php?resultado=Pedido inválido&tipo=error&monto=$monto&id_pedido=$id_pedido");
+    exit();
+}
 
 // Agregar costo de envío
-$monto_total = $monto_float + 50.00;
+$monto_total = $monto + 50.00;
 
 // Incluir conexiones
 try {
     include('../BD/ConexionBD.php');  // Base de datos principal
     include('../BD/ConexionBDB.php'); // Base de datos del banco
-    logDebug("Conexiones incluidas exitosamente");
 } catch (Exception $e) {
-    logDebug("Error incluyendo conexiones", $e->getMessage());
-    sendJsonResponse(['success' => false, 'message' => 'Error de conexión a la base de datos: ' . $e->getMessage()]);
+    header("Location: Pagos.php?resultado=Error de conexión: " . urlencode($e->getMessage()) . "&tipo=error&monto=$monto&id_pedido=$id_pedido");
+    exit();
 }
 
 // Verificar conexiones
-if (!isset($conn) || !$conn) {
-    logDebug("Conexión principal no disponible");
-    sendJsonResponse(['success' => false, 'message' => 'Error: Conexión principal no establecida']);
+if (!$conn || $conn->connect_error) {
+    header("Location: Pagos.php?resultado=Error de conexión principal&tipo=error&monto=$monto&id_pedido=$id_pedido");
+    exit();
 }
 
-if ($conn->connect_error) {
-    logDebug("Error en conexión principal", $conn->connect_error);
-    sendJsonResponse(['success' => false, 'message' => 'Error de conexión principal: ' . $conn->connect_error]);
+if (!$conn2 || $conn2->connect_error) {
+    header("Location: Pagos.php?resultado=Error de conexión banco&tipo=error&monto=$monto&id_pedido=$id_pedido");
+    exit();
 }
-
-if (!isset($conn2) || !$conn2) {
-    logDebug("Conexión banco no disponible");
-    sendJsonResponse(['success' => false, 'message' => 'Error: Conexión banco no establecida']);
-}
-
-if ($conn2->connect_error) {
-    logDebug("Error en conexión banco", $conn2->connect_error);
-    sendJsonResponse(['success' => false, 'message' => 'Error de conexión banco: ' . $conn2->connect_error]);
-}
-
-logDebug("Todas las validaciones pasadas, procediendo con el método: " . $metodo_pago);
 
 try {
+    // Iniciar transacción en ambas conexiones
+    $conn->autocommit(FALSE);
+    $conn2->autocommit(FALSE);
+
     if ($metodo_pago === 'sucursal') {
-        logDebug("Procesando pago en sucursal");
+        // PAGO EN SUCURSAL
         
-        // Para pago en sucursal, generar un folio y guardar en la BD principal
+        // Generar folio único
         $folio = 'SUC' . date('YmdHis') . rand(100, 999);
-        logDebug("Folio generado", $folio);
         
-        // Insertar forma de pago en la base de datos principal
+        // Insertar forma de pago
         $query_forma_pago = "INSERT INTO formas_pago (forma, folio, estado) VALUES ('Sucursal', ?, 'Activo')";
         $stmt_forma_pago = $conn->prepare($query_forma_pago);
-        
-        if (!$stmt_forma_pago) {
-            logDebug("Error preparando consulta forma_pago", $conn->error);
-            sendJsonResponse(['success' => false, 'message' => 'Error preparando consulta: ' . $conn->error]);
-        }
-        
         $stmt_forma_pago->bind_param('s', $folio);
         
         if (!$stmt_forma_pago->execute()) {
-            logDebug("Error ejecutando forma_pago", $stmt_forma_pago->error);
-            sendJsonResponse(['success' => false, 'message' => 'Error ejecutando consulta: ' . $stmt_forma_pago->error]);
+            throw new Exception("Error insertando forma de pago: " . $stmt_forma_pago->error);
         }
         
         $id_forma_pago = $conn->insert_id;
-        logDebug("Forma de pago insertada", $id_forma_pago);
         $stmt_forma_pago->close();
         
-        // Crear registro de pago pendiente
-        $query_pago = "INSERT INTO pago (id_forma_pago, id_pedido, fecha_pago) VALUES (?, 0, NOW())";
+        // Crear registro de pago
+        $query_pago = "INSERT INTO pago (id_forma_pago, id_pedido, fecha_pago) VALUES (?, ?, NOW())";
         $stmt_pago = $conn->prepare($query_pago);
-        
-        if (!$stmt_pago) {
-            logDebug("Error preparando pago", $conn->error);
-            sendJsonResponse(['success' => false, 'message' => 'Error preparando pago: ' . $conn->error]);
-        }
-        
-        $stmt_pago->bind_param('i', $id_forma_pago);
+        $stmt_pago->bind_param('ii', $id_forma_pago, $id_pedido);
         
         if (!$stmt_pago->execute()) {
-            logDebug("Error insertando pago", $stmt_pago->error);
-            sendJsonResponse(['success' => false, 'message' => 'Error insertando pago: ' . $stmt_pago->error]);
+            throw new Exception("Error insertando pago: " . $stmt_pago->error);
         }
         
         $stmt_pago->close();
-        logDebug("Pago sucursal completado exitosamente");
         
-        sendJsonResponse([
-            'success' => true, 
-            'message' => 'Código de pago generado: ' . $folio,
-            'folio' => $folio,
-            'redirect' => '../pedidos/confirmacion.php?folio=' . $folio
-        ]);
+        // Agregar 5% al monedero del cliente
+        $bonus_monedero = $monto_total * 0.05;
+        $query_monedero = "UPDATE cliente SET monedero = monedero + ? WHERE id_cliente = ?";
+        $stmt_monedero = $conn->prepare($query_monedero);
+        $stmt_monedero->bind_param('di', $bonus_monedero, $id_cliente);
+        
+        if (!$stmt_monedero->execute()) {
+            throw new Exception("Error actualizando monedero: " . $stmt_monedero->error);
+        }
+        
+        $stmt_monedero->close();
+        
+        // Confirmar transacciones
+        $conn->commit();
+        
+        // Redireccionar con éxito
+        header("Location: ../pago/confirmacion.php?folio=$folio&tipo=sucursal&bonus=" . number_format($bonus_monedero, 2));
+        exit();
         
     } elseif ($metodo_pago === 'tarjeta') {
-        logDebug("Procesando pago con tarjeta");
+        // PAGO CON TARJETA
         
         if (!isset($_POST['id_tarjeta'])) {
-            sendJsonResponse(['success' => false, 'message' => 'ID de tarjeta no proporcionado']);
+            throw new Exception("ID de tarjeta no proporcionado");
         }
         
         $id_tarjeta = intval($_POST['id_tarjeta']);
-        logDebug("ID tarjeta recibido", $id_tarjeta);
         
         if ($id_tarjeta <= 0) {
-            sendJsonResponse(['success' => false, 'message' => 'ID de tarjeta inválido: ' . $id_tarjeta]);
+            throw new Exception("ID de tarjeta inválido");
         }
         
-        // Resto del código para tarjeta...
-        // (mantengo el código original aquí para no alargar demasiado)
+        // 1. Obtener información de la tarjeta de la BD principal
+        $query_tarjeta_info = "SELECT numero_tarjeta, cvv, tipo_tarjeta, red_pago FROM tarjeta WHERE id_tarjeta = ? AND titular = ?";
+        $stmt_tarjeta_info = $conn->prepare($query_tarjeta_info);
+        $stmt_tarjeta_info->bind_param('ii', $id_tarjeta, $id_cliente);
+        $stmt_tarjeta_info->execute();
+        $result_tarjeta = $stmt_tarjeta_info->get_result();
         
-        sendJsonResponse(['success' => true, 'message' => 'Procesamiento de tarjeta completado (simulado)']);
+        if ($result_tarjeta->num_rows === 0) {
+            throw new Exception("Tarjeta no encontrada o no pertenece al cliente");
+        }
+        
+        $tarjeta_info = $result_tarjeta->fetch_assoc();
+        $stmt_tarjeta_info->close();
+        
+        // 2. Buscar la tarjeta en la BD del banco
+        $query_banco_tarjeta = "SELECT id_tarjeta, saldo FROM tarjeta WHERE numero_tarjeta = ? AND cvv = ?";
+        $stmt_banco_tarjeta = $conn2->prepare($query_banco_tarjeta);
+        $stmt_banco_tarjeta->bind_param('ss', $tarjeta_info['numero_tarjeta'], $tarjeta_info['cvv']);
+        $stmt_banco_tarjeta->execute();
+        $result_banco = $stmt_banco_tarjeta->get_result();
+        
+        if ($result_banco->num_rows === 0) {
+            throw new Exception("Tarjeta no válida en el sistema bancario");
+        }
+        
+        $tarjeta_banco = $result_banco->fetch_assoc();
+        $stmt_banco_tarjeta->close();
+        
+        // 3. Verificar saldo suficiente
+        if ($tarjeta_banco['saldo'] < $monto_total) {
+            throw new Exception("Saldo insuficiente. Saldo actual: $" . number_format($tarjeta_banco['saldo'], 2) . ", Requerido: $" . number_format($monto_total, 2));
+        }
+        
+        // 4. Descontar el monto del saldo en la BD del banco
+        $query_descuento = "UPDATE tarjeta SET saldo = saldo - ? WHERE id_tarjeta = ?";
+        $stmt_descuento = $conn2->prepare($query_descuento);
+        $stmt_descuento->bind_param('di', $monto_total, $tarjeta_banco['id_tarjeta']);
+        
+        if (!$stmt_descuento->execute()) {
+            throw new Exception("Error al descontar saldo: " . $stmt_descuento->error);
+        }
+        
+        $stmt_descuento->close();
+        
+        // 5. Insertar forma de pago en BD principal
+        $query_forma_pago = "INSERT INTO formas_pago (forma, estado) VALUES ('Tarjeta', 'Usado')";
+        $stmt_forma_pago = $conn->prepare($query_forma_pago);
+        
+        if (!$stmt_forma_pago->execute()) {
+            throw new Exception("Error insertando forma de pago: " . $stmt_forma_pago->error);
+        }
+        
+        $id_forma_pago = $conn->insert_id;
+        $stmt_forma_pago->close();
+        
+        // 6. Crear registro de pago
+        $query_pago = "INSERT INTO pago (id_forma_pago, id_pedido, fecha_pago) VALUES (?, ?, NOW())";
+        $stmt_pago = $conn->prepare($query_pago);
+        $stmt_pago->bind_param('ii', $id_forma_pago, $id_pedido);
+        
+        if (!$stmt_pago->execute()) {
+            throw new Exception("Error insertando pago: " . $stmt_pago->error);
+        }
+        
+        $stmt_pago->close();
+        
+        // 7. Agregar 5% al monedero del cliente
+        $bonus_monedero = $monto_total * 0.05;
+        $query_monedero = "UPDATE cliente SET monedero = monedero + ? WHERE id_cliente = ?";
+        $stmt_monedero = $conn->prepare($query_monedero);
+        $stmt_monedero->bind_param('di', $bonus_monedero, $id_cliente);
+        
+        if (!$stmt_monedero->execute()) {
+            throw new Exception("Error actualizando monedero: " . $stmt_monedero->error);
+        }
+        
+        $stmt_monedero->close();
+        
+        // Confirmar transacciones en ambas BDs
+        $conn->commit();
+        $conn2->commit();
+        
+        // Redireccionar con éxito
+        $numero_oculto = "**** **** **** " . substr($tarjeta_info['numero_tarjeta'], -4);
+        header("Location: ../pago/confirmacion.php?tipo=tarjeta&tarjeta=" . urlencode($numero_oculto) . "&bonus=" . number_format($bonus_monedero, 2) . "&id_pedido=$id_pedido");
+        exit();
         
     } else {
-        logDebug("Método de pago no válido", $metodo_pago);
-        sendJsonResponse(['success' => false, 'message' => 'Método de pago no válido: ' . $metodo_pago]);
+        throw new Exception("Método de pago no válido");
     }
     
 } catch (Exception $e) {
-    logDebug("Excepción capturada", $e->getMessage());
-    sendJsonResponse(['success' => false, 'message' => 'Error interno: ' . $e->getMessage()]);
+    // Rollback en caso de error
+    $conn->rollback();
+    $conn2->rollback();
+    
+    // Redireccionar con error
+    header("Location: Pagos.php?resultado=" . urlencode("Error: " . $e->getMessage()) . "&tipo=error&monto=$monto&id_pedido=$id_pedido");
+    exit();
+    
 } finally {
-    // Cerrar conexiones si existen
-    if (isset($conn) && $conn instanceof mysqli) {
+    // Restaurar autocommit y cerrar conexiones
+    if ($conn) {
+        $conn->autocommit(TRUE);
         $conn->close();
     }
-    if (isset($conn2) && $conn2 instanceof mysqli) {
+    if ($conn2) {
+        $conn2->autocommit(TRUE);
         $conn2->close();
     }
 }
