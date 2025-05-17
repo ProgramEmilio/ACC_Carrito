@@ -1,6 +1,6 @@
 <?php
 session_start();
-include '../Nav.php';
+include('../Nav/header.php');
 include '../BD/ConexionBD.php';
 
 $id_usuario = $_SESSION['id_usuario'];

@@ -56,6 +56,13 @@ include('CerrarSesion.php');
             <img src="../Imagenes/acc_logo.png" class="img-logo" alt="Logo">
         </a>
 
+        <div class="carrito-icono" onclick="irAlCarrito()">
+                    <img src="../Imagenes/carrito.png" alt="Carrito" class="carrito-img">
+                    <span id="contador-carrito">0</span>
+                </div>
+
+                <a href="../Perfil/Perfil.php" class="btn-ver-perfil">Perfil</a>
+                
         <!-- Contenedor para alinear el botón de cierre de sesión -->
         <div class="logout-container">
             <form method="POST">

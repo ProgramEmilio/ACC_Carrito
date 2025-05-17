@@ -1,7 +1,7 @@
 <?php
 include '../BD/ConexionBanco.php';  // $conn2 -> Base banco_acc (tarjeta)
 include '../BD/ConexionBD.php';     // $conn  -> Base principal (cliente)
-include '../Nav.php';
+include('../Nav/header.php');
 
 // Procesar eliminación si se recibe eliminar_id
 if (isset($_GET['eliminar_id'])) {
