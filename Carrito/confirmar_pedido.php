@@ -3,161 +3,98 @@ include('../BD/ConexionBD.php');
 include('../Nav/header.php');
 
 $id_usuario = $_SESSION['id_usuario'] ?? null;
+
 if (!$id_usuario) {
     echo "Usuario no autenticado.";
     exit;
 }
 
-// Obtener el último carrito activo del usuario
-$queryCarrito = "
-    SELECT c.id_carrito, c.fecha, c.total, cli.nom_persona, cli.id_cliente
-    FROM carrito c
-    JOIN cliente cli ON c.id_cliente = cli.id_cliente
-    JOIN usuario u ON cli.id_usuario = u.id_usuario
-    WHERE u.id_usuario = $id_usuario
-    ORDER BY c.fecha DESC
-    LIMIT 1
-";
-$resultCarrito = $conn->query($queryCarrito);
-$carrito = $resultCarrito->fetch_assoc();
+// Obtener ID del cliente
+$queryCliente = "SELECT id_cliente, nom_persona, apellido_paterno, apellido_materno, telefono FROM cliente WHERE id_usuario = ?";
+$stmtCliente = $conn->prepare($queryCliente);
+$stmtCliente->bind_param('i', $id_usuario);
+$stmtCliente->execute();
+$resultCliente = $stmtCliente->get_result();
+$cliente = $resultCliente->fetch_assoc();
 
-if (!$carrito) {
-    echo "No hay carrito activo.";
+$id_cliente = $cliente['id_cliente'] ?? null;
+
+if (!$id_cliente) {
+    echo "Cliente no encontrado.";
     exit;
 }
 
-$id_carrito = $carrito['id_carrito'];
+// Mostrar nombre del cliente
+echo "<h2>Bienvenido, " . htmlspecialchars($cliente['nom_persona']) . " " . htmlspecialchars($cliente['apellido_paterno']) . " " . htmlspecialchars($cliente['apellido_materno']) . "</h2>";
+echo "<p><strong>Teléfono:</strong> " . htmlspecialchars($cliente['telefono']) . "</p>";
 
-// Opcional: obtener info de envío asociado al carrito, si ya fue seleccionado
-// Para este ejemplo supondremos que la info de envío viene del localStorage, la tomaremos en JS
+// Mostrar direcciones
+$sql_direcciones = "SELECT * FROM direccion WHERE id_cliente = ?";
+$stmt_dir = $conn->prepare($sql_direcciones);
+$stmt_dir->bind_param("i", $id_cliente);
+$stmt_dir->execute();
+$resultado_dir = $stmt_dir->get_result();
 
+echo "<h3>Elige la forma de entrega</h3>";
+
+if ($resultado_dir->num_rows > 0) {
+    while ($direccion = $resultado_dir->fetch_assoc()) {
+        echo "<div style='border:1px solid #ccc; padding:10px; margin:10px 0;'>";
+        echo "<strong>Dirección:</strong><br>";
+        echo htmlspecialchars($direccion['calle']) . " #" . htmlspecialchars($direccion['num_ext']) . ", ";
+        echo htmlspecialchars($direccion['colonia']) . ", CP " . htmlspecialchars($direccion['codigo_postal']) . "<br>";
+        echo htmlspecialchars($direccion['ciudad']) . ", " . htmlspecialchars($direccion['estado']) . "<br><br>";
+        echo "<button onclick=\"alert('Dirección elegida: ID " . $direccion['id_direccion'] . "')\">Elegir esta dirección</button> ";
+        echo "<button onclick=\"window.location.href='editar_direccion.php?id=" . $direccion['id_direccion'] . "'\">Editar</button>";
+        echo "</div>";
+    }
+} else {
+    echo "<p>No tienes direcciones registradas.</p>";
+    echo "<a href='agregar_direccion.php'>Agregar una nueva dirección</a>";
+}
+
+// Mostrar artículos del carrito
+echo "<h2>Artículos en el carrito</h2>";
+
+$sql_carrito = "
+SELECT 
+  a.id_articulo,
+  a.descripcion,
+  ac.valor AS imagen,
+  dc.cantidad,
+  dc.precio,
+  dc.importe,
+  dc.personalizacion
+FROM carrito ca
+JOIN detalle_carrito dc ON ca.id_carrito = dc.id_carrito
+JOIN articulos a ON dc.id_articulo = a.id_articulo
+LEFT JOIN articulo_completo ac ON a.id_articulo = ac.id_articulo AND ac.id_atributo = 3
+WHERE ca.id_cliente = ?
+";
+
+$stmt_carrito = $conn->prepare($sql_carrito);
+$stmt_carrito->bind_param("i", $id_cliente);
+$stmt_carrito->execute();
+$resultado_carrito = $stmt_carrito->get_result();
+
+if ($resultado_carrito->num_rows > 0) {
+    while ($row = $resultado_carrito->fetch_assoc()) {
+        echo "<hr>";
+        echo "<p><strong>ID:</strong> " . htmlspecialchars($row["id_articulo"]) . "</p>";
+        echo "<p><strong>Descripción:</strong> " . htmlspecialchars($row["descripcion"]) . "</p>";
+        echo "<p><strong>Cantidad:</strong> " . htmlspecialchars($row["cantidad"]) . "</p>";
+        echo "<p><strong>Precio unitario:</strong> $" . htmlspecialchars(number_format($row["precio"], 2)) . "</p>";
+        echo "<p><strong>Importe:</strong> $" . htmlspecialchars(number_format($row["importe"], 2)) . "</p>";
+        echo "<p><strong>Personalización:</strong> " . htmlspecialchars($row["personalizacion"]) . "</p>";
+        echo "<p><strong>Imagen:</strong> <img src='ruta/imagenes/" . htmlspecialchars($row["imagen"]) . "' width='100'></p>";
+    }
+} else {
+    echo "<p>No hay artículos en el carrito.</p>";
+}
+
+// Cierre
+$stmtCliente->close();
+$stmt_dir->close();
+$stmt_carrito->close();
+$conn->close();
 ?>
-
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8" />
-    <title>Confirmar Pedido - Resumen</title>
-    <style>
-        table {
-            border-collapse: collapse; width: 100%; margin-bottom: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd; padding: 8px; text-align: center;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        .btn {
-            padding: 10px 20px; margin: 5px; cursor: pointer;
-            border: none; border-radius: 5px;
-        }
-        .btn-back {
-            background-color: #ccc;
-        }
-        .btn-continue {
-            background-color: #28a745; color: white;
-        }
-    </style>
-</head>
-<body>
-
-<h1>Confirmar Pedido</h1>
-<p><strong>Cliente:</strong> <?= htmlspecialchars($carrito['nom_persona']) ?></p>
-<p><strong>Fecha del carrito:</strong> <?= htmlspecialchars($carrito['fecha']) ?></p>
-
-<h2>Resumen de Compra</h2>
-<table id="resumenTabla">
-    <thead>
-        <tr>
-            <th>Artículo</th>
-            <th>Cantidad</th>
-            <th>Personalización</th>
-            <th>Precio Unitario</th>
-            <th>Importe</th>
-        </tr>
-    </thead>
-    <tbody>
-        <!-- Aquí se llenará con JS desde localStorage -->
-    </tbody>
-</table>
-
-<h2>Información de Envío</h2>
-<p>Tipo de envío: <span id="tipoEnvio"></span></p>
-<p>Fecha estimada de llegada: <span id="fechaEntrega"></span></p>
-
-<div>
-    <button class="btn btn-back" onclick="window.history.back()">Retroceder</button>
-    <button class="btn btn-continue" id="btnContinuar">Continuar</button>
-</div>
-
-<script>
-// Ejemplo de cómo puede venir almacenada la info en localStorage:
-// "carrito_items": JSON.stringify([{id_articulo:"P001", descripcion:"Playera", cantidad:2, personalizacion:"Texto", precio:250.00, importe:500.00}, ...])
-// "envio_seleccionado": JSON.stringify({tipo_envio:"Domicilio", fecha_estimada:"2025-05-19T00:00:00"})
-
-function formatearFecha(fechaStr) {
-    const fecha = new Date(fechaStr);
-    return fecha.toLocaleDateString('es-MX', {year: 'numeric', month: 'long', day: 'numeric'});
-}
-
-function cargarResumen() {
-    const resumenBody = document.querySelector("#resumenTabla tbody");
-    resumenBody.innerHTML = '';
-
-    const carritoItemsStr = localStorage.getItem("carrito_items");
-    if (!carritoItemsStr) {
-        resumenBody.innerHTML = '<tr><td colspan="5">No hay artículos en el carrito.</td></tr>';
-        return;
-    }
-    
-    const carritoItems = JSON.parse(carritoItemsStr);
-    let total = 0;
-
-    carritoItems.forEach(item => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-            <td>${item.descripcion}</td>
-            <td>${item.cantidad}</td>
-            <td>${item.personalizacion}</td>
-            <td>$${item.precio.toFixed(2)}</td>
-            <td>$${item.importe.toFixed(2)}</td>
-        `;
-        resumenBody.appendChild(tr);
-        total += item.importe;
-    });
-
-    // Mostrar total al final de la tabla
-    const trTotal = document.createElement("tr");
-    trTotal.innerHTML = `
-        <td colspan="4" style="text-align:right;"><strong>Total:</strong></td>
-        <td><strong>$${total.toFixed(2)}</strong></td>
-    `;
-    resumenBody.appendChild(trTotal);
-}
-
-function cargarEnvio() {
-    const envioStr = localStorage.getItem("envio_seleccionado");
-    if (!envioStr) {
-        document.getElementById("tipoEnvio").textContent = "No seleccionado";
-        document.getElementById("fechaEntrega").textContent = "-";
-        return;
-    }
-
-    const envio = JSON.parse(envioStr);
-    document.getElementById("tipoEnvio").textContent = envio.tipo_envio || "-";
-    document.getElementById("fechaEntrega").textContent = envio.fecha_estimada ? formatearFecha(envio.fecha_estimada) : "-";
-}
-
-document.getElementById("btnContinuar").addEventListener("click", () => {
-    // Aquí podrías hacer validaciones o enviar la orden para procesar en el backend
-    // Por ahora, redirigiremos a la página de procesamiento
-    window.location.href = "procesar_pedido.php";
-});
-
-cargarResumen();
-cargarEnvio();
-</script>
-
-</body>
-</html>

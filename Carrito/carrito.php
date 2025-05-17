@@ -56,7 +56,7 @@ $resultDetalles = $conn->query($queryDetalles);
     <p><strong>Cliente:</strong> <?= htmlspecialchars($carrito['nom_persona']) ?></p>
     <p><strong>Fecha:</strong> <?= htmlspecialchars($carrito['fecha']) ?></p>
 
-    <form method="POST" action="procesar_compra.php">
+    <form method="POST" action="../Direccion/direccion.php">
 
         <table>
             <thead>
@@ -106,76 +106,81 @@ $resultDetalles = $conn->query($queryDetalles);
         </div>
 
         <div class="continuar-compra">
-            <button type="button" id="continuarCompra" onclick="validarContinuar()">Continuar con la compra</button>
+            <button type="submit" id="continuarCompra">Continuar con la compra</button>
         </div>
     </form>
 
     <script>
         const STORAGE_KEY = "articulos_seleccionados";
+        const STORAGE_CANTIDADES_KEY = "cantidades_articulos";
 
         function actualizarTotal() {
             let total = 0;
+            let cantidadesGuardadas = JSON.parse(localStorage.getItem(STORAGE_CANTIDADES_KEY) || "{}");
+
             document.querySelectorAll('tbody tr').forEach(fila => {
                 const checkbox = fila.querySelector('.select-articulo');
                 const cantidadInput = fila.querySelector('.cantidad-input');
                 const precio = parseFloat(fila.getAttribute('data-precio')) || 0;
-                const cantidad = parseInt(cantidadInput.value) || 1;
-                const nuevoImporte = cantidad * precio;
 
+                let cantidad = parseInt(cantidadInput.value) || 1;
+                cantidad = Math.max(1, Math.floor(cantidad)); // Bloquear decimales y negativos
+                cantidadInput.value = cantidad;
+
+                cantidadesGuardadas[cantidadInput.name] = cantidad;
+
+                const nuevoImporte = cantidad * precio;
                 fila.querySelector('.importe').textContent = `$${nuevoImporte.toFixed(2)}`;
 
                 if (checkbox.checked) {
                     total += nuevoImporte;
                 }
+                  guardarCarritoEnStorage();
             });
 
             document.getElementById('total').textContent = total.toFixed(2);
+            localStorage.setItem(STORAGE_CANTIDADES_KEY, JSON.stringify(cantidadesGuardadas));
             localStorage.setItem("total_carrito", total.toFixed(2));
         }
 
-        function validarContinuar() {
-            const checkboxes = document.querySelectorAll('.select-articulo:checked');
-            const productosSeleccionados = [];
+        function guardarCarritoEnStorage() {
+    const carrito = [];
 
-            if (checkboxes.length === 0) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: '¡Ups!',
-                    text: 'Debes seleccionar al menos un producto para continuar.',
-                    confirmButtonColor: '#4CAF50'
-                });
-            } else {
-                checkboxes.forEach(cb => {
-                    const fila = cb.closest('tr');
-                    productosSeleccionados.push({
-                        id_articulo: cb.value,
-                        descripcion: fila.querySelector('td:nth-child(3)').innerText,
-                        personalizacion: fila.querySelector('td:nth-child(4)').innerText,
-                        cantidad: fila.querySelector('.cantidad-input').value,
-                        precio: parseFloat(fila.getAttribute('data-precio')) || 0,
-                        importe: (parseFloat(fila.querySelector('.cantidad-input').value) * (parseFloat(fila.getAttribute('data-precio')) || 0)).toFixed(2),
-                        imagen: fila.querySelector('img')?.getAttribute('src') || ''
-                    });
-                });
+    document.querySelectorAll('tbody tr').forEach(fila => {
+        const checkbox = fila.querySelector('.select-articulo');
+        if (!checkbox.checked) return; // solo seleccionados
 
-                localStorage.setItem("productos_seleccionados", JSON.stringify(productosSeleccionados));
-                window.location.href = "../Direccion/direccion.php";
-            }
-        }
+        const idArticulo = checkbox.value;
+        const descripcion = fila.querySelector('td:nth-child(3)').textContent.trim();
+        const personalizacion = fila.querySelector('td:nth-child(4)').textContent.trim();
+        const cantidad = parseInt(fila.querySelector('.cantidad-input').value) || 1;
+        const precio = parseFloat(fila.getAttribute('data-precio')) || 0;
+        const importe = cantidad * precio;
+        const imagenSrc = fila.querySelector('td:nth-child(2) img')?.getAttribute('src') || null;
 
-        function confirmarEliminacion(idArticulo) {
-            Swal.fire({
-                title: '¿Eliminar artículo?',
-                text: "Esta acción no se puede deshacer.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Sí, eliminar',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = `eliminar_articulo.php?id_articulo=${idArticulo}&id_carrito=<?= $id_carrito ?>`;
+        carrito.push({
+            idArticulo,
+            descripcion,
+            personalizacion,
+            cantidad,
+            precio,
+            importe,
+            imagenSrc
+        });
+    });
+
+    localStorage.setItem('carrito_completo', JSON.stringify(carrito));
+
+    // También guardar total (ya lo tienes)
+    let total = carrito.reduce((acc, item) => acc + item.importe, 0);
+    localStorage.setItem('total_carrito', total.toFixed(2));
+}
+
+        function restaurarCantidadesDesdeLocalStorage() {
+            const cantidadesGuardadas = JSON.parse(localStorage.getItem(STORAGE_CANTIDADES_KEY) || "{}");
+            document.querySelectorAll(".cantidad-input").forEach(input => {
+                if (cantidadesGuardadas.hasOwnProperty(input.name)) {
+                    input.value = cantidadesGuardadas[input.name];
                 }
             });
         }
@@ -194,6 +199,7 @@ $resultDetalles = $conn->query($queryDetalles);
 
         document.addEventListener('DOMContentLoaded', () => {
             restaurarSeleccionDesdeLocalStorage();
+            restaurarCantidadesDesdeLocalStorage();
             actualizarTotal();
 
             document.querySelectorAll(".select-articulo").forEach(cb => {
@@ -205,6 +211,9 @@ $resultDetalles = $conn->query($queryDetalles);
 
             document.querySelectorAll(".cantidad-input").forEach(input => {
                 input.addEventListener("change", actualizarTotal);
+                input.addEventListener("input", (e) => {
+                    e.target.value = e.target.value.replace(/[^\d]/g, '');
+                });
             });
         });
     </script>
