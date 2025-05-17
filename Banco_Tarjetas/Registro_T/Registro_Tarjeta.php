@@ -4,7 +4,7 @@ include('../../Nav/header_Banco2.php');
 
 $id_banco = $_GET['id_banco'];
 
-$clientes = $conn->query("SELECT * FROM cliente");
+$clientes = $conn2->query("SELECT * FROM cliente");
 ?>
 
 <h1 class="titulo">Agregar Tarjeta</h1>

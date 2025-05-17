@@ -2,13 +2,13 @@
 include('../../BD/ConexionBDB.php');
 include('../../Nav/header_Banco2.php');
 
-if (!$conn) {
-    die("Error de conexión: " . mysqli_connect_error());
+if (!$conn2) {
+    die("Error de conexión: " . mysqli_conn2ect_error());
 }
 
 $id_usuario = $_GET['id'];
 $query = "SELECT u.*, c.* FROM usuario u JOIN cliente c ON u.id_usuario = c.id_usuario WHERE u.id_usuario = ?";
-$stmt = $conn->prepare($query);
+$stmt = $conn2->prepare($query);
 $stmt->bind_param("i", $id_usuario);
 $stmt->execute();
 $result = $stmt->get_result();

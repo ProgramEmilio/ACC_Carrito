@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         tipo_tarjeta, red_pago, titular, id_banco
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-    $stmt = $conn->prepare($query);
+    $stmt = $conn2->prepare($query);
 
     $stmt->bind_param('sssdssii', $numero, $cvv, $vencimiento, $saldo, $tipo, $red, $titular, $id_banco);
 
