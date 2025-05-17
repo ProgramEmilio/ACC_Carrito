@@ -1,0 +1,66 @@
+.direccion-container {
+    max-width: 500px;
+    margin: 60px auto;
+    background: #fff;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.direccion-container h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #333;
+}
+
+.direccion-container p,
+.direccion-container label {
+    font-size: 16px;
+    margin: 10px 0;
+    color: #444;
+    display: block;
+}
+
+.direccion-container input[type="text"],
+.direccion-container input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+.direccion-container .btn {
+    margin-top: 20px;
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.direccion-container .btn:hover {
+    background-color: #0056b3;
+}
+
+.direccion-container .edit-link {
+    display: inline-block;
+    margin-top: 20px;
+    text-align: center;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.direccion-container .edit-link:hover {
+    text-decoration: underline;
+}
+
+
+
+
+
