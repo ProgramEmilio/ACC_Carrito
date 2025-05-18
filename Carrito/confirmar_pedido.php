@@ -1,7 +1,9 @@
 <?php
 include('../BD/ConexionBD.php');
 include('../Nav/header.php');
-
+echo "<pre>";
+print_r($_POST);
+echo "</pre>";
 $id_usuario = $_SESSION['id_usuario'] ?? null;
 if (!$id_usuario) {
     echo "Usuario no autenticado.";
@@ -28,7 +30,8 @@ $direccion_id = $_POST['domicilio_seleccionado'] ?? null;
 $paqueteria_id = $_POST['paqueteria'] ?? null;
 $articulos = $_POST['articulos'] ?? [];
 $cantidades = $_POST['cantidades'] ?? [];
-
+$id_paqueteria = $_POST['id_paqueteria'] ?? null;
+$id_direccion = $_POST['id_direccion'] ?? null;
 $subtotal = 0;
 if (is_array($articulos) && is_array($cantidades)) {
     foreach ($articulos as $articulo_id) {
@@ -87,10 +90,10 @@ $id_carrito = $row['id_carrito'] ?? null;
 
 <!-- Dirección o punto de entrega -->
 <?php
-if ($forma_entrega === 'Punto de Entrega' && $paqueteria_id) {
+if ($forma_entrega === 'Punto de Entrega' && $id_paqueteria) {
     $sqlPaq = "SELECT nombre_paqueteria, descripcion, fecha FROM paqueteria WHERE id_paqueteria = ?";
     $stmtPaq = $conn->prepare($sqlPaq);
-    $stmtPaq->bind_param('i', $paqueteria_id);
+    $stmtPaq->bind_param('i', $id_paqueteria);
     $stmtPaq->execute();
     $resPaq = $stmtPaq->get_result();
     if ($paqueteria_info = $resPaq->fetch_assoc()) {
@@ -99,10 +102,10 @@ if ($forma_entrega === 'Punto de Entrega' && $paqueteria_id) {
         echo "<p><strong>Descripción:</strong> " . htmlspecialchars($paqueteria_info['descripcion']) . "</p>";
         echo "<p><strong>Fecha:</strong> " . htmlspecialchars($paqueteria_info['fecha']) . "</p>";
     }
-} elseif ($forma_entrega === 'Domicilio' && $direccion_id) {
+} elseif ($forma_entrega === 'Domicilio' && $id_direccion) {
     $sqlDir = "SELECT calle, num_ext, colonia, ciudad, estado, codigo_postal FROM direccion WHERE id_direccion = ?";
     $stmtDir = $conn->prepare($sqlDir);
-    $stmtDir->bind_param('i', $direccion_id);
+    $stmtDir->bind_param('i', $id_direccion);
     $stmtDir->execute();
     $resDir = $stmtDir->get_result();
     if ($direccion_info = $resDir->fetch_assoc()) {
@@ -166,10 +169,16 @@ if ($forma_entrega === 'Punto de Entrega' && $paqueteria_id) {
 
 <!-- FORMULARIO PARA CONFIRMAR PEDIDO -->
 <form action="pedido.php" method="POST">
-    <input type="hidden" name="id_envio" value="<?= htmlspecialchars($direccion_id) ?>">
-    <input type="hidden" name="id_paqueteria" value="<?= htmlspecialchars($paqueteria_id) ?>">
+<input type="hidden" name="id_envio" value="<?= ($forma_entrega === 'Domicilio') ? 1 : 2 ?>">
     <input type="hidden" name="id_carrito" value="<?= htmlspecialchars($id_carrito) ?>">
     <input type="hidden" name="total" value="<?= htmlspecialchars($total) ?>">
+    <input type="hidden" name="iva" value="<?= htmlspecialchars($iva) ?>">
+
+    <?php if ($forma_entrega === 'Domicilio') : ?>
+        <input type="hidden" name="id_direccion" value="<?= htmlspecialchars($id_direccion) ?>">
+    <?php elseif ($forma_entrega === 'Punto de Entrega') : ?>
+        <input type="hidden" name="id_paqueteria" value="<?= htmlspecialchars($id_paqueteria) ?>">
+    <?php endif; ?>
 
     <button type="submit">Proceder al pago</button>
 </form>

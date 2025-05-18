@@ -2,8 +2,12 @@
 include('../BD/ConexionBD.php');
 include('../Nav/header.php');
 
-
+$id_articulo = $_POST['articulos'] ?? [];
+$cantidades = $_POST['cantidades'] ?? [];
+$total_carrito = $_POST['total'] ?? '';
+$id_carrito = $_POST['id_carrito'] ?? '';
 $id_usuario = $_SESSION['id_usuario'] ?? null;
+
 if (!$id_usuario) {
     echo "Usuario no autenticado.";
     exit;
@@ -23,8 +27,9 @@ if (!$id_cliente) {
     exit;
 }
 
-// Direcciones del cliente
-$queryDireccion = "SELECT id_direccion, calle, num_ext, colonia, ciudad, estado, codigo_postal FROM direccion WHERE id_cliente = ?";
+// Obtener direcciones
+$queryDireccion = "SELECT id_direccion, calle, num_ext, colonia, ciudad, estado, codigo_postal 
+FROM direccion WHERE id_cliente = ?";
 $stmtDireccion = $conn->prepare($queryDireccion);
 $stmtDireccion->bind_param('i', $id_cliente);
 $stmtDireccion->execute();
@@ -47,7 +52,7 @@ while ($row = $result_envios->fetch_assoc()) {
     }
 }
 
-// Lista de paqueterías
+// Paqueterías
 $sql_paqueterias = "SELECT id_paqueteria, nombre_paqueteria FROM paqueteria";
 $result_paqueterias = $conn->query($sql_paqueterias);
 $lista_paqueterias = [];
@@ -96,9 +101,9 @@ while ($row = $result_paqueterias->fetch_assoc()) {
                             <?= htmlspecialchars($dir['colonia']) ?>, <?= htmlspecialchars($dir['ciudad']) ?>, 
                             <?= htmlspecialchars($dir['estado']) ?>, CP <?= htmlspecialchars($dir['codigo_postal']) ?>
                             <br>
-                            <a href="editar_domicilio.php?id=<?= $dir['id_direccion'] ?>" class="boton btn-editar">Editar</a>
+                            <a href="../Perfil/Perfil.php?id=<?= $dir['id_direccion'] ?>" class="boton btn-editar">Editar</a>
                             <label>
-                                <input type="radio" name="domicilio_seleccionado" value="<?= $dir['id_direccion'] ?>">
+                                <input type="radio" name="id_direccion" value="<?= $dir['id_direccion'] ?>">
                                 Elegir esta dirección
                             </label>
                         </div>
@@ -109,7 +114,7 @@ while ($row = $result_paqueterias->fetch_assoc()) {
             </div>
 
             <label style="margin-top:20px;">
-                <input type="radio" name="forma_entrega" value="Punto de Entrega">
+                <input type="radio" name="forma_entrega" value="Punto de Entrega" onclick="mostrarPaqueterias(true)">
                 Retiro en punto de entrega (costo $<?= number_format($costo_retiro, 2) ?>)
             </label>
 
@@ -117,8 +122,8 @@ while ($row = $result_paqueterias->fetch_assoc()) {
                 <h4>Selecciona la paquetería:</h4>
                 <?php foreach ($lista_paqueterias as $paq): ?>
                     <label>
-                        <input type="radio" name="paqueteria" value="<?= htmlspecialchars($paq['id_paqueteria']) ?>">
-                        <?= htmlspecialchars($paq['nombre_paqueteria']) ?>
+                        <input type="radio" name="id_paqueteria" value="<?= $paq['id_paqueteria'] ?>">
+                        <?= $paq['nombre_paqueteria'] ?>
                     </label><br>
                 <?php endforeach; ?>
             </div>
@@ -128,385 +133,109 @@ while ($row = $result_paqueterias->fetch_assoc()) {
                 <a href="../Carrito/carrito.php" class="boton" style="background:#6c757d;">Regresar</a>
             </div>
 
-            <div id="inputsOcultos"></div>
+            <div id="inputsOcultos">
+                <input type="hidden" name="id_carrito" value="<?= htmlspecialchars($id_carrito) ?>">
+                <?php foreach ($id_articulo as $index => $id): ?>
+                    <input type="hidden" name="articulos[]" value="<?= htmlspecialchars($id) ?>">
+                    <input type="hidden" name="cantidades[<?= $id ?>]" value="<?= htmlspecialchars($cantidades[$id]) ?>">
+                    
+                <?php endforeach; ?>
+            </div>
         </form>
     </div>
 
     <div class="right-section">
         <h2>Resumen de compra</h2>
-        <table id="resumenCompra">
+        <table>
             <thead>
                 <tr>
                     <th>Artículo</th>
-                    <th>Personalización</th>
+                    <th>Precio</th>
                     <th>Cantidad</th>
-                    <th>Precio Unitario</th>
-                    <th>Importe</th>
+                    <th>Subtotal</th>
                 </tr>
             </thead>
-            <tbody></tbody>
-            <tfoot>
-                <tr><td colspan="4" style="text-align:right;">Subtotal</td><td id="subtotalCompra">$0.00</td></tr>
-                <tr><td colspan="4" style="text-align:right;">IVA (16%)</td><td id="ivaCompra">$0.00</td></tr>
-                <tr><td colspan="4" style="text-align:right;">Costo de envío</td><td id="costoEnvioCompra">$0.00</td></tr>
-                <tr><td colspan="4" style="text-align:right;"><strong>Total</strong></td><td id="totalCompra"><strong>$0.00</strong></td></tr>
-            </tfoot>
+            <tbody>
+                <?php
+                $totalSubtotal = 0;
+                $totalIVA = 0;
+                foreach ($id_articulo as $id) {
+                    $cantidad = $cantidades[$id] ?? 1;
+
+                    $query = "
+                        SELECT a.descripcion, da.precio
+                        FROM articulos a
+                        JOIN detalle_articulos da ON a.id_detalle_articulo = da.id_detalle_articulo
+                        WHERE a.id_articulo = ?
+                    ";
+                    $stmt = $conn->prepare($query);
+                    $stmt->bind_param('s', $id);
+                    $stmt->execute();
+                    $res = $stmt->get_result();
+                    $row = $res->fetch_assoc();
+
+                    $subtotal = $row['precio'] * $cantidad;
+                    $iva = $subtotal * 0.16;
+                    $totalSubtotal += $subtotal;
+                    $totalIVA += $iva;
+
+                    echo "<tr>
+                        <td>" . htmlspecialchars($row['descripcion']) . "</td>
+                        <td>$" . number_format($row['precio'], 2) . "</td>
+                        <td>$cantidad</td>
+                        <td>$" . number_format($subtotal, 2) . "</td>
+                    </tr>";
+                }
+
+                $totalFinal = $totalSubtotal + $totalIVA;
+                ?>
+            </tbody>
         </table>
+        <p><strong>Subtotal:</strong> $<?= number_format($totalSubtotal, 2) ?></p>
+        <p><strong>IVA:</strong> $<?= number_format($totalIVA, 2) ?></p>
+        <p><strong>Total:</strong> $<?= number_format($totalFinal, 2) ?></p>
     </div>
 </div>
-
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    // Obtener carrito del localStorage (debe estar previamente guardado)
-    const carrito = JSON.parse(localStorage.getItem('carrito_completo')) || [];
-    const tbody = document.querySelector('#resumenCompra tbody');
-    const subtotalElem = document.getElementById('subtotalCompra');
-    const ivaElem = document.getElementById('ivaCompra');
-    const costoEnvioElem = document.getElementById('costoEnvioCompra');
-    const totalElem = document.getElementById('totalCompra');
-    const inputsOcultos = document.getElementById('inputsOcultos');
-
-    const IVA_RATE = 0.16;
-    const costoEnvioDomicilio = <?= json_encode($costo_envio_domicilio) ?>;
-    const costoRetiro = <?= json_encode($costo_retiro) ?>;
-
-    let subtotal = 0;
-    tbody.innerHTML = '';  // Limpiar tabla
-
-    carrito.forEach(item => {
-        const importe = item.cantidad * item.precio;
-        subtotal += importe;
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${item.descripcion}</td>
-            <td>${item.personalizacion || ''}</td>
-            <td>${item.cantidad}</td>
-            <td>$${item.precio.toFixed(2)}</td>
-            <td>$${importe.toFixed(2)}</td>
-        `;
-        tbody.appendChild(tr);
-
-        // Inputs ocultos para el formulario
-        inputsOcultos.innerHTML += `
-            <input type="hidden" name="articulos[]" value="${item.idArticulo}">
-            <input type="hidden" name="cantidades[${item.idArticulo}]" value="${item.cantidad}">
-        `;
-    });
-
-    function actualizarResumen() {
-        const formaEntrega = document.querySelector('input[name="forma_entrega"]:checked')?.value;
-        const paqSeleccionada = document.querySelector('input[name="paqueteria"]:checked');
-        const domicilioSeleccionado =document.querySelector('input[name="domicilio_seleccionado"]:checked');
-            let costoEnvio = 0;
-
-    if (formaEntrega === 'Domicilio') {
-        costoEnvio = costoEnvioDomicilio;
-    } else if (formaEntrega === 'Punto de Entrega') {
-        costoEnvio = costoRetiro;
-    }
-
-    costoEnvioElem.textContent = `$${costoEnvio.toFixed(2)}`;
-
-    const iva = subtotal * IVA_RATE;
-    ivaElem.textContent = `$${iva.toFixed(2)}`;
-    subtotalElem.textContent = `$${subtotal.toFixed(2)}`;
-
-    const total = subtotal + iva + costoEnvio;
-    totalElem.textContent = `$${total.toFixed(2)}`;
+function mostrarPaqueterias(show) {
+    const container = document.getElementById('paqueteria-container');
+    container.style.display = show ? 'block' : 'none';
 }
 
-// Mostrar u ocultar secciones según forma de entrega
-function toggleFormasEntrega() {
-    const formaEntrega = document.querySelector('input[name="forma_entrega"]:checked')?.value;
-    const direccionesDiv = document.getElementById('direcciones-container');
-    const paqueteriaDiv = document.getElementById('paqueteria-container');
-
-    if (formaEntrega === 'Domicilio') {
-        direccionesDiv.style.display = 'block';
-        paqueteriaDiv.style.display = 'none';
-    } else {
-        direccionesDiv.style.display = 'none';
-        paqueteriaDiv.style.display = 'block';
-    }
-
-    actualizarResumen();
-}
-
-// Validación al enviar el formulario
-document.getElementById('formEntrega').addEventListener('submit', function(e) {
-    const formaEntrega = document.querySelector('input[name="forma_entrega"]:checked')?.value;
-    const domicilio = document.querySelector('input[name="domicilio_seleccionado"]:checked');
-    const paqueteria = document.querySelector('input[name="paqueteria"]:checked');
-
-       if (formaEntrega === 'Domicilio') {
-        costoEnvio = costoEnvioDomicilio;
-
-        if (!domicilioSeleccionado) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Selecciona una dirección',
-                text: 'Debes elegir una dirección registrada para el envío a domicilio.',
-            });
-            return false;
-        }
-    } else if (formaEntrega === 'Punto de Entrega') {
-        costoEnvio = costoRetiro;
-
-        if (!paqSeleccionada) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Selecciona una paquetería',
-                text: 'Debes elegir una paquetería para el retiro.',
-            });
-            return false;
-        }
-    }
-
-    const iva = subtotal * IVA_RATE;
-    const total = subtotal + iva + costoEnvio;
-
-    subtotalElem.textContent = `$${subtotal.toFixed(2)}`;
-    ivaElem.textContent = `$${iva.toFixed(2)}`;
-    costoEnvioElem.textContent = `$${costoEnvio.toFixed(2)}`;
-    totalElem.innerHTML = `<strong>$${total.toFixed(2)}</strong>`;
-
-    return true;
-}
-
-// Evento para actualizar resumen al cambiar forma de entrega o seleccionar dirección/paquetería
-document.querySelectorAll('input[name="forma_entrega"]').forEach(radio => {
-    radio.addEventListener('change', () => {
-        const forma = radio.value;
-        document.getElementById('paqueteria-container').style.display = forma === 'Punto de Entrega' ? 'block' : 'none';
-        actualizarResumen();
+document.querySelectorAll('input[name="forma_entrega"]').forEach((input) => {
+    input.addEventListener('change', function () {
+        mostrarPaqueterias(this.value === 'Punto de Entrega');
     });
 });
 
-document.querySelectorAll('input[name="domicilio_seleccionado"], input[name="paqueteria"]').forEach(input => {
-    input.addEventListener('change', actualizarResumen);
-});
-
-// Validación final al enviar formulario
 document.getElementById('formEntrega').addEventListener('submit', function (e) {
-    if (!actualizarResumen()) {
-        e.preventDefault(); // Evitar envío si falta algo
-    }
-});
-
-// Cálculo inicial
-actualizarResumen();
-});
-</script>
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  // Leer carrito desde localStorage (ajusta la clave según guardes)
-  const carrito = JSON.parse(localStorage.getItem("carrito_completo")) || [];
-
-  // Actualizar tabla resumen
-  const tbody = document.querySelector('#resumenCompra tbody');
-  const subtotalElem = document.getElementById('subtotalCompra');
-  const ivaElem = document.getElementById('ivaCompra');
-  const costoEnvioElem = document.getElementById('costoEnvioCompra');
-  const totalElem = document.getElementById('totalCompra');
-  const inputsOcultos = document.getElementById('inputsOcultos');
-
-  const IVA_RATE = 0.16;
-  const costoEnvioDomicilio = <?= json_encode($costo_envio_domicilio) ?>;
-  const costoRetiro = <?= json_encode($costo_retiro) ?>;
-
-  let subtotal = 0;
-  tbody.innerHTML = '';
-  inputsOcultos.innerHTML = '';
-
-  carrito.forEach(item => {
-    const importe = item.cantidad * item.precio;
-    subtotal += importe;
-
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${item.descripcion}</td>
-      <td>${item.personalizacion || ''}</td>
-      <td>${item.cantidad}</td>
-      <td>$${item.precio.toFixed(2)}</td>
-      <td>$${importe.toFixed(2)}</td>
-    `;
-    tbody.appendChild(tr);
-
-    // Inputs ocultos para enviar por POST
-    inputsOcultos.innerHTML += `
-      <input type="hidden" name="articulos[]" value="${item.idArticulo}">
-      <input type="hidden" name="cantidades[${item.idArticulo}]" value="${item.cantidad}">
-    `;
-  });
-
-  // Función para actualizar totales y mostrar en la tabla
-  function actualizarTotales() {
     const formaEntrega = document.querySelector('input[name="forma_entrega"]:checked').value;
-    let costoEnvio = 0;
-    if (formaEntrega.toLowerCase() === 'domicilio') {
-      costoEnvio = costoEnvioDomicilio;
-    } else if (formaEntrega.toLowerCase() === 'punto de entrega') {
-      costoEnvio = costoRetiro;
-    }
-
-    const iva = subtotal * IVA_RATE;
-    const total = subtotal + iva + costoEnvio;
-
-    subtotalElem.textContent = `$${subtotal.toFixed(2)}`;
-    ivaElem.textContent = `$${iva.toFixed(2)}`;
-    costoEnvioElem.textContent = `$${costoEnvio.toFixed(2)}`;
-    totalElem.innerHTML = `<strong>$${total.toFixed(2)}</strong>`;
-  }
-
-  actualizarTotales();
-  
-
-  // Mostrar/ocultar contenedores según forma de entrega
-  function toggleEntregaOptions() {
-    const formaEntrega = document.querySelector('input[name="forma_entrega"]:checked').value.toLowerCase();
-    document.getElementById('direcciones-container').style.display = formaEntrega === 'domicilio' ? 'block' : 'none';
-    document.getElementById('paqueteria-container').style.display = formaEntrega === 'punto de entrega' ? 'block' : 'none';
-  }
-  toggleEntregaOptions();
-
-  // Escuchar cambios en forma de entrega
-  document.querySelectorAll('input[name="forma_entrega"]').forEach(radio => {
-    radio.addEventListener('change', () => {
-      toggleEntregaOptions();
-      actualizarTotales();
-    });
-  });
-
-  // Cargar selección previa desde localStorage si quieres
-  const formaEntregaGuardada = localStorage.getItem('forma_entrega');
-  if (formaEntregaGuardada) {
-    const radio = document.querySelector(`input[name="forma_entrega"][value="${formaEntregaGuardada}"]`);
-    if (radio) {
-      radio.checked = true;
-      toggleEntregaOptions();
-      actualizarTotales();
-    }
-  }
-
-  const domicilioGuardado = localStorage.getItem('domicilio_seleccionado');
-  if (domicilioGuardado) {
-    const radioDomicilio = document.querySelector(`input[name="domicilio_seleccionado"][value="${domicilioGuardado}"]`);
-    if (radioDomicilio) radioDomicilio.checked = true;
-  }
-
-  const paqueteriaGuardada = localStorage.getItem('paqueteria_seleccionada');
-  if (paqueteriaGuardada) {
-    const radioPaq = document.querySelector(`input[name="paqueteria"][value="${paqueteriaGuardada}"]`);
-    if (radioPaq) radioPaq.checked = true;
-  }
-
-  // Guardar selecciones en localStorage para persistencia
-  document.querySelectorAll('input[name="forma_entrega"]').forEach(radio => {
-    radio.addEventListener('change', () => {
-      localStorage.setItem('forma_entrega', radio.value);
-    });
-  });
-  document.querySelectorAll('input[name="domicilio_seleccionado"]').forEach(radio => {
-    radio.addEventListener('change', () => {
-      localStorage.setItem('domicilio_seleccionado', radio.value);
-    });
-  });
-  document.querySelectorAll('input[name="paqueteria"]').forEach(radio => {
-    radio.addEventListener('change', () => {
-      localStorage.setItem('paqueteria_seleccionada', radio.value);
-    });
-  });
-});
-</script>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
-    const productosContainer = document.getElementById('productos-carrito');
-    const resumenContainer = document.getElementById('resumen-carrito');
-    const formulario = document.getElementById('formulario-compra');
-    let subtotal = 0;
-
-    // Mostrar productos del carrito
-    carrito.forEach(producto => {
-        const precioTotal = producto.precio * producto.cantidad;
-        subtotal += precioTotal;
-
-        const item = document.createElement('div');
-        item.innerHTML = `
-            <p><strong>${producto.nombre}</strong></p>
-            <p>Cantidad: ${producto.cantidad}</p>
-            <p>Precio: $${producto.precio.toFixed(2)}</p>
-            <hr>
-        `;
-        productosContainer.appendChild(item);
-
-        // Crear inputs ocultos para enviar en formulario
-        const inputArticulo = document.createElement('input');
-        inputArticulo.type = 'hidden';
-        inputArticulo.name = 'articulos[]';
-        inputArticulo.value = producto.id;
-        formulario.appendChild(inputArticulo);
-
-        const inputCantidad = document.createElement('input');
-        inputCantidad.type = 'hidden';
-        inputCantidad.name = 'cantidades[]';
-        inputCantidad.value = producto.cantidad;
-        formulario.appendChild(inputCantidad);
-    });
-
-    const iva = subtotal * 0.16;
-    const envio = subtotal > 0 ? 120 : 0;
-    const total = subtotal + iva + envio;
-
-    resumenContainer.innerHTML = `
-        <p>Subtotal: $${subtotal.toFixed(2)}</p>
-        <p>IVA (16%): $${iva.toFixed(2)}</p>
-        <p>Envío: $${envio.toFixed(2)}</p>
-        <h4>Total: $${total.toFixed(2)}</h4>
-    `;
-
-    // Guardar resumen en localStorage
-    const resumenCompra = {
-        subtotal: subtotal.toFixed(2),
-        iva: iva.toFixed(2),
-        envio: envio.toFixed(2),
-        total: total.toFixed(2)
-    };
-    localStorage.setItem('resumenCompra', JSON.stringify(resumenCompra));
-});
-
-function mostrarDireccionSeleccionada() {
-    const formaEntrega = document.querySelector('input[name="forma_entrega"]:checked')?.value;
-    const direccionDiv = document.getElementById('direccionSeleccionada');
 
     if (formaEntrega === 'Domicilio') {
-        const domicilioSeleccionado = document.querySelector('input[name="domicilio_seleccionado"]:checked');
-        if (domicilioSeleccionado) {
-            const label = document.querySelector(`label[for="${domicilioSeleccionado.id}"]`);
-            if (label) {
-                direccionDiv.innerHTML = `Dirección seleccionada: ${label.textContent.trim()}`;
-            }
-        } else {
-            direccionDiv.innerHTML = 'No se ha seleccionado ninguna dirección.';
+        const direccionSeleccionada = document.querySelector('input[name="id_direccion"]:checked');
+        if (!direccionSeleccionada) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'warning',
+                title: 'Falta seleccionar dirección',
+                text: 'Por favor selecciona una dirección para el envío a domicilio.'
+            });
+            return;
         }
-    } else {
-        direccionDiv.innerHTML = '';
+    } else if (formaEntrega === 'Punto de Entrega') {
+        const paqueteriaSeleccionada = document.querySelector('input[name="id_paqueteria"]:checked');
+        if (!paqueteriaSeleccionada) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'warning',
+                title: 'Falta seleccionar paquetería',
+                text: 'Por favor selecciona una paquetería para el retiro en punto de entrega.'
+            });
+            return;
+        }
     }
-}
-
-// Llamar al cargar y cuando cambie la selección
-mostrarDireccionSeleccionada();
-
-document.querySelectorAll('input[name="domicilio_seleccionado"]').forEach(radio => {
-    radio.addEventListener('change', mostrarDireccionSeleccionada);
-});
-
-document.querySelectorAll('input[name="forma_entrega"]').forEach(radio => {
-    radio.addEventListener('change', mostrarDireccionSeleccionada);
 });
 </script>
 
-</body> </html>
+</body>
+</html>

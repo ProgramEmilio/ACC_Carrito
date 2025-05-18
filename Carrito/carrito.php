@@ -55,7 +55,8 @@ $resultDetalles = $conn->query($queryDetalles);
     <p><strong>Fecha:</strong> <?= htmlspecialchars($carrito['fecha']) ?></p>
 
     <form id="formCarrito" method="POST" action="../Direccion/direccion.php">
-        <input type="hidden" class="id-carrito" value="<?= $id_carrito ?>">
+        <input type="hidden" name="id_carrito" value="<?= $id_carrito ?>">
+        <input type="hidden" name="total_carrito" id="inputTotalCarrito" value="0.00">
         <table>
             <thead>
                 <tr>
@@ -126,6 +127,7 @@ function actualizarTotal() {
     });
 
     document.getElementById('total').textContent = total.toFixed(2);
+    document.getElementById('inputTotalCarrito').value = total.toFixed(2);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
