@@ -9,12 +9,7 @@ if (!$id_usuario) {
 }
 
 // Obtener cliente
-$queryCliente = "SELECT id_cliente,
-nom_persona,
-apellido_paterno,
-apellido_materno,
-telefono
-FROM cliente WHERE id_usuario = ?";
+$queryCliente = "SELECT id_cliente, nom_persona, apellido_paterno, apellido_materno, telefono FROM cliente WHERE id_usuario = ?";
 $stmtCliente = $conn->prepare($queryCliente);
 $stmtCliente->bind_param('i', $id_usuario);
 $stmtCliente->execute();
@@ -27,37 +22,24 @@ if (!$id_cliente) {
     exit;
 }
 
-// Recibir datos del formulario
+// Recibir datos del formulario anterior
 $forma_entrega = $_POST['forma_entrega'] ?? '';
 $direccion_id = $_POST['domicilio_seleccionado'] ?? null;
 $paqueteria_id = $_POST['paqueteria'] ?? null;
 $articulos = $_POST['articulos'] ?? [];
 $cantidades = $_POST['cantidades'] ?? [];
 
-// Mostrar info según forma de entrega
-
-
-// Calcular subtotal y demás montos
 $subtotal = 0;
-
 if (is_array($articulos) && is_array($cantidades)) {
     foreach ($articulos as $articulo_id) {
         if (!isset($cantidades[$articulo_id])) continue;
-
         $cantidad = floatval($cantidades[$articulo_id]);
 
-        $stmtArt = $conn->prepare("
-            SELECT dc.precio 
-            FROM detalle_carrito dc
-            WHERE dc.id_articulo = ?
-            LIMIT 1
-        ");
+        $stmtArt = $conn->prepare("SELECT precio FROM detalle_carrito WHERE id_articulo = ? LIMIT 1");
         $stmtArt->bind_param('s', $articulo_id);
         $stmtArt->execute();
         $resultArt = $stmtArt->get_result();
-        $row = $resultArt->fetch_assoc();
-
-        if ($row) {
+        if ($row = $resultArt->fetch_assoc()) {
             $precio = floatval($row['precio']);
             $subtotal += $precio * $cantidad;
         }
@@ -67,17 +49,25 @@ if (is_array($articulos) && is_array($cantidades)) {
 $iva = $subtotal * 0.16;
 $costo_envio = 0;
 
-// Obtener costo de envío según forma_entrega
+// Obtener costo de envío
 $stmtEnvio = $conn->prepare("SELECT costo FROM envio WHERE tipo_envio = ? LIMIT 1");
 $stmtEnvio->bind_param("s", $forma_entrega);
 $stmtEnvio->execute();
 $resultEnvio = $stmtEnvio->get_result();
-
 if ($rowEnvio = $resultEnvio->fetch_assoc()) {
     $costo_envio = floatval($rowEnvio['costo']);
 }
 
 $total = $subtotal + $iva + $costo_envio;
+
+// Obtener ID del carrito activo
+$sql_carrito = "SELECT id_carrito FROM carrito WHERE id_cliente = ?";
+$stmt = $conn->prepare($sql_carrito);
+$stmt->bind_param("i", $id_cliente);
+$stmt->execute();
+$result = $stmt->get_result();
+$row = $result->fetch_assoc();
+$id_carrito = $row['id_carrito'] ?? null;
 ?>
 
 <!DOCTYPE html>
@@ -93,81 +83,42 @@ $total = $subtotal + $iva + $costo_envio;
 <h2>Datos del Cliente</h2>
 <p><strong>Nombre:</strong> <?= htmlspecialchars($cliente['nom_persona'] . ' ' . $cliente['apellido_paterno'] . ' ' . $cliente['apellido_materno']) ?></p>
 <p><strong>Teléfono:</strong> <?= htmlspecialchars($cliente['telefono']) ?></p>
-
 <p><strong>Forma de entrega:</strong> <?= htmlspecialchars($forma_entrega) ?></p>
 
+<!-- Dirección o punto de entrega -->
 <?php
-if ($forma_entrega === 'Punto de Entrega') {
-    if (isset($paqueteria_id) && is_numeric($paqueteria_id)) {
-        $paqueteria_id = (int) $paqueteria_id;
-
-        $sqlPaq = "
-          SELECT 
-            nombre_paqueteria, descripcion, fecha
-          FROM paqueteria
-          WHERE id_paqueteria = ?
-          LIMIT 1
-        ";
-        $stmtPaq = $conn->prepare($sqlPaq);
-        $stmtPaq->bind_param('i', $paqueteria_id);
-        $stmtPaq->execute();
-        $resPaq = $stmtPaq->get_result();
-        $paqueteria_info = $resPaq->fetch_assoc();
-
-        if ($paqueteria_info) {
-            echo "<h2>Datos de la Paquetería</h2>";
-            echo "<p><strong>Nombre:</strong> " . htmlspecialchars($paqueteria_info['nombre_paqueteria']) . "</p>";
-            echo "<p><strong>Descripción:</strong> " . htmlspecialchars($paqueteria_info['descripcion']) . "</p>";
-            echo "<p><strong>Fecha:</strong> " . htmlspecialchars($paqueteria_info['fecha']) . "</p>";
-        } else {
-            echo "<p style='color:red;'>Paquetería no encontrada.</p>";
-        }
-    } else {
-        echo "<p style='color:red;'>No seleccionaste ninguna paquetería.</p>";
+if ($forma_entrega === 'Punto de Entrega' && $paqueteria_id) {
+    $sqlPaq = "SELECT nombre_paqueteria, descripcion, fecha FROM paqueteria WHERE id_paqueteria = ?";
+    $stmtPaq = $conn->prepare($sqlPaq);
+    $stmtPaq->bind_param('i', $paqueteria_id);
+    $stmtPaq->execute();
+    $resPaq = $stmtPaq->get_result();
+    if ($paqueteria_info = $resPaq->fetch_assoc()) {
+        echo "<h2>Datos de la Paquetería</h2>";
+        echo "<p><strong>Nombre:</strong> " . htmlspecialchars($paqueteria_info['nombre_paqueteria']) . "</p>";
+        echo "<p><strong>Descripción:</strong> " . htmlspecialchars($paqueteria_info['descripcion']) . "</p>";
+        echo "<p><strong>Fecha:</strong> " . htmlspecialchars($paqueteria_info['fecha']) . "</p>";
     }
-} elseif ($forma_entrega === 'Domicilio') {
-    if (isset($direccion_id) && is_numeric($direccion_id)) {
-        $direccion_id = (int) $direccion_id;
-
-        $sqlDir = "
-          SELECT 
-            id_direccion, codigo_postal, calle, num_ext, colonia, ciudad, estado
-          FROM direccion
-          WHERE id_direccion = ?
-          LIMIT 1
-        ";
-        $stmtDir = $conn->prepare($sqlDir);
-        $stmtDir->bind_param('i', $direccion_id);
-        $stmtDir->execute();
-        $resDir = $stmtDir->get_result();
-        $direccion_info = $resDir->fetch_assoc();
-
-        if ($direccion_info) {
-            echo "<h2>Dirección seleccionada</h2>";
-            echo "<p>"
-               . htmlspecialchars($direccion_info['calle']) . " #"
-               . htmlspecialchars($direccion_info['num_ext']) . ", "
-               . htmlspecialchars($direccion_info['colonia']) . ", "
-               . htmlspecialchars($direccion_info['ciudad']) . ", "
-               . htmlspecialchars($direccion_info['estado']) . " CP "
-               . htmlspecialchars($direccion_info['codigo_postal'])
-               . "</p>";
-        } else {
-            echo "<p style='color:red;'>Dirección no encontrada.</p>";
-        }
-    } else {
-        echo "<p style='color:red;'>No seleccionaste ninguna dirección.</p>";
+} elseif ($forma_entrega === 'Domicilio' && $direccion_id) {
+    $sqlDir = "SELECT calle, num_ext, colonia, ciudad, estado, codigo_postal FROM direccion WHERE id_direccion = ?";
+    $stmtDir = $conn->prepare($sqlDir);
+    $stmtDir->bind_param('i', $direccion_id);
+    $stmtDir->execute();
+    $resDir = $stmtDir->get_result();
+    if ($direccion_info = $resDir->fetch_assoc()) {
+        echo "<h2>Dirección seleccionada</h2>";
+        echo "<p>" . htmlspecialchars($direccion_info['calle']) . " #" . htmlspecialchars($direccion_info['num_ext']) . ", " .
+            htmlspecialchars($direccion_info['colonia']) . ", " . htmlspecialchars($direccion_info['ciudad']) . ", " .
+            htmlspecialchars($direccion_info['estado']) . " CP " . htmlspecialchars($direccion_info['codigo_postal']) . "</p>";
     }
-} else {
-    echo "<p style='color:red;'>Forma de entrega no válida o no seleccionada.</p>";
 }
-
 ?>
+
 <h2>Resumen de compra</h2>
 <table border="1" cellpadding="6" cellspacing="0">
     <thead>
         <tr>
-            <th>Artículo ID</th>
+            <th>ID Artículo</th>
             <th>Descripción</th>
             <th>Precio Unitario</th>
             <th>Cantidad</th>
@@ -176,64 +127,52 @@ if ($forma_entrega === 'Punto de Entrega') {
     </thead>
     <tbody>
     <?php
-    if (is_array($articulos) && is_array($cantidades)) {
-        foreach ($articulos as $articulo_id) {
-            if (!isset($cantidades[$articulo_id])) continue;
+    foreach ($articulos as $articulo_id) {
+        $cantidad = $cantidades[$articulo_id] ?? 0;
 
-            $cantidad = $cantidades[$articulo_id];
+        $stmtDet = $conn->prepare("
+            SELECT a.descripcion, dc.precio 
+            FROM detalle_carrito dc 
+            JOIN articulos a ON a.id_articulo = dc.id_articulo 
+            WHERE dc.id_articulo = ? 
+            LIMIT 1
+        ");
+        $stmtDet->bind_param('s', $articulo_id);
+        $stmtDet->execute();
+        $resultDet = $stmtDet->get_result();
 
-            $stmtArt = $conn->prepare("
-                SELECT 
-                    a.id_articulo, 
-                    a.descripcion, 
-                    dc.cantidad, 
-                    dc.precio, 
-                    dc.importe, 
-                    dc.personalizacion,
-                    (
-                        SELECT valor 
-                        FROM articulo_completo ac 
-                        WHERE ac.id_articulo = a.id_articulo 
-                        AND ac.id_atributo = 3 
-                        LIMIT 1
-                    ) AS imagen
-                FROM detalle_carrito dc
-                JOIN articulos a ON a.id_articulo = dc.id_articulo
-                WHERE dc.id_articulo = ?
-                LIMIT 1
-            ");
-            $stmtArt->bind_param('s', $articulo_id);
-            $stmtArt->execute();
-            $resultArt = $stmtArt->get_result();
-            $articulo = $resultArt->fetch_assoc();
+        if ($row = $resultDet->fetch_assoc()) {
+            $descripcion = $row['descripcion'];
+            $precio = $row['precio'];
+            $sub = $precio * $cantidad;
 
-            if ($articulo) {
-                $precio = floatval($articulo['precio']);
-                $subtotal_art = $precio * $cantidad;
-
-                echo "<tr>";
-                echo "<td>" . htmlspecialchars($articulo['id_articulo']) . "</td>";
-                echo "<td>" . htmlspecialchars($articulo['descripcion']) . "</td>";
-                echo "<td>$" . number_format($precio, 2) . "</td>";
-                echo "<td>" . htmlspecialchars($cantidad) . "</td>";
-                echo "<td>$" . number_format($subtotal_art, 2) . "</td>";
-                echo "</tr>";
-            } else {
-                echo "<tr><td colspan='5'>Artículo ID {$articulo_id} no encontrado.</td></tr>";
-            }
+            echo "<tr>
+                    <td>{$articulo_id}</td>
+                    <td>" . htmlspecialchars($descripcion) . "</td>
+                    <td>$" . number_format($precio, 2) . "</td>
+                    <td>{$cantidad}</td>
+                    <td>$" . number_format($sub, 2) . "</td>
+                  </tr>";
         }
     }
     ?>
     </tbody>
 </table>
 
-<p><strong>Subtotal:</strong> $<?= number_format($subtotal, 2) ?></p>
-<p><strong>IVA (16%):</strong> $<?= number_format($iva, 2) ?></p>
-<p><strong>Costo de envío:</strong> $<?= number_format($costo_envio, 2) ?></p>
-<p><strong>Total:</strong> $<?= number_format($total, 2) ?></p>
+<h3>Subtotal: $<?= number_format($subtotal, 2) ?></h3>
+<h3>IVA (16%): $<?= number_format($iva, 2) ?></h3>
+<h3>Costo de Envío: $<?= number_format($costo_envio, 2) ?></h3>
+<h2>Total a Pagar: $<?= number_format($total, 2) ?></h2>
 
-<a href="../Carrito/carrito.php">Regresar al carrito</a>
-<a href="../Pago/pagos.php">Continuar Pago</a>
+<!-- FORMULARIO PARA CONFIRMAR PEDIDO -->
+<form action="pedido.php" method="POST">
+    <input type="hidden" name="id_envio" value="<?= htmlspecialchars($direccion_id) ?>">
+    <input type="hidden" name="id_paqueteria" value="<?= htmlspecialchars($paqueteria_id) ?>">
+    <input type="hidden" name="id_carrito" value="<?= htmlspecialchars($id_carrito) ?>">
+    <input type="hidden" name="total" value="<?= htmlspecialchars($total) ?>">
+
+    <button type="submit">Proceder al pago</button>
+</form>
 
 </body>
 </html>
