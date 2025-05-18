@@ -236,29 +236,276 @@ function toggleFormasEntrega() {
 // Validación al enviar el formulario
 document.getElementById('formEntrega').addEventListener('submit', function(e) {
     const formaEntrega = document.querySelector('input[name="forma_entrega"]:checked')?.value;
-    if (formaEntrega === 'Domicilio') {
-        const domicilio = document.querySelector('input[name="domicilio_seleccionado"]:checked');
-        if (!domicilio) {
-            e.preventDefault();
-            Swal.fire('Error', 'Por favor selecciona una dirección de domicilio.', 'error');
+    const domicilio = document.querySelector('input[name="domicilio_seleccionado"]:checked');
+    const paqueteria = document.querySelector('input[name="paqueteria"]:checked');
+
+       if (formaEntrega === 'Domicilio') {
+        costoEnvio = costoEnvioDomicilio;
+
+        if (!domicilioSeleccionado) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Selecciona una dirección',
+                text: 'Debes elegir una dirección registrada para el envío a domicilio.',
+            });
             return false;
         }
     } else if (formaEntrega === 'Punto de Entrega') {
-        const paqueteria = document.querySelector('input[name="paqueteria"]:checked');
-        if (!paqueteria) {
-            e.preventDefault();
-            Swal.fire('Error', 'Por favor selecciona una paquetería para el retiro.', 'error');
+        costoEnvio = costoRetiro;
+
+        if (!paqSeleccionada) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Selecciona una paquetería',
+                text: 'Debes elegir una paquetería para el retiro.',
+            });
             return false;
         }
     }
-});
 
-// Eventos para radios forma de entrega
+    const iva = subtotal * IVA_RATE;
+    const total = subtotal + iva + costoEnvio;
+
+    subtotalElem.textContent = `$${subtotal.toFixed(2)}`;
+    ivaElem.textContent = `$${iva.toFixed(2)}`;
+    costoEnvioElem.textContent = `$${costoEnvio.toFixed(2)}`;
+    totalElem.innerHTML = `<strong>$${total.toFixed(2)}</strong>`;
+
+    return true;
+}
+
+// Evento para actualizar resumen al cambiar forma de entrega o seleccionar dirección/paquetería
 document.querySelectorAll('input[name="forma_entrega"]').forEach(radio => {
-    radio.addEventListener('change', toggleFormasEntrega);
+    radio.addEventListener('change', () => {
+        const forma = radio.value;
+        document.getElementById('paqueteria-container').style.display = forma === 'Punto de Entrega' ? 'block' : 'none';
+        actualizarResumen();
+    });
 });
 
-toggleFormasEntrega();  // Inicializar vista y resumen
+document.querySelectorAll('input[name="domicilio_seleccionado"], input[name="paqueteria"]').forEach(input => {
+    input.addEventListener('change', actualizarResumen);
+});
+
+// Validación final al enviar formulario
+document.getElementById('formEntrega').addEventListener('submit', function (e) {
+    if (!actualizarResumen()) {
+        e.preventDefault(); // Evitar envío si falta algo
+    }
+});
+
+// Cálculo inicial
+actualizarResumen();
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // Leer carrito desde localStorage (ajusta la clave según guardes)
+  const carrito = JSON.parse(localStorage.getItem("carrito_completo")) || [];
+
+  // Actualizar tabla resumen
+  const tbody = document.querySelector('#resumenCompra tbody');
+  const subtotalElem = document.getElementById('subtotalCompra');
+  const ivaElem = document.getElementById('ivaCompra');
+  const costoEnvioElem = document.getElementById('costoEnvioCompra');
+  const totalElem = document.getElementById('totalCompra');
+  const inputsOcultos = document.getElementById('inputsOcultos');
+
+  const IVA_RATE = 0.16;
+  const costoEnvioDomicilio = <?= json_encode($costo_envio_domicilio) ?>;
+  const costoRetiro = <?= json_encode($costo_retiro) ?>;
+
+  let subtotal = 0;
+  tbody.innerHTML = '';
+  inputsOcultos.innerHTML = '';
+
+  carrito.forEach(item => {
+    const importe = item.cantidad * item.precio;
+    subtotal += importe;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${item.descripcion}</td>
+      <td>${item.personalizacion || ''}</td>
+      <td>${item.cantidad}</td>
+      <td>$${item.precio.toFixed(2)}</td>
+      <td>$${importe.toFixed(2)}</td>
+    `;
+    tbody.appendChild(tr);
+
+    // Inputs ocultos para enviar por POST
+    inputsOcultos.innerHTML += `
+      <input type="hidden" name="articulos[]" value="${item.idArticulo}">
+      <input type="hidden" name="cantidades[${item.idArticulo}]" value="${item.cantidad}">
+    `;
+  });
+
+  // Función para actualizar totales y mostrar en la tabla
+  function actualizarTotales() {
+    const formaEntrega = document.querySelector('input[name="forma_entrega"]:checked').value;
+    let costoEnvio = 0;
+    if (formaEntrega.toLowerCase() === 'domicilio') {
+      costoEnvio = costoEnvioDomicilio;
+    } else if (formaEntrega.toLowerCase() === 'punto de entrega') {
+      costoEnvio = costoRetiro;
+    }
+
+    const iva = subtotal * IVA_RATE;
+    const total = subtotal + iva + costoEnvio;
+
+    subtotalElem.textContent = `$${subtotal.toFixed(2)}`;
+    ivaElem.textContent = `$${iva.toFixed(2)}`;
+    costoEnvioElem.textContent = `$${costoEnvio.toFixed(2)}`;
+    totalElem.innerHTML = `<strong>$${total.toFixed(2)}</strong>`;
+  }
+
+  actualizarTotales();
+  
+
+  // Mostrar/ocultar contenedores según forma de entrega
+  function toggleEntregaOptions() {
+    const formaEntrega = document.querySelector('input[name="forma_entrega"]:checked').value.toLowerCase();
+    document.getElementById('direcciones-container').style.display = formaEntrega === 'domicilio' ? 'block' : 'none';
+    document.getElementById('paqueteria-container').style.display = formaEntrega === 'punto de entrega' ? 'block' : 'none';
+  }
+  toggleEntregaOptions();
+
+  // Escuchar cambios en forma de entrega
+  document.querySelectorAll('input[name="forma_entrega"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      toggleEntregaOptions();
+      actualizarTotales();
+    });
+  });
+
+  // Cargar selección previa desde localStorage si quieres
+  const formaEntregaGuardada = localStorage.getItem('forma_entrega');
+  if (formaEntregaGuardada) {
+    const radio = document.querySelector(`input[name="forma_entrega"][value="${formaEntregaGuardada}"]`);
+    if (radio) {
+      radio.checked = true;
+      toggleEntregaOptions();
+      actualizarTotales();
+    }
+  }
+
+  const domicilioGuardado = localStorage.getItem('domicilio_seleccionado');
+  if (domicilioGuardado) {
+    const radioDomicilio = document.querySelector(`input[name="domicilio_seleccionado"][value="${domicilioGuardado}"]`);
+    if (radioDomicilio) radioDomicilio.checked = true;
+  }
+
+  const paqueteriaGuardada = localStorage.getItem('paqueteria_seleccionada');
+  if (paqueteriaGuardada) {
+    const radioPaq = document.querySelector(`input[name="paqueteria"][value="${paqueteriaGuardada}"]`);
+    if (radioPaq) radioPaq.checked = true;
+  }
+
+  // Guardar selecciones en localStorage para persistencia
+  document.querySelectorAll('input[name="forma_entrega"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      localStorage.setItem('forma_entrega', radio.value);
+    });
+  });
+  document.querySelectorAll('input[name="domicilio_seleccionado"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      localStorage.setItem('domicilio_seleccionado', radio.value);
+    });
+  });
+  document.querySelectorAll('input[name="paqueteria"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      localStorage.setItem('paqueteria_seleccionada', radio.value);
+    });
+  });
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+    const productosContainer = document.getElementById('productos-carrito');
+    const resumenContainer = document.getElementById('resumen-carrito');
+    const formulario = document.getElementById('formulario-compra');
+    let subtotal = 0;
+
+    // Mostrar productos del carrito
+    carrito.forEach(producto => {
+        const precioTotal = producto.precio * producto.cantidad;
+        subtotal += precioTotal;
+
+        const item = document.createElement('div');
+        item.innerHTML = `
+            <p><strong>${producto.nombre}</strong></p>
+            <p>Cantidad: ${producto.cantidad}</p>
+            <p>Precio: $${producto.precio.toFixed(2)}</p>
+            <hr>
+        `;
+        productosContainer.appendChild(item);
+
+        // Crear inputs ocultos para enviar en formulario
+        const inputArticulo = document.createElement('input');
+        inputArticulo.type = 'hidden';
+        inputArticulo.name = 'articulos[]';
+        inputArticulo.value = producto.id;
+        formulario.appendChild(inputArticulo);
+
+        const inputCantidad = document.createElement('input');
+        inputCantidad.type = 'hidden';
+        inputCantidad.name = 'cantidades[]';
+        inputCantidad.value = producto.cantidad;
+        formulario.appendChild(inputCantidad);
+    });
+
+    const iva = subtotal * 0.16;
+    const envio = subtotal > 0 ? 120 : 0;
+    const total = subtotal + iva + envio;
+
+    resumenContainer.innerHTML = `
+        <p>Subtotal: $${subtotal.toFixed(2)}</p>
+        <p>IVA (16%): $${iva.toFixed(2)}</p>
+        <p>Envío: $${envio.toFixed(2)}</p>
+        <h4>Total: $${total.toFixed(2)}</h4>
+    `;
+
+    // Guardar resumen en localStorage
+    const resumenCompra = {
+        subtotal: subtotal.toFixed(2),
+        iva: iva.toFixed(2),
+        envio: envio.toFixed(2),
+        total: total.toFixed(2)
+    };
+    localStorage.setItem('resumenCompra', JSON.stringify(resumenCompra));
+});
+
+function mostrarDireccionSeleccionada() {
+    const formaEntrega = document.querySelector('input[name="forma_entrega"]:checked')?.value;
+    const direccionDiv = document.getElementById('direccionSeleccionada');
+
+    if (formaEntrega === 'Domicilio') {
+        const domicilioSeleccionado = document.querySelector('input[name="domicilio_seleccionado"]:checked');
+        if (domicilioSeleccionado) {
+            const label = document.querySelector(`label[for="${domicilioSeleccionado.id}"]`);
+            if (label) {
+                direccionDiv.innerHTML = `Dirección seleccionada: ${label.textContent.trim()}`;
+            }
+        } else {
+            direccionDiv.innerHTML = 'No se ha seleccionado ninguna dirección.';
+        }
+    } else {
+        direccionDiv.innerHTML = '';
+    }
+}
+
+// Llamar al cargar y cuando cambie la selección
+mostrarDireccionSeleccionada();
+
+document.querySelectorAll('input[name="domicilio_seleccionado"]').forEach(radio => {
+    radio.addEventListener('change', mostrarDireccionSeleccionada);
+});
+
+document.querySelectorAll('input[name="forma_entrega"]').forEach(radio => {
+    radio.addEventListener('change', mostrarDireccionSeleccionada);
 });
 </script>
 
