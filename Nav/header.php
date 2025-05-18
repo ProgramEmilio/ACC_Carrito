@@ -38,8 +38,9 @@ $menus = [
         "Mis datos" => [
             "Direcciones" => "../Perfil/Perfil.php",
            "Tarjetas" => "../Perfil/Formas_pago.php"
-        ]
+        ],
         
+        "Carrito" => "../Carrito\carrito.php",
         
     ],
 
