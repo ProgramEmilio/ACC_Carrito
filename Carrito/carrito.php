@@ -9,7 +9,7 @@ if (!$id_usuario) {
 }
 
 $queryCarrito = "
-    SELECT c.id_carrito, c.fecha, c.total, cli.nom_persona
+    SELECT c.id_carrito, c.fecha, c.total, cli.nom_persona,cli.apellido_materno,cli.apellido_paterno
     FROM carrito c
     JOIN cliente cli ON c.id_cliente = cli.id_cliente
     JOIN usuario u ON cli.id_usuario = u.id_usuario
@@ -45,20 +45,16 @@ $resultDetalles = $conn->query($queryDetalles);
     <meta charset="UTF-8">
     <title>Carrito de Compras</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
-        img { width: 80px; height: auto; }
-        table, th, td { border: 1px solid #ccc; border-collapse: collapse; padding: 8px; }
-    </style>
 </head>
 <body>
 
 <h1>Carrito de Compras</h1>
 
 <?php if ($carrito): ?>
-    <p><strong>Cliente:</strong> <?= htmlspecialchars($carrito['nom_persona']) ?></p>
+<p><strong>Nombre:</strong> <?= htmlspecialchars($carrito['nom_persona'] . ' ' . $carrito['apellido_paterno'] . ' ' . $carrito['apellido_materno']) ?></p>
     <p><strong>Fecha:</strong> <?= htmlspecialchars($carrito['fecha']) ?></p>
 
-    <form method="POST" action="../Direccion/direccion.php">
+    <form id="formCarrito" method="POST" action="../Direccion/direccion.php">
         <input type="hidden" class="id-carrito" value="<?= $id_carrito ?>">
         <table>
             <thead>
@@ -181,6 +177,35 @@ function confirmarEliminacion(idDetalleCarrito) {
 <?php else: ?>
     <p>Carrito no encontrado.</p>
 <?php endif; ?>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    actualizarTotal();
+
+    document.querySelectorAll(".select-articulo").forEach(cb => {
+        cb.addEventListener("change", actualizarTotal);
+    });
+
+    document.querySelectorAll(".cantidad-input").forEach(input => {
+        input.addEventListener("change", actualizarTotal);
+        input.addEventListener("input", (e) => {
+            e.target.value = e.target.value.replace(/[^\d]/g, '');
+        });
+    });
+
+    document.getElementById('formCarrito').addEventListener('submit', function(e) {
+        const checkboxes = document.querySelectorAll('.select-articulo:checked');
+        if (checkboxes.length === 0) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'warning',
+                title: 'Atención',
+                text: 'Debes seleccionar al menos un artículo para continuar con la compra.',
+                confirmButtonText: 'Entendido'
+            });
+        }
+    });
+});
+</script>
 
 </body>
 </html>
