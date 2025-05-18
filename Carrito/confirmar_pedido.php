@@ -36,6 +36,67 @@ $cantidades = $_POST['cantidades'] ?? [];
 
 // Mostrar info según forma de entrega
 
+
+// Calcular subtotal y demás montos
+$subtotal = 0;
+
+if (is_array($articulos) && is_array($cantidades)) {
+    foreach ($articulos as $articulo_id) {
+        if (!isset($cantidades[$articulo_id])) continue;
+
+        $cantidad = floatval($cantidades[$articulo_id]);
+
+        $stmtArt = $conn->prepare("
+            SELECT dc.precio 
+            FROM detalle_carrito dc
+            WHERE dc.id_articulo = ?
+            LIMIT 1
+        ");
+        $stmtArt->bind_param('s', $articulo_id);
+        $stmtArt->execute();
+        $resultArt = $stmtArt->get_result();
+        $row = $resultArt->fetch_assoc();
+
+        if ($row) {
+            $precio = floatval($row['precio']);
+            $subtotal += $precio * $cantidad;
+        }
+    }
+}
+
+$iva = $subtotal * 0.16;
+$costo_envio = 0;
+
+// Obtener costo de envío según forma_entrega
+$stmtEnvio = $conn->prepare("SELECT costo FROM envio WHERE tipo_envio = ? LIMIT 1");
+$stmtEnvio->bind_param("s", $forma_entrega);
+$stmtEnvio->execute();
+$resultEnvio = $stmtEnvio->get_result();
+
+if ($rowEnvio = $resultEnvio->fetch_assoc()) {
+    $costo_envio = floatval($rowEnvio['costo']);
+}
+
+$total = $subtotal + $iva + $costo_envio;
+?>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Confirmar Pedido</title>
+</head>
+<body>
+
+<h1>Confirmar Pedido</h1>
+
+<h2>Datos del Cliente</h2>
+<p><strong>Nombre:</strong> <?= htmlspecialchars($cliente['nom_persona'] . ' ' . $cliente['apellido_paterno'] . ' ' . $cliente['apellido_materno']) ?></p>
+<p><strong>Teléfono:</strong> <?= htmlspecialchars($cliente['telefono']) ?></p>
+
+<p><strong>Forma de entrega:</strong> <?= htmlspecialchars($forma_entrega) ?></p>
+
+<?php
 if ($forma_entrega === 'Punto de Entrega') {
     if (isset($paqueteria_id) && is_numeric($paqueteria_id)) {
         $paqueteria_id = (int) $paqueteria_id;
@@ -101,65 +162,7 @@ if ($forma_entrega === 'Punto de Entrega') {
     echo "<p style='color:red;'>Forma de entrega no válida o no seleccionada.</p>";
 }
 
-// Calcular subtotal y demás montos
-$subtotal = 0;
-
-if (is_array($articulos) && is_array($cantidades)) {
-    foreach ($articulos as $articulo_id) {
-        if (!isset($cantidades[$articulo_id])) continue;
-
-        $cantidad = floatval($cantidades[$articulo_id]);
-
-        $stmtArt = $conn->prepare("
-            SELECT dc.precio 
-            FROM detalle_carrito dc
-            WHERE dc.id_articulo = ?
-            LIMIT 1
-        ");
-        $stmtArt->bind_param('s', $articulo_id);
-        $stmtArt->execute();
-        $resultArt = $stmtArt->get_result();
-        $row = $resultArt->fetch_assoc();
-
-        if ($row) {
-            $precio = floatval($row['precio']);
-            $subtotal += $precio * $cantidad;
-        }
-    }
-}
-
-$iva = $subtotal * 0.16;
-$costo_envio = 0;
-
-// Obtener costo de envío según forma_entrega
-$stmtEnvio = $conn->prepare("SELECT costo FROM envio WHERE tipo_envio = ? LIMIT 1");
-$stmtEnvio->bind_param("s", $forma_entrega);
-$stmtEnvio->execute();
-$resultEnvio = $stmtEnvio->get_result();
-
-if ($rowEnvio = $resultEnvio->fetch_assoc()) {
-    $costo_envio = floatval($rowEnvio['costo']);
-}
-
-$total = $subtotal + $iva + $costo_envio;
 ?>
-
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8" />
-    <title>Confirmar Pedido</title>
-</head>
-<body>
-
-<h1>Confirmar Pedido</h1>
-
-<h2>Datos del Cliente</h2>
-<p><strong>Nombre:</strong> <?= htmlspecialchars($cliente['nom_persona'] . ' ' . $cliente['apellido_paterno'] . ' ' . $cliente['apellido_materno']) ?></p>
-<p><strong>Teléfono:</strong> <?= htmlspecialchars($cliente['telefono']) ?></p>
-
-<p><strong>Forma de entrega:</strong> <?= htmlspecialchars($forma_entrega) ?></p>
-
 <h2>Resumen de compra</h2>
 <table border="1" cellpadding="6" cellspacing="0">
     <thead>
