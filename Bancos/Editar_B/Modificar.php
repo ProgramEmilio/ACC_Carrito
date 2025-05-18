@@ -1,6 +1,5 @@
 <?php
-include('../../BD/ConexionBDB.php');
-include('../../Nav/header_Banco2.php');
+include('../../Nav/header2.php');
 
 if (!$conn2) {
     die("Error de conexión: " . mysqli_conn2ect_error());
