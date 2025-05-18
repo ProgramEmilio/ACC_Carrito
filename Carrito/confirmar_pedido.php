@@ -3,20 +3,18 @@ include('../BD/ConexionBD.php');
 include('../Nav/header.php');
 
 $id_usuario = $_SESSION['id_usuario'] ?? null;
-
 if (!$id_usuario) {
     echo "Usuario no autenticado.";
     exit;
 }
 
-// Obtener ID del cliente
-$queryCliente = "SELECT id_cliente, nom_persona, apellido_paterno, apellido_materno, telefono FROM cliente WHERE id_usuario = ?";
+// Obtener cliente
+$queryCliente = "SELECT id_cliente FROM cliente WHERE id_usuario = ?";
 $stmtCliente = $conn->prepare($queryCliente);
 $stmtCliente->bind_param('i', $id_usuario);
 $stmtCliente->execute();
 $resultCliente = $stmtCliente->get_result();
 $cliente = $resultCliente->fetch_assoc();
-
 $id_cliente = $cliente['id_cliente'] ?? null;
 
 if (!$id_cliente) {
@@ -24,77 +22,127 @@ if (!$id_cliente) {
     exit;
 }
 
-// Mostrar nombre del cliente
-echo "<h2>Bienvenido, " . htmlspecialchars($cliente['nom_persona']) . " " . htmlspecialchars($cliente['apellido_paterno']) . " " . htmlspecialchars($cliente['apellido_materno']) . "</h2>";
-echo "<p><strong>Teléfono:</strong> " . htmlspecialchars($cliente['telefono']) . "</p>";
+// Obtener direcciones
+$queryDireccion = "SELECT id_direccion, calle, num_ext, colonia, ciudad, estado, codigo_postal 
+                   FROM direccion WHERE id_cliente = ?";
+$stmtDireccion = $conn->prepare($queryDireccion);
+$stmtDireccion->bind_param('i', $id_cliente);
+$stmtDireccion->execute();
+$resultDirecciones = $stmtDireccion->get_result();
 
-// Mostrar direcciones
-$sql_direcciones = "SELECT * FROM direccion WHERE id_cliente = ?";
-$stmt_dir = $conn->prepare($sql_direcciones);
-$stmt_dir->bind_param("i", $id_cliente);
-$stmt_dir->execute();
-$resultado_dir = $stmt_dir->get_result();
-
-echo "<h3>Elige la forma de entrega</h3>";
-
-if ($resultado_dir->num_rows > 0) {
-    while ($direccion = $resultado_dir->fetch_assoc()) {
-        echo "<div style='border:1px solid #ccc; padding:10px; margin:10px 0;'>";
-        echo "<strong>Dirección:</strong><br>";
-        echo htmlspecialchars($direccion['calle']) . " #" . htmlspecialchars($direccion['num_ext']) . ", ";
-        echo htmlspecialchars($direccion['colonia']) . ", CP " . htmlspecialchars($direccion['codigo_postal']) . "<br>";
-        echo htmlspecialchars($direccion['ciudad']) . ", " . htmlspecialchars($direccion['estado']) . "<br><br>";
-        echo "<button onclick=\"alert('Dirección elegida: ID " . $direccion['id_direccion'] . "')\">Elegir esta dirección</button> ";
-        echo "<button onclick=\"window.location.href='editar_direccion.php?id=" . $direccion['id_direccion'] . "'\">Editar</button>";
-        echo "</div>";
-    }
-} else {
-    echo "<p>No tienes direcciones registradas.</p>";
-    echo "<a href='agregar_direccion.php'>Agregar una nueva dirección</a>";
+$direccionesArray = [];
+while ($row = $resultDirecciones->fetch_assoc()) {
+    $direccionesArray[] = $row;
 }
 
-// Mostrar artículos del carrito
-echo "<h2>Artículos en el carrito</h2>";
+// Obtener paqueterías disponibles
+$queryPaqueteria = "SELECT id_paqueteria, nombre_paqueteria, descripcion, fecha FROM paqueteria";
+$resultPaqueteria = $conn->query($queryPaqueteria);
 
-$sql_carrito = "
-SELECT 
-  a.id_articulo,
-  a.descripcion,
-  ac.valor AS imagen,
-  dc.cantidad,
-  dc.precio,
-  dc.importe,
-  dc.personalizacion
-FROM carrito ca
-JOIN detalle_carrito dc ON ca.id_carrito = dc.id_carrito
-JOIN articulos a ON dc.id_articulo = a.id_articulo
-LEFT JOIN articulo_completo ac ON a.id_articulo = ac.id_articulo AND ac.id_atributo = 3
-WHERE ca.id_cliente = ?
-";
-
-$stmt_carrito = $conn->prepare($sql_carrito);
-$stmt_carrito->bind_param("i", $id_cliente);
-$stmt_carrito->execute();
-$resultado_carrito = $stmt_carrito->get_result();
-
-if ($resultado_carrito->num_rows > 0) {
-    while ($row = $resultado_carrito->fetch_assoc()) {
-        echo "<hr>";
-        echo "<p><strong>ID:</strong> " . htmlspecialchars($row["id_articulo"]) . "</p>";
-        echo "<p><strong>Descripción:</strong> " . htmlspecialchars($row["descripcion"]) . "</p>";
-        echo "<p><strong>Cantidad:</strong> " . htmlspecialchars($row["cantidad"]) . "</p>";
-        echo "<p><strong>Precio unitario:</strong> $" . htmlspecialchars(number_format($row["precio"], 2)) . "</p>";
-        echo "<p><strong>Importe:</strong> $" . htmlspecialchars(number_format($row["importe"], 2)) . "</p>";
-        echo "<p><strong>Personalización:</strong> " . htmlspecialchars($row["personalizacion"]) . "</p>";
-        echo "<p><strong>Imagen:</strong> <img src='ruta/imagenes/" . htmlspecialchars($row["imagen"]) . "' width='100'></p>";
-    }
-} else {
-    echo "<p>No hay artículos en el carrito.</p>";
+$paqueteriasArray = [];
+while ($row = $resultPaqueteria->fetch_assoc()) {
+    $paqueteriasArray[] = $row;
 }
-
-// Cierre
-$stmtCliente->close();
-$stmt_dir->close();
-$stmt_carrito->close();
-$conn->close();
 ?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Confirmar Pedido</title>
+</head>
+<body>
+    <h1>Confirmar Pedido</h1>
+
+    <div id="forma-entrega"></div>
+    <div id="articulos-lista"></div>
+    <div id="resumen-costos"></div>
+
+    <script>
+        const direccionesCliente = <?php echo json_encode($direccionesArray); ?>;
+        const paqueterias = <?php echo json_encode($paqueteriasArray); ?>;
+    </script>
+
+    <script>
+        const pedidoJSON = localStorage.getItem("pedidoActual");
+        const carritoJSON = localStorage.getItem("carrito_completo");
+        const carrito = carritoJSON ? JSON.parse(carritoJSON) : [];
+
+        if (!pedidoJSON) {
+            document.body.innerHTML += "<p>No hay datos de pedido guardados.</p>";
+        } else {
+            const pedido = JSON.parse(pedidoJSON);
+            let htmlFormaEntrega = `<h2>ID del Pedido: ${pedido.idPedido || "No disponible"}</h2>`;
+            htmlFormaEntrega += `<h3>Forma de entrega: ${pedido.formaEntrega || "No especificada"}</h3>`;
+
+            if (pedido.formaEntrega === "Domicilio") {
+                const idSeleccionado = pedido.domicilioSeleccionado;
+                const direccion = direccionesCliente.find(d => d.id_direccion == idSeleccionado);
+
+                if (direccion) {
+                    htmlFormaEntrega += `
+                        <p><strong>Domicilio:</strong></p>
+                        <ul>
+                            <li><strong>Calle:</strong> ${direccion.calle}</li>
+                            <li><strong>Número:</strong> ${direccion.num_ext}</li>
+                            <li><strong>Colonia:</strong> ${direccion.colonia}</li>
+                            <li><strong>Ciudad:</strong> ${direccion.ciudad}</li>
+                            <li><strong>Estado:</strong> ${direccion.estado}</li>
+                            <li><strong>Código Postal:</strong> ${direccion.codigo_postal}</li>
+                        </ul>
+                    `;
+                } else {
+                    htmlFormaEntrega += "<p><strong>No se encontró el domicilio seleccionado.</strong></p>";
+                }
+
+            } else if (pedido.formaEntrega === "Punto de Entrega") {
+                const idPaqueteria = pedido.paqueteriaSeleccionada;
+                const p = paqueterias.find(pq => pq.id_paqueteria == idPaqueteria) || {};
+
+                htmlFormaEntrega += `
+                    <p><strong>Paquetería seleccionada:</strong></p>
+                    <ul>
+                        <li><strong>Nombre:</strong> ${p.nombre_paqueteria || "No disponible"}</li>
+                        <li><strong>Descripción:</strong> ${p.descripcion || "No disponible"}</li>
+                        <li><strong>Fecha estimada:</strong> ${p.fecha || "No disponible"}</li>
+                    </ul>
+                `;
+            }
+
+            document.getElementById("forma-entrega").innerHTML = htmlFormaEntrega;
+
+            // Mostrar artículos
+            let htmlArticulos = "<h3>Artículos:</h3><ul>";
+            carrito.forEach(item => {
+                const imagen = (item.atributos || []).find(a => a.nombre === "Imagen");
+                htmlArticulos += `
+                    <li>
+                        <p><strong>${item.descripcion}</strong></p>
+                        ${imagen ? `<img src="${imagen.valor}" alt="Imagen del producto" width="100" />` : ""}
+                        <p>Cantidad: ${item.cantidad}</p>
+                        <p>Precio unitario: $${item.precio.toFixed(2)}</p>
+                        <p><strong>Importe: $${item.importe.toFixed(2)}</strong></p>
+                    </li>
+                    <hr/>
+                `;
+            });
+            htmlArticulos += "</ul>";
+            document.getElementById("articulos-lista").innerHTML = htmlArticulos;
+
+            // Resumen de costos
+            if (pedido.resumen) {
+                const r = pedido.resumen;
+                const htmlResumen = `
+                    <h3>Resumen de costos</h3>
+                    <p>Subtotal: $${r.subtotal.toFixed(2)}</p>
+                    <p>IVA: $${r.iva.toFixed(2)}</p>
+                    <p>Costo de envío: $${r.costoEnvio.toFixed(2)}</p>
+                    <p><strong>Total: $${r.total.toFixed(2)}</strong></p>
+                `;
+                document.getElementById("resumen-costos").innerHTML = htmlResumen;
+            }
+        }
+    </script>
+    
+</body>
+<?php include('../Nav/footer.php'); ?>
+</html>
