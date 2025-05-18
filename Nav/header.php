@@ -101,11 +101,12 @@ include('CerrarSesion.php');
 
         <!-- Carrito y botón perfil centrados -->
         <div class="centro-cabecera">
-            <div class="carrito-icono" onclick="irAlCarrito()">
+            <div class="carrito-icono">
+            <a href="../Carrito\carrito.php">
                 <img src="../Imagenes/carrito.png" alt="Carrito" class="carrito-img">
                 <span id="contador-carrito">0</span>
+            </a>
             </div>
-           
         </div>
 
         <!-- Botón cerrar sesión -->
