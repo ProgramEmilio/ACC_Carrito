@@ -1,5 +1,6 @@
 <?php
 include('../BD/ConexionBD.php');
+include('../BD/ConexionBDB.php');
 
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
@@ -32,7 +33,8 @@ $menus = [
 
     // Rol 2: CLIENTE
     2 => [
-        
+        "Inicio" => "../Home\Home.php",
+
         "Mis datos" => [
             "Direcciones" => "../Perfil/Perfil.php",
            "Tarjetas" => "../Perfil/Formas_pago.php"

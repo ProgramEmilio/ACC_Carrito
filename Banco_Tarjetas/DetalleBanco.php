@@ -1,6 +1,5 @@
 <?php
-include('../BD/ConexionBDB.php');
-include('../Nav/header_Banco.php');
+include('../Nav/header.php');
 
 $id_banco = $_GET['id'];
 

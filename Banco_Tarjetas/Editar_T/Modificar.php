@@ -1,6 +1,5 @@
 <?php
-include('../../BD/ConexionBDB.php');
-include('../../Nav/header_Banco2.php');
+include('../../Nav/header2.php');
 
 // Obtener el ID de la tarjeta a modificar
 $id_tarjeta = $_GET['id_tarjeta'];
