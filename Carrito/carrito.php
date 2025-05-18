@@ -1,10 +1,8 @@
 <?php
-
 include('../BD/ConexionBD.php');
 include('../Nav/header.php');
 
 $id_usuario = $_SESSION['id_usuario'] ?? null;
-
 if (!$id_usuario) {
     echo "Usuario no autenticado.";
     exit;
@@ -22,7 +20,6 @@ $queryCarrito = "
 
 $resultCarrito = $conn->query($queryCarrito);
 $carrito = $resultCarrito->fetch_assoc();
-
 $id_carrito = $carrito['id_carrito'] ?? null;
 
 if (!$id_carrito) {
@@ -31,7 +28,8 @@ if (!$id_carrito) {
 }
 
 $queryDetalles = "
-    SELECT a.id_articulo, a.descripcion, dc.cantidad, dc.precio, dc.importe, dc.personalizacion,
+    SELECT dc.id_detalle_carrito, a.id_articulo, a.descripcion, dc.cantidad, dc.precio, 
+    dc.importe, dc.personalizacion,
         (SELECT valor FROM articulo_completo ac 
          WHERE ac.id_articulo = a.id_articulo AND ac.id_atributo = 3 LIMIT 1) AS imagen
     FROM detalle_carrito dc
@@ -47,6 +45,10 @@ $resultDetalles = $conn->query($queryDetalles);
     <meta charset="UTF-8">
     <title>Carrito de Compras</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        img { width: 80px; height: auto; }
+        table, th, td { border: 1px solid #ccc; border-collapse: collapse; padding: 8px; }
+    </style>
 </head>
 <body>
 
@@ -57,31 +59,27 @@ $resultDetalles = $conn->query($queryDetalles);
     <p><strong>Fecha:</strong> <?= htmlspecialchars($carrito['fecha']) ?></p>
 
     <form method="POST" action="../Direccion/direccion.php">
-
+        <input type="hidden" class="id-carrito" value="<?= $id_carrito ?>">
         <table>
             <thead>
-            <tr>
-                <th>Seleccionar</th>
-                <th>Imagen</th>
-                <th>Artículo</th>
-                <th>Personalización</th>
-                <th>Cantidad</th>
-                <th>Precio</th>
-                <th>Importe</th>
-                <th>Eliminar</th>
-            </tr>
+                <tr>
+                    <th>Seleccionar</th>
+                    <th>Imagen</th>
+                    <th>Artículo</th>
+                    <th>Personalización</th>
+                    <th>Cantidad</th>
+                    <th>Precio</th>
+                    <th>Importe</th>
+                    <th>Eliminar</th>
+                </tr>
             </thead>
             <tbody>
             <?php while ($row = $resultDetalles->fetch_assoc()): ?>
-                <tr data-precio="<?= $row['precio'] ?>">
-                    <td>
-                        <input type="checkbox" class="select-articulo" name="articulos[]" value="<?= $row['id_articulo'] ?>">
-                    </td>
+                <tr id="fila-<?= $row['id_detalle_carrito'] ?>" data-precio="<?= $row['precio'] ?>">
+                    <td><input type="checkbox" class="select-articulo" name="articulos[]" value="<?= $row['id_articulo'] ?>"></td>
                     <td>
                         <?php if ($row['imagen']): ?>
-                            <a href="detalle_articulo.php?id=<?= urlencode($row['id_articulo']) ?>">
-                                <img src="../imagenes/<?= htmlspecialchars($row['imagen']) ?>" alt="Imagen del artículo">
-                            </a>
+                            <img src="../imagenes/<?= htmlspecialchars($row['imagen']) ?>" alt="Imagen del artículo">
                         <?php else: ?>
                             Sin imagen
                         <?php endif; ?>
@@ -94,7 +92,7 @@ $resultDetalles = $conn->query($queryDetalles);
                     <td>$<?= number_format($row['precio'], 2) ?></td>
                     <td class="importe">$<?= number_format($row['importe'], 2) ?></td>
                     <td>
-                        <button type="button" class="eliminar-btn" onclick="confirmarEliminacion('<?= $row['id_articulo'] ?>')">🗑</button>
+                        <button type="button" class="eliminar-btn" onclick="confirmarEliminacion(<?= $row['id_detalle_carrito'] ?>)">🗑</button>
                     </td>
                 </tr>
             <?php endwhile; ?>
@@ -110,113 +108,75 @@ $resultDetalles = $conn->query($queryDetalles);
         </div>
     </form>
 
-    <script>
-        const STORAGE_KEY = "articulos_seleccionados";
-        const STORAGE_CANTIDADES_KEY = "cantidades_articulos";
-
-        function actualizarTotal() {
-            let total = 0;
-            let cantidadesGuardadas = JSON.parse(localStorage.getItem(STORAGE_CANTIDADES_KEY) || "{}");
-
-            document.querySelectorAll('tbody tr').forEach(fila => {
-                const checkbox = fila.querySelector('.select-articulo');
-                const cantidadInput = fila.querySelector('.cantidad-input');
-                const precio = parseFloat(fila.getAttribute('data-precio')) || 0;
-
-                let cantidad = parseInt(cantidadInput.value) || 1;
-                cantidad = Math.max(1, Math.floor(cantidad)); // Bloquear decimales y negativos
-                cantidadInput.value = cantidad;
-
-                cantidadesGuardadas[cantidadInput.name] = cantidad;
-
-                const nuevoImporte = cantidad * precio;
-                fila.querySelector('.importe').textContent = `$${nuevoImporte.toFixed(2)}`;
-
-                if (checkbox.checked) {
-                    total += nuevoImporte;
-                }
-                  guardarCarritoEnStorage();
-            });
-
-            document.getElementById('total').textContent = total.toFixed(2);
-            localStorage.setItem(STORAGE_CANTIDADES_KEY, JSON.stringify(cantidadesGuardadas));
-            localStorage.setItem("total_carrito", total.toFixed(2));
-        }
-
-        function guardarCarritoEnStorage() {
-    const carrito = [];
+<script>
+function actualizarTotal() {
+    let total = 0;
 
     document.querySelectorAll('tbody tr').forEach(fila => {
         const checkbox = fila.querySelector('.select-articulo');
-        if (!checkbox.checked) return; // solo seleccionados
-
-        const idArticulo = checkbox.value;
-        const descripcion = fila.querySelector('td:nth-child(3)').textContent.trim();
-        const personalizacion = fila.querySelector('td:nth-child(4)').textContent.trim();
-        const cantidad = parseInt(fila.querySelector('.cantidad-input').value) || 1;
+        const cantidadInput = fila.querySelector('.cantidad-input');
         const precio = parseFloat(fila.getAttribute('data-precio')) || 0;
-        const importe = cantidad * precio;
-        const imagenSrc = fila.querySelector('td:nth-child(2) img')?.getAttribute('src') || null;
 
-        carrito.push({
-            idArticulo,
-            descripcion,
-            personalizacion,
-            cantidad,
-            precio,
-            importe,
-            imagenSrc
-        });
+        let cantidad = parseInt(cantidadInput.value) || 1;
+        cantidad = Math.max(1, cantidad);
+        cantidadInput.value = cantidad;
+
+        const nuevoImporte = cantidad * precio;
+        fila.querySelector('.importe').textContent = `$${nuevoImporte.toFixed(2)}`;
+
+        if (checkbox.checked) {
+            total += nuevoImporte;
+        }
     });
 
-    localStorage.setItem('carrito_completo', JSON.stringify(carrito));
-
-    // También guardar total (ya lo tienes)
-    let total = carrito.reduce((acc, item) => acc + item.importe, 0);
-    localStorage.setItem('total_carrito', total.toFixed(2));
+    document.getElementById('total').textContent = total.toFixed(2);
 }
 
-        function restaurarCantidadesDesdeLocalStorage() {
-            const cantidadesGuardadas = JSON.parse(localStorage.getItem(STORAGE_CANTIDADES_KEY) || "{}");
-            document.querySelectorAll(".cantidad-input").forEach(input => {
-                if (cantidadesGuardadas.hasOwnProperty(input.name)) {
-                    input.value = cantidadesGuardadas[input.name];
+document.addEventListener('DOMContentLoaded', () => {
+    actualizarTotal();
+
+    document.querySelectorAll(".select-articulo").forEach(cb => {
+        cb.addEventListener("change", actualizarTotal);
+    });
+
+    document.querySelectorAll(".cantidad-input").forEach(input => {
+        input.addEventListener("change", actualizarTotal);
+        input.addEventListener("input", (e) => {
+            e.target.value = e.target.value.replace(/[^\d]/g, '');
+        });
+    });
+});
+
+function confirmarEliminacion(idDetalleCarrito) {
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "Esta acción eliminará el artículo del carrito.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('eliminar_detalle.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'id_detalle_carrito=' + encodeURIComponent(idDetalleCarrito)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const fila = document.getElementById('fila-' + idDetalleCarrito);
+                    if (fila) fila.remove();
+                    actualizarTotal();
+                    Swal.fire('Eliminado', 'El artículo fue eliminado.', 'success');
+                } else {
+                    Swal.fire('Error', data.error || 'No se pudo eliminar.', 'error');
                 }
             });
         }
-
-        function guardarSeleccionLocalStorage() {
-            const seleccionados = Array.from(document.querySelectorAll(".select-articulo:checked")).map(cb => cb.value);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(seleccionados));
-        }
-
-        function restaurarSeleccionDesdeLocalStorage() {
-            const seleccionados = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-            document.querySelectorAll(".select-articulo").forEach(cb => {
-                cb.checked = seleccionados.includes(cb.value);
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            restaurarSeleccionDesdeLocalStorage();
-            restaurarCantidadesDesdeLocalStorage();
-            actualizarTotal();
-
-            document.querySelectorAll(".select-articulo").forEach(cb => {
-                cb.addEventListener("change", () => {
-                    actualizarTotal();
-                    guardarSeleccionLocalStorage();
-                });
-            });
-
-            document.querySelectorAll(".cantidad-input").forEach(input => {
-                input.addEventListener("change", actualizarTotal);
-                input.addEventListener("input", (e) => {
-                    e.target.value = e.target.value.replace(/[^\d]/g, '');
-                });
-            });
-        });
-    </script>
+    });
+}
+</script>
 
 <?php else: ?>
     <p>Carrito no encontrado.</p>
