@@ -21,10 +21,17 @@ body {
     text-align: left;
 }
 
-h1, h2 {
+h1 {
     text-align: center;
     color: #000000;
     margin-top: 20px;
+}
+
+h2 {
+    text-align: left;
+    color: #000000;
+    margin-top: 20px;
+    margin-left: 20px;
 }
 
 .parrafo_pedi{
@@ -60,12 +67,20 @@ h1, h2 {
         border-radius: 10px;
         cursor: pointer;
         transition: background-color 0.3s ease;
-        margin-left: 1100px;
+        text-align: right;
         margin-top: 20px;
     }
     .boton_conf:hover {
         background-color: #218838;
     }
+
+.contenedor_boton {
+    display: flex;
+    justify-content: flex-end;
+    margin-right: 20px;
+}
+
+
 .section {
     margin-bottom: 30px;
 }

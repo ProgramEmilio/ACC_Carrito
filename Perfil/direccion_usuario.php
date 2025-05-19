@@ -42,7 +42,7 @@ if ($row = $result->fetch_assoc()) {
 <h2 class="sub_titulo">Mis Direcciones Guardadas</h2>
 
 <?php if ($direccion_result->num_rows > 0): ?>
-    <table border="1" cellpadding="5" cellspacing="0">
+    <table border="1" cellpadding="5" cellspacing="0" class="tabla_forma_pago">
         <tr>
             <th>Calle</th>
             <th>Núm. Ext</th>

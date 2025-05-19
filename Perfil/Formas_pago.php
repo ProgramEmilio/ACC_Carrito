@@ -120,7 +120,7 @@ while ($row = $clientes_result->fetch_assoc()) {
 </div>
 
 <h2 class="sub_titulo">Tarjetas Registradas</h2>
-<table>
+<table class="tabla_forma_pago">
     <thead>
         <tr>
             <th>ID</th>

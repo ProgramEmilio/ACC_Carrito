@@ -46,7 +46,12 @@ include('CerrarSesion.php');
     <link rel="stylesheet" href="../../CSS/Detalle_Producto.css" type="text/css">
     <link rel="stylesheet" href="../../CSS/eliminar.css" type="text/css">
     <link rel="stylesheet" href="../../CSS/Recursos.css" type="text/css">
-
+    <link rel="stylesheet" href="../../CSS/Detalle_Producto.css" type="text/css">
+    <link rel="stylesheet" href="../../CSS/Carrito.css" type="text/css">
+    <link rel="stylesheet" href="../../CSS/direccion.css" type="text/css">
+    <link rel="stylesheet" href="../../CSS/Perfil.css" type="text/css">
+    <link rel="stylesheet" href="../../CSS/Tarjetas.css" type="text/css">
+    <link rel="stylesheet" href="../../CSS/Confirmar_pedido.css" type="text/css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
 
 </head>
@@ -64,10 +69,13 @@ include('CerrarSesion.php');
 
         <!-- Contenedor para alinear el botón de cierre de sesión -->
         <div class="logout-container">
-            <form method="POST" action="../../Nav/CerrarSesion.php">
-                <button type="submit" name="cerrar_sesion" class="btn_logout">Cerrar Sesión</button>
-            </form>
-        </div>
+    <div class="perfil-usuario">
+        <a href="../../Perfil/Perfil.php"><img src="../Imagenes/avatar.png" alt="Usuario" class="icono-usuario"></a>
+        <form method="POST">
+            <button type="submit" name="cerrar_sesion" class="btn_logout">Cerrar Sesión</button>
+        </form>
+    </div>
+</div>
     </div>
         <div class="header">
             <ul class="nav">
