@@ -35,7 +35,7 @@ $menus = [
 
     // Rol 2: CLIENTE
     2 => [
-        "" => "",
+        "Mis pedidos" => "#",
 
         "" => [
             "" => "",
