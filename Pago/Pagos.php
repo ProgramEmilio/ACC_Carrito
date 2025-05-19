@@ -23,7 +23,7 @@ $stmt->close();
 
 
 // Obtener monto e id_pedido desde POST/GET
-$monto = $_POST['monto'] ?? $_GET['monto'] ?? 50;
+$monto = $_POST['precio_total_pedido'] ?? $_GET['precio_total_pedido'] ?? 50;
 $id_pedido = $_POST['id_pedido'] ?? $_GET['id_pedido'] ?? 1;
 
 // Verificar que tenemos los datos necesarios

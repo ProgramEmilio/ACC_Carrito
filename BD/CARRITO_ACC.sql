@@ -171,7 +171,7 @@ INSERT INTO roles (roles) VALUES
 -- Usuarios
 INSERT INTO usuario (nombre_usuario, correo, contraseña, id_rol) VALUES
 ('admin', 'admin@ACC.com', '12', 1),
-('cliente', 'cliente@ACC.com', '12', 2),
+('Juans', 'cliente@ACC.com', '12', 2),
 ('proveedor', 'proveedor@ACC.com', '12', 3);
 
 -- Cliente

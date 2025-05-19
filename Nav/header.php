@@ -17,10 +17,8 @@ $id_rol = $_SESSION['id_rol'];
 $menus = [
     // Rol 1: Administrador
     1 => [
-        "Usuarios" => [
-            "Ver Usuarios" => "../Usuarios/usuario.php",
-            "Registrar Usuario" => "../Usuarios/Registro/Registro_Usuario.php"
-        ],
+        "Usuarios" => "../Usuarios\Usuarios.php",
+
         "Catálogo" => [
             "Incapacidades" => "../Incapacidad/incapacidades.php",
             "Registrar Incapacidad" => "../Incapacidad/Registro/Registro_Incapacidades.php"
@@ -28,6 +26,10 @@ $menus = [
         "Nómina" => [
             "Ver Nómina" => "../Carrito/carrito.php",
             "Registrar Nómina" => "../Nomina/Registro_N/Registro_Nomina.php"
+        ],
+        "Banco" => [
+            "Clientes" => "../Banco_Usuarios\Usuarios_B.php",
+            "Bancos" => "../Bancos\Bancos.php"
         ]
     ],
 
@@ -84,10 +86,7 @@ include('CerrarSesion.php');
     <link rel="stylesheet" href="../CSS/Detalle_Producto.css" type="text/css">
     <link rel="stylesheet" href="../CSS/Carrito.css" type="text/css">
     <link rel="stylesheet" href="../CSS/direccion.css" type="text/css">
-    <link rel="stylesheet" href="../CSS/confirmar_pedido.css" type="text/css">
-    <link rel="stylesheet" href="../CSS/Perfil.css" type="text/css">
-    <link rel="stylesheet" href="../CSS/Tarjetas.css" type="text/css">
-    <link rel="stylesheet" href="../CSS/Home.css" type="text/css">
+    <link rel="stylesheet" href="../CSS/Recursos.css" type="text/css">
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
