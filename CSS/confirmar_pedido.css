@@ -1,0 +1,142 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f4f9;
+    color: #000000;
+    margin: 0;
+    padding: 0;
+    margin-left: 20px;
+}
+
+.sub_titulo{
+    background-color: #8cb8e0;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    margin-left: 20px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    margin-right: 20px;
+    text-align: left;
+}
+
+h1, h2 {
+    text-align: center;
+    color: #000000;
+    margin-top: 20px;
+}
+
+.parrafo_pedi{
+    text-align: left;
+      margin-top: 10px;
+      margin-left: 20px;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 30px auto;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    padding: 30px;
+}
+
+.total_pago{
+        text-align: right;
+        font-size: 25px;
+        margin-right: 30px;
+        margin-top: 20px;
+        font-weight: bold;
+        color: #000000;
+}
+
+.boton_pago{
+    background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        font-size:15px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        margin-left: 1100px;
+        margin-top: 20px;
+    }
+    .boton_conf:hover {
+        background-color: #218838;
+    }
+.section {
+    margin-bottom: 30px;
+}
+
+.section h2 {
+    color: #4a90e2;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+    font-size: 22px;
+}
+
+.section p {
+    font-size: 18px;
+    margin: 8px 0;
+}
+
+.table-resumen {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 20px;
+}
+
+.table-resumen th,
+.table-resumen td {
+    padding: 12px;
+    border: 1px solid #ccc;
+    text-align: left;
+}
+
+.table-resumen thead tr:first-child th:first-child {
+    border-top-left-radius: 12px;
+}
+
+.table-resumen thead tr:first-child th:last-child {
+    border-top-right-radius: 12px;
+}
+
+.table-resumen tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 12px;
+}
+
+.table-resumen tbody tr:last-child td:last-child {
+    border-bottom-right-radius: 12px;
+}
+
+.total-section {
+    text-align: right;
+    margin-top: 30px;
+    font-size: 20px;
+    color: #000;
+}
+
+.boton-confirmar {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: block;
+    margin: 30px auto 0;
+}
+
+.boton-confirmar:hover {
+    background-color: #218838;
+}

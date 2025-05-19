@@ -43,21 +43,21 @@ $resultDetalles = $conn->query($queryDetalles);
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Carrito de Compras</title>
+    <title class="titulo">Carrito de Compras</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
-<h1>Carrito de Compras</h1>
+<h1 class = "titulo">Carrito de Compras</h1>
 
 <?php if ($carrito): ?>
-<p><strong>Nombre:</strong> <?= htmlspecialchars($carrito['nom_persona'] . ' ' . $carrito['apellido_paterno'] . ' ' . $carrito['apellido_materno']) ?></p>
-    <p><strong>Fecha:</strong> <?= htmlspecialchars($carrito['fecha']) ?></p>
+<p><strong class="nom">Nombre:</strong> <?= htmlspecialchars($carrito['nom_persona'] . ' ' . $carrito['apellido_paterno'] . ' ' . $carrito['apellido_materno']) ?></p>
+   <!--  <p><strong>Fecha:</strong> <?= htmlspecialchars($carrito['fecha']) ?></p> -->
 
     <form id="formCarrito" method="POST" action="../Direccion/direccion.php">
         <input type="hidden" name="id_carrito" value="<?= $id_carrito ?>">
         <input type="hidden" name="total_carrito" id="inputTotalCarrito" value="0.00">
-        <table>
+        <table class="carrito_table">
             <thead>
                 <tr>
                     <th>Seleccionar</th>
@@ -76,7 +76,7 @@ $resultDetalles = $conn->query($queryDetalles);
                     <td><input type="checkbox" class="select-articulo" name="articulos[]" value="<?= $row['id_articulo'] ?>"></td>
                     <td>
                         <?php if ($row['imagen']): ?>
-                            <img src="../imagenes/<?= htmlspecialchars($row['imagen']) ?>" alt="Imagen del artículo">
+                            <img class="img_art" src="../imagenes/<?= htmlspecialchars($row['imagen']) ?>" alt="Imagen del artículo">
                         <?php else: ?>
                             Sin imagen
                         <?php endif; ?>
@@ -96,7 +96,7 @@ $resultDetalles = $conn->query($queryDetalles);
             </tbody>
         </table>
 
-        <div class="total">
+        <div class="total_carr">
             Total del Carrito: $<span id="total">0.00</span>
         </div>
 
@@ -108,8 +108,11 @@ $resultDetalles = $conn->query($queryDetalles);
 <script>
 function actualizarTotal() {
     let total = 0;
+    const seleccionados = {};
+    const cantidades = {};
 
     document.querySelectorAll('tbody tr').forEach(fila => {
+        const id = fila.id.split('-')[1]; // id_detalle_carrito
         const checkbox = fila.querySelector('.select-articulo');
         const cantidadInput = fila.querySelector('.cantidad-input');
         const precio = parseFloat(fila.getAttribute('data-precio')) || 0;
@@ -121,6 +124,10 @@ function actualizarTotal() {
         const nuevoImporte = cantidad * precio;
         fila.querySelector('.importe').textContent = `$${nuevoImporte.toFixed(2)}`;
 
+        // Guardar estado en objetos
+        cantidades[id] = cantidad;
+        seleccionados[id] = checkbox.checked;
+
         if (checkbox.checked) {
             total += nuevoImporte;
         }
@@ -128,9 +135,32 @@ function actualizarTotal() {
 
     document.getElementById('total').textContent = total.toFixed(2);
     document.getElementById('inputTotalCarrito').value = total.toFixed(2);
+
+    // Guardar en localStorage
+    localStorage.setItem('cantidades', JSON.stringify(cantidades));
+    localStorage.setItem('seleccionados', JSON.stringify(seleccionados));
+    localStorage.setItem('total_carrito', total.toFixed(2));
+}
+
+function restaurarDesdeLocalStorage() {
+    const cantidades = JSON.parse(localStorage.getItem('cantidades') || '{}');
+    const seleccionados = JSON.parse(localStorage.getItem('seleccionados') || '{}');
+
+    document.querySelectorAll('tbody tr').forEach(fila => {
+        const id = fila.id.split('-')[1];
+        const cantidadInput = fila.querySelector('.cantidad-input');
+        const checkbox = fila.querySelector('.select-articulo');
+
+        if (cantidades[id]) {
+            cantidadInput.value = cantidades[id];
+        }
+
+        checkbox.checked = seleccionados[id] || false;
+    });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    restaurarDesdeLocalStorage();
     actualizarTotal();
 
     document.querySelectorAll(".select-articulo").forEach(cb => {
@@ -143,37 +173,20 @@ document.addEventListener('DOMContentLoaded', () => {
             e.target.value = e.target.value.replace(/[^\d]/g, '');
         });
     });
-});
 
-function confirmarEliminacion(idDetalleCarrito) {
-    Swal.fire({
-        title: '¿Estás seguro?',
-        text: "Esta acción eliminará el artículo del carrito.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch('eliminar_detalle.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'id_detalle_carrito=' + encodeURIComponent(idDetalleCarrito)
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    const fila = document.getElementById('fila-' + idDetalleCarrito);
-                    if (fila) fila.remove();
-                    actualizarTotal();
-                    Swal.fire('Eliminado', 'El artículo fue eliminado.', 'success');
-                } else {
-                    Swal.fire('Error', data.error || 'No se pudo eliminar.', 'error');
-                }
+    document.getElementById('formCarrito').addEventListener('submit', function(e) {
+        const checkboxes = document.querySelectorAll('.select-articulo:checked');
+        if (checkboxes.length === 0) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'warning',
+                title: 'Atención',
+                text: 'Debes seleccionar al menos un artículo para continuar con la compra.',
+                confirmButtonText: 'Entendido'
             });
         }
     });
-}
+});
 </script>
 
 <?php else: ?>
@@ -207,6 +220,40 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+</script>
+<script>
+function confirmarEliminacion(idDetalle) {
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "¡Esta acción eliminará el artículo del carrito!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('eliminar_detalle.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'id_detalle_carrito=' + encodeURIComponent(idDetalle)
+            })
+            .then(response => response.json())
+.then(data => {
+    if (data.success) {
+        const fila = document.getElementById('fila-' + idDetalle);
+        fila.remove();
+        actualizarTotal();
+    } else {
+        Swal.fire('Error', data.error || 'No se pudo eliminar el artículo.', 'error');
+    }
+})
+        }
+    });
+}
 </script>
 
 </body>

@@ -1,9 +1,6 @@
 <?php
 include('../BD/ConexionBD.php');
 include('../Nav/header.php');
-echo "<pre>";
-print_r($_POST);
-echo "</pre>";
 $id_usuario = $_SESSION['id_usuario'] ?? null;
 if (!$id_usuario) {
     echo "Usuario no autenticado.";
@@ -81,12 +78,13 @@ $id_carrito = $row['id_carrito'] ?? null;
 </head>
 <body>
 
-<h1>Confirmar Pedido</h1>
+<h1 class="titulo">Confirmar Pedido</h1>
 
-<h2>Datos del Cliente</h2>
-<p><strong>Nombre:</strong> <?= htmlspecialchars($cliente['nom_persona'] . ' ' . $cliente['apellido_paterno'] . ' ' . $cliente['apellido_materno']) ?></p>
-<p><strong>Teléfono:</strong> <?= htmlspecialchars($cliente['telefono']) ?></p>
-<p><strong>Forma de entrega:</strong> <?= htmlspecialchars($forma_entrega) ?></p>
+<h2 class="sub_titulo">Datos del Cliente</h2>
+<p ><strong class="parrafo_pedi">Nombre:</strong> <?= htmlspecialchars($cliente['nom_persona'] . ' ' . $cliente['apellido_paterno'] . ' ' . $cliente['apellido_materno']) ?></p>
+<p class="parrafo_pedi"><strong>Teléfono:</strong> <?= htmlspecialchars($cliente['telefono']) ?></p>
+<h2 class="sub_titulo">Forma de entrega</h2>
+<p class="parrafo_pedi"><strong>Forma de entrega:</strong> <?= htmlspecialchars($forma_entrega) ?></p>
 
 <!-- Dirección o punto de entrega -->
 <?php
@@ -97,10 +95,10 @@ if ($forma_entrega === 'Punto de Entrega' && $id_paqueteria) {
     $stmtPaq->execute();
     $resPaq = $stmtPaq->get_result();
     if ($paqueteria_info = $resPaq->fetch_assoc()) {
-        echo "<h2>Datos de la Paquetería</h2>";
-        echo "<p><strong>Nombre:</strong> " . htmlspecialchars($paqueteria_info['nombre_paqueteria']) . "</p>";
-        echo "<p><strong>Descripción:</strong> " . htmlspecialchars($paqueteria_info['descripcion']) . "</p>";
-        echo "<p><strong>Fecha:</strong> " . htmlspecialchars($paqueteria_info['fecha']) . "</p>";
+        echo "<h2 class='parrafo_pedi'>Datos de la Paquetería</h2>";
+        echo "<p class='parrafo_pedi'><strong>Nombre:</strong> " . htmlspecialchars($paqueteria_info['nombre_paqueteria']) . "</p>";
+        echo "<p class='parrafo_pedi'><strong>Descripción:</strong> " . htmlspecialchars($paqueteria_info['descripcion']) . "</p>";
+        echo "<p class='parrafo_pedi'><strong>Fecha:</strong> " . htmlspecialchars($paqueteria_info['fecha']) . "</p>";
     }
 } elseif ($forma_entrega === 'Domicilio' && $id_direccion) {
     $sqlDir = "SELECT calle, num_ext, colonia, ciudad, estado, codigo_postal FROM direccion WHERE id_direccion = ?";
@@ -117,8 +115,8 @@ if ($forma_entrega === 'Punto de Entrega' && $id_paqueteria) {
 }
 ?>
 
-<h2>Resumen de compra</h2>
-<table border="1" cellpadding="6" cellspacing="0">
+<h2 class="sub_titulo">Resumen de compra</h2>
+<table border="1" cellpadding="6" cellspacing="0" class="table_resumen">
     <thead>
         <tr>
             <th>ID Artículo</th>
@@ -162,10 +160,10 @@ if ($forma_entrega === 'Punto de Entrega' && $id_paqueteria) {
     </tbody>
 </table>
 
-<h3>Subtotal: $<?= number_format($subtotal, 2) ?></h3>
-<h3>IVA (16%): $<?= number_format($iva, 2) ?></h3>
-<h3>Costo de Envío: $<?= number_format($costo_envio, 2) ?></h3>
-<h2>Total a Pagar: $<?= number_format($total, 2) ?></h2>
+<h3 class="parr">Subtotal: $<?= number_format($subtotal, 2) ?></h3>
+<h3 class="parr">IVA (16%): $<?= number_format($iva, 2) ?></h3>
+<h3 class="parr">Costo de Envío: $<?= number_format($costo_envio, 2) ?></h3>
+<h2 class="total_pago">Total a Pagar: $<?= number_format($total, 2) ?></h2>
 
 <!-- FORMULARIO PARA CONFIRMAR PEDIDO -->
 <form action="pedido.php" method="POST">
@@ -180,8 +178,11 @@ if ($forma_entrega === 'Punto de Entrega' && $id_paqueteria) {
         <input type="hidden" name="id_paqueteria" value="<?= htmlspecialchars($id_paqueteria) ?>">
     <?php endif; ?>
 
-    <button type="submit">Proceder al pago</button>
+    <button type="submit" class="boton_pago">Proceder al pago</button>
 </form>
 
 </body>
+<?php
+include('../Nav/footer.php');
+?>
 </html>

@@ -67,22 +67,13 @@ while ($row = $result_paqueterias->fetch_assoc()) {
     <meta charset="UTF-8" />
     <title>Dirección y Resumen de Compra</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
-        .direccion { margin-bottom: 15px; }
-        .boton { padding: 6px 10px; background: #007bff; color: white; text-decoration: none; border-radius: 3px; }
-        .btn-editar { background: #28a745; margin-left: 10px; }
-        .container { display: flex; gap: 20px; }
-        .left-section { flex: 1; }
-        .right-section { flex: 1; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-    </style>
+    
 </head>
 <body>
+<h1 class="titulo">Dirección y Resumen de Compra</h1>
+<h3 class="subt">Elige la forma de entrega</h3>
 
-<h1>Elige la forma de entrega</h1>
-
-<div class="container">
+<div class="container_dir">
     <div class="left-section">
         <form action="../Carrito/confirmar_pedido.php" method="POST" id="formEntrega"> 
             <h3>Formas de entrega</h3>
@@ -101,7 +92,7 @@ while ($row = $result_paqueterias->fetch_assoc()) {
                             <?= htmlspecialchars($dir['colonia']) ?>, <?= htmlspecialchars($dir['ciudad']) ?>, 
                             <?= htmlspecialchars($dir['estado']) ?>, CP <?= htmlspecialchars($dir['codigo_postal']) ?>
                             <br>
-                            <a href="../Perfil/Perfil.php?id=<?= $dir['id_direccion'] ?>" class="boton btn-editar">Editar</a>
+                            <!-- <a href="../Perfil/Perfil.php?id=<?= $dir['id_direccion'] ?>" class="boton btn-editar">Editar</a>-->
                             <label>
                                 <input type="radio" name="id_direccion" value="<?= $dir['id_direccion'] ?>">
                                 Elegir esta dirección
@@ -128,9 +119,10 @@ while ($row = $result_paqueterias->fetch_assoc()) {
                 <?php endforeach; ?>
             </div>
 
-            <div style="margin-top:20px;">
-                <button type="submit">Confirmar pedido</button>
-                <a href="../Carrito/carrito.php" class="boton" style="background:#6c757d;">Regresar</a>
+            <div>
+                <a href="../Carrito/carrito.php" class="boton">Regresar</a>
+                <button type="submit" class="boton_conf">Confirmar pedido</button>
+        
             </div>
 
             <div id="inputsOcultos">
@@ -146,7 +138,7 @@ while ($row = $result_paqueterias->fetch_assoc()) {
 
     <div class="right-section">
         <h2>Resumen de compra</h2>
-        <table>
+        <table class="table_resumen">
             <thead>
                 <tr>
                     <th>Artículo</th>
@@ -191,9 +183,9 @@ while ($row = $result_paqueterias->fetch_assoc()) {
                 ?>
             </tbody>
         </table>
-        <p><strong>Subtotal:</strong> $<?= number_format($totalSubtotal, 2) ?></p>
-        <p><strong>IVA:</strong> $<?= number_format($totalIVA, 2) ?></p>
-        <p><strong>Total:</strong> $<?= number_format($totalFinal, 2) ?></p>
+        <p class="parr"><strong>Subtotal:</strong> $<?= number_format($totalSubtotal, 2) ?></p>
+        <p class="parr"><strong>IVA:</strong> $<?= number_format($totalIVA, 2) ?></p>
+        <p class="parr"><strong>Total:</strong> $<?= number_format($totalFinal, 2) ?></p>
     </div>
 </div>
 <script>
@@ -236,6 +228,8 @@ document.getElementById('formEntrega').addEventListener('submit', function (e) {
     }
 });
 </script>
-
+<?php
+include('../Nav/footer.php');
+?>
 </body>
 </html>
