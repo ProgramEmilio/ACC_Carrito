@@ -16,25 +16,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $ciudad = $_POST['ciudad'];
     $telefono = $_POST['telefono'];
 
-    $conn2->begin_transaction();
+    $conn->begin_transaction();
 
     try {
         $query = "INSERT INTO usuario (nombre_usuario, correo, contraseña) VALUES (?, ?, ?)";
-        $stmt = $conn2->prepare($query);
+        $stmt = $conn->prepare($query);
         $stmt->bind_param("sss", $nombre_usuario, $correo, $clave);
         $stmt->execute();
         $id_usuario = $stmt->insert_id;
 
         $query_cliente = "INSERT INTO cliente (id_usuario, nombre_cliente, apellido_paterno, apellido_materno, codigo_postal, calle, num_ext, colonia, ciudad, telefono) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        $stmt = $conn2->prepare($query_cliente);
+        $stmt = $conn->prepare($query_cliente);
         $stmt->bind_param("isssssssss", $id_usuario, $nombre_cliente, $apellido_paterno, $apellido_materno, $codigo_postal, $calle, $num_ext, $colonia, $ciudad, $telefono);
         $stmt->execute();
 
-        $conn2->commit();
+        $conn->commit();
         header("Location: ../Usuarios_B.php");
         exit();
     } catch (Exception $e) {
-        $conn2->rollback();
+        $conn->rollback();
         echo "Error al insertar: " . $e->getMessage();
     }
 }

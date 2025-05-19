@@ -12,7 +12,19 @@
     margin-right: 20px;
 }
 
-
+.sub_titulo{
+    background-color: #8cb8e0;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    margin-left: 20px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    margin-right: 20px;
+}
 
 .form_edi_usuario {
     max-width: 100%;

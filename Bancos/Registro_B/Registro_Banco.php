@@ -1,4 +1,5 @@
 <?php
+  include('../../BD/ConexionBDB.php');
   include('../../Nav/header2.php');
   ?>
   <h1 class="titulo">Agregar Banco</h1>

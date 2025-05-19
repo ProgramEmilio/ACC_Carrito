@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 titular = ?
               WHERE id_tarjeta = ?";
 
-    $stmt = $conn2->prepare($query);
+    $stmt = $conn->prepare($query);
     
     // Vincular parámetros
     $stmt->bind_param('sssdssii', $numero, $cvv, $vencimiento, $saldo, $tipo, $red, $titular, $id_tarjeta);

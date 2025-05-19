@@ -1,5 +1,6 @@
 <?php
-include('../../Nav/header2.php');
+include('../../BD/ConexionBDB.php');
+include('../../Nav/header_Banco2.php');
 
 // Obtener el ID de la tarjeta a modificar
 $id_tarjeta = $_GET['id_tarjeta'];
@@ -7,14 +8,14 @@ $id_banco = $_GET['id_banco'];
 
 // Consultar los datos de la tarjeta actual
 $query_tarjeta = "SELECT * FROM tarjeta WHERE id_tarjeta = ?";
-$stmt_tarjeta = $conn2->prepare($query_tarjeta);
+$stmt_tarjeta = $conn->prepare($query_tarjeta);
 $stmt_tarjeta->bind_param('i', $id_tarjeta);
 $stmt_tarjeta->execute();
 $resultado_tarjeta = $stmt_tarjeta->get_result();
 $tarjeta = $resultado_tarjeta->fetch_assoc();
 
 // Obtener lista de clientes para el select
-$clientes = $conn2->query("SELECT * FROM cliente");
+$clientes = $conn->query("SELECT * FROM cliente");
 ?>
 
 <h1 class="titulo">Modificar Tarjeta</h1>

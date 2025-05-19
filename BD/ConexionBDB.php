@@ -7,7 +7,7 @@
 </head>
 <body>
     <?php
-    $_servername='localhost:3307';
+    $_servername='localhost:3306';
     $database='BANCO_ACC';
     $username='root';
     $password='';

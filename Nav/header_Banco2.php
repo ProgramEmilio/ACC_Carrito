@@ -1,5 +1,5 @@
 <?php
-include('../../BD/ConexionBD.php');
+include('../../BD/ConexionBDB.php');
 
 session_start(); // Asegura que se mantenga la sesión
 if (!isset($_SESSION['id_rol'])) {

@@ -18,26 +18,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $ciudad = $_POST['ciudad'];
     $telefono = $_POST['telefono'];
 
-    $conn2->begin_transaction();
+    $conn->begin_transaction();
 
     try {
         // Actualizar tabla usuario
         $update_usuario = "UPDATE usuario SET nombre_usuario = ?, correo = ?, contraseña = ? WHERE id_usuario = ?";
-        $stmt = $conn2->prepare($update_usuario);
+        $stmt = $conn->prepare($update_usuario);
         $stmt->bind_param("sssi", $nombre_usuario, $correo, $clave, $id_usuario);
         $stmt->execute();
 
         // Actualizar tabla cliente
         $update_cliente = "UPDATE cliente SET nombre_cliente = ?, apellido_paterno = ?, apellido_materno = ?, codigo_postal = ?, calle = ?, num_ext = ?, colonia = ?, ciudad = ?, telefono = ? WHERE id_usuario = ?";
-        $stmt = $conn2->prepare($update_cliente);
+        $stmt = $conn->prepare($update_cliente);
         $stmt->bind_param("sssssisssi", $nombre_cliente, $apellido_paterno, $apellido_materno, $codigo_postal, $calle, $num_ext, $colonia, $ciudad, $telefono, $id_usuario);
         $stmt->execute();
 
-        $conn2->commit();
+        $conn->commit();
         header("Location: ../Usuarios_B.php");
         exit();
     } catch (Exception $e) {
-        $conn2->rollback();
+        $conn->rollback();
         echo "Error al actualizar: " . $e->getMessage();
     }
 } else {

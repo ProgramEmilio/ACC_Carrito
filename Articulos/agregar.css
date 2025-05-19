@@ -1,0 +1,116 @@
+
+.form-container {
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 25px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    background-color: #f9f9f9;
+    font-family: Arial, sans-serif;
+}
+
+
+.form-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+
+.form-container input[type="text"],
+.form-container textarea,
+.form-container select,
+.form-container input[type="file"] {
+    width: 100%;
+    padding: 8px;
+    margin-top: 4px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+
+.form-container input[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    background-color: #32b843;
+    border: none;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.form-container input[type="submit"]:hover {
+    background-color: #32b843;
+}
+
+
+
+
+
+
+.tabla-articulos {
+    width: 90%;
+    margin: 20px auto 40px auto;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-family: Arial, sans-serif;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+
+.tabla-articulos th {
+    background-color: #6c6e7a;
+    color: white;
+    padding: 12px 15px;
+    text-align: center;
+    font-weight: 600;
+}
+
+
+.tabla-articulos td {
+    background-color: #fff;
+    padding: 12px 15px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+
+.tabla-articulos tr:last-child td {
+    border-bottom: none;
+}
+
+
+.tabla-articulos tbody tr:hover {
+    background-color: #f1f8e9;
+    cursor: default;
+}
+
+.tabla-articulos img {
+    border-radius: 6px;
+    max-width: 80px;
+    height: auto;
+}
+
+
+.tabla-articulos a {
+    text-decoration: none;
+    color: #2196F3;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.tabla-articulos a:hover {
+    color: #0b7dda;
+    text-decoration: underline;
+}
+
+

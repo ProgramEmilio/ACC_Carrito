@@ -39,6 +39,11 @@
                     <input type="text" name="telefono" required>
                     <label>Teléfono</label>
                 </div>
+
+                <div class="input-group">
+                    <input type="text" name="monedero" required>
+                    <label>Monedero</label>
+                </div>
                 
 
                 <button type="submit" class="register-button">Guardar Datos</button>

@@ -1,175 +1,165 @@
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f4f4f9;
-        color: #000000;
-    }
-
-    h1 {
-        text-align: center;
-        margin-bottom: 30px;
-        color: #000000;
-    }
-
-    .container_dir {
-        display: flex;
-        gap: 40px;
-        padding: 20px 50px;
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
     }
 
     .left-section, .right-section {
-        flex: 1;
-        background-color: #fff;
-        border-radius: 10px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-        padding: 20px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
     }
 
-    .table_resumen {
-    border-collapse: separate;
-    border-spacing: 0;
-    border: 1px solid #ccc;
-    border-radius: 12px;
-    overflow: hidden;
-}
-
-.table_resumen th,
-.table_resumen td {
-    padding: 10px;
-    border: 1px solid #ccc;
-}
-
-/* Redondear solo las esquinas externas */
-.table_resumen thead tr:first-child th:first-child {
-    border-top-left-radius: 12px;
-}
-
-.table_resumen thead tr:first-child th:last-child {
-    border-top-right-radius: 12px;
-}
-
-.table_resumen tbody tr:last-child td:first-child {
-    border-bottom-left-radius: 12px;
-}
-
-.table_resumen tbody tr:last-child td:last-child {
-    border-bottom-right-radius: 12px;
-}
-
-    h3 {
-        color: #000000;
-        margin-bottom: 10px;
-    }
-    h4 {
-        color: #4a90e2;
-        margin-bottom: 10px;
+    .left-section {
+      flex: 2;
     }
 
-    label {
-        display: block;
-        margin-bottom: 10px;
-        font-size: 20px;
-        cursor: pointer;
-    }
-
-    input[type="radio"] {
-        width: 20px;
-        height: 20px;
-        accent-color: #4a90e2;
-        margin-right: 10px;
-        vertical-align: middle;
-        cursor: pointer;
-    }
-
-    .parr{
-      text-align: right;
-      margin-top: 10px;
-      margin-right: 20px;
-      font-size: 20px;
+    .right-section {
+      flex: 1;
+      min-width: 300px;
     }
 
     .direccion {
-        margin-bottom: 15px;
-        padding: 15px;
-        border: 1px solid #e0e0e0;
-        border-radius: 10px;
-        background-color: #f9f9f9;
+      margin-bottom: 15px;
+      padding: 10px;
+      background: #f9f9f9;
+      border: 1px solid #ccc;
+      border-radius: 5px;
     }
 
     .boton {
-        padding: 8px 15px;
-        background:#6c757d;
-        color: white;
-        text-decoration: none;
-        border-radius: 10px;
-        font-size: 14px;
-        transition: background-color 0.3s;
-        margin-top: 10px;
-        display: inline-block;
-    }
-
-
-    .boton_conf {
-        background-color: #28a745;
-        color: white;
-        border: none;
-        padding: 12px 25px;
-        font-size:15px;
-        border-radius: 10px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-        margin-left: 270px;
-    }
-
-    .boton_conf:hover {
-        background-color: #218838;
+      display: inline-block;
+      margin-top: 5px;
+      padding: 8px 12px;
+      background-color: #4CAF50;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
     }
 
     .btn-editar {
-        background-color: #28a745;
-        margin-left: 15px;
+      background-color: #2196F3;
+      margin-right: 10px;
     }
 
-    .boton:hover {
-        background-color: #357ABD;
+    .resumen-titulo {
+      font-size: 20px;
+      margin-bottom: 10px;
+      font-weight: bold;
     }
 
-    .btn-editar:hover {
-        background-color: #218838;
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 10px;
     }
 
-    .form-section {
-        margin-top: 20px;
+    th, td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
     }
 
-    #paqueteria-container {
-        margin-top: 15px;
-        padding-left: 10px;
+    .total {
+      margin-top: 10px;
+      font-size: 16px;
     }
 
-    .continuar-btn {
-        margin-top: 30px;
-        text-align: center;
-    }
-
-    #continuarCompra {
-        background-color: #28a745;
-        color: white;
-        border: none;
-        padding: 12px 25px;
-        font-size: 20px;
-        border-radius: 10px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
-
-    #continuarCompra:hover {
-        background-color: #218838;
-    }
-
-    .subt{
-      font-style: bold;
+    .botones {
       margin-top: 20px;
-      margin-left: 20px;
-      font-size: 30px;
-      color: #000000;
     }
+
+    .forma-entrega {
+      margin-top: 20px;
+    }
+
+    .forma-entrega label {
+      display: block;
+      margin: 5px 0;
+    }
+
+    .total-envio {
+      font-weight: bold;
+    }
+
+    #direcciones-container {
+    transition: visibility 0.3s, opacity 0.3s ease-in-out;
+}
+
+#direcciones-container[style*="visibility: hidden"] {
+    opacity: 0;
+}
+label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+input[type="radio"] {
+    transform: scale(1.2);
+    margin: 0;
+    cursor: pointer;
+}
+
+/* Opciones dentro de paquetería */
+#paqueteria-container label {
+    font-weight: normal;
+    font-size: 15px;
+    gap: 8px;
+}
+
+/* Opciones de dirección */
+#direcciones-container .direccion {
+    border: 1px solid #ddd;
+    padding: 8px;
+    margin: 8px 0;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#direcciones-container .direccion input[type="radio"] {
+    margin-left: 10px;
+}
+
+/* Estilo general de las opciones de entrega */
+label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+input[type="radio"] {
+    transform: scale(1.2);
+    margin: 0;
+    cursor: pointer;
+}
+
+/* Opciones dentro de paquetería */
+#paqueteria-container label {
+    font-weight: normal;
+    font-size: 15px;
+    gap: 8px;
+}
+
+/* Opciones de dirección */
+#direcciones-container .direccion {
+    border: 1px solid #ddd;
+    padding: 8px;
+    margin: 8px 0;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#direcciones-container .direccion input[type="radio"] {
+    margin-left: 10px;
+}

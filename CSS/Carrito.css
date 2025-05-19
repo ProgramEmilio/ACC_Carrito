@@ -1,144 +1,83 @@
-body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f4f4f9;
-        color: #000000;
-    }
-
-    h1 {
-        text-align: center;
-        margin-bottom: 30px;
-        color: #000000;
-    }
-
-    .carrito_table {
-        width: 90%;
-        justify-content: center;
-        margin-left: 50px;
-        margin-top: 20px;
-        border-collapse: collapse;
-        background-color: #fff;
-        border-radius: 12px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-        overflow: hidden;
-    }
-
-    thead {
-        background-color: #4a90e2;
-        color: #fff;
-    }
-
-    th, td {
-        padding: 12px 15px;
-        text-align: center;
-        vertical-align: middle;
-    }
-
-    tbody tr {
-        border-bottom: 1px solid #eee;
-    }
-
-    tbody tr:hover {
-        background-color: #f0f8ff;
-    }
-
-    .img_art {
-        width: 150px;
-        height: 150px;
-        object-fit: cover;
-        border-radius: 8px;
-    }
-
-    .cantidad-input {
-        width: 100px;
-        font-size: 25px;
-        padding: 6px;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-        text-align: center;
-    }
-
-    .eliminar-btn {
-        background-color: transparent;
-        border: none;
-        font-size: 80px;
-        cursor: pointer;
-        color: #d9534f;
-        margin-left: 20%;
-    }
-
-    .nom{
-      margin-left: 20px;
-      font-size: 30px;
-    }
-
-    .eliminar-btn:hover {
-        color: #c9302c;
-        transform: scale(1.1);
-    }
-
-    .total_carr {
-        text-align: right;
-        font-size: 30px;
-        margin-right: 60px;
-        margin-top: 20px;
-        font-weight: bold;
-        color: #000000;
-    }
+body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { color: #444; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { padding: 10px; border: 1px solid #ddd; text-align: left; vertical-align: middle; }
+    th { background-color: #f0f0f0; }
+    .total { text-align: right; font-weight: bold; margin-top: 15px; }
+    .btn { padding: 10px 20px; background: #4CAF50; color: white; border: none; cursor: pointer; }
+    .btn:disabled { background: #ccc; cursor: not-allowed; }
+    img { width: 80px; height: auto; }
 
     .continuar-compra {
-        text-align: center;
-        margin-top: 30px;
-        margin-left: 900px;
+      margin-top: 20px;
+      text-align: right;
     }
 
-    #continuarCompra {
-        background-color: #28a745;
-        color: white;
-        border: none;
-        padding: 12px 25px;
-        font-size: 20px;
-        border-radius: 10px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
+    .continuar-compra button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
     }
 
-    #continuarCompra:hover {
-        background-color: #218838;
+    .continuar-compra button:hover {
+      background-color: #45a049;
     }
 
-    input[type="checkbox"] {
-        width: 40px;
-        height: 45px;
-        accent-color: #4a90e2;
-        cursor: pointer;
-        margin-left: 20px;
+    .mensaje-alerta {
+      display: none;
+      color: red;
+      font-weight: bold;
+      margin-top: 10px;
     }
     
+.resumen-titulo {
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 30px;
+}
+.resumen-compra {
+  max-width: 400px;
+  border: 1px solid #ccc;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+.resumen-linea {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.total-final {
+  font-weight: bold;
+  font-size: 18px;
+}
 
-    @media (max-width: 768px) {
-        table, thead, tbody, th, td, tr {
-            display: block;
-        }
+.continuar-compra {
+      margin-top: 20px;
+      text-align: right;
+    }
 
-        thead {
-            display: none;
-        }
+    .continuar-compra button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
 
-        td {
-            position: relative;
-            padding-left: 50%;
-            text-align: left;
-        }
+    .continuar-compra button:hover {
+      background-color: #45a049;
+    }
 
-        td::before {
-            content: attr(data-label);
-            position: absolute;
-            left: 15px;
-            font-weight: bold;
-            color: #666;
-        }
-
-        .total, .continuar-compra {
-            text-align: center;
-        }
+    .mensaje-alerta {
+      display: none;
+      color: red;
+      font-weight: bold;
+      margin-top: 10px;
     }
