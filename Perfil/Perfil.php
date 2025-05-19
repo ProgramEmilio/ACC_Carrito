@@ -6,11 +6,14 @@ include '../BD/ConexionBD.php';
 $id_usuario = $_SESSION['id_usuario'];
 
 // Obtener id_cliente
-$query_cliente = "SELECT id_cliente FROM cliente WHERE id_usuario = ?";
+$query_cliente = "SELECT id_cliente, nom_persona, apellido_paterno, apellido_materno, telefono  
+FROM cliente 
+WHERE id_usuario = ?";
 $stmt = $conn->prepare($query_cliente);
 $stmt->bind_param("i", $id_usuario);
 $stmt->execute();
 $result = $stmt->get_result();
+
 
 if ($row = $result->fetch_assoc()) {
     $id_cliente = $row['id_cliente'];
@@ -22,20 +25,92 @@ if ($row = $result->fetch_assoc()) {
     $stmt2->execute();
     $direccion_result = $stmt2->get_result();
 }
+
+
 ?>
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Mis Direcciones</title>
+    <title>Perfil</title>
     <link rel="stylesheet" href="Perfil.css">
 </head>
 <body>
+<div class="datos_perfil_container">
+<h1 class="titulo">Mi información</h1>
 
-<div class="direccion-container">
-    <h2>Agregar Nueva Dirección</h2>
-    <form method="POST" action="guardar_direccion.php">
+<form action="actualizar_clientes.php" method="POST" class="form_edi_usuario">
+    <?php
+    $query_cliente = "SELECT id_cliente, nom_persona, apellido_paterno, apellido_materno, telefono  
+                      FROM cliente 
+                      WHERE id_usuario = ?";
+    $stmt = $conn->prepare($query_cliente);
+    $stmt->bind_param("i", $id_usuario);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    while ($row = $result->fetch_assoc()) {
+        ?>
+            <input type="hidden" name="id_cliente[]" value="<?= $row['id_cliente'] ?>">
+
+            <label>Nombre:</label><br>
+            <input type="text" name="nom_persona[]" value="<?= htmlspecialchars($row['nom_persona']) ?>"><br>
+
+            <label>Apellido Paterno:</label><br>
+            <input type="text" name="apellido_paterno[]" value="<?= htmlspecialchars($row['apellido_paterno']) ?>"><br>
+
+            <label>Apellido Materno:</label><br>
+            <input type="text" name="apellido_materno[]" value="<?= htmlspecialchars($row['apellido_materno']) ?>"><br>
+
+            <label>Teléfono:</label><br>
+            <input type="text" name="telefono[]" value="<?= htmlspecialchars($row['telefono']) ?>"><br>
+            <input class="btn" type="submit" value="Guardar Cambios">
+        </fieldset>
+        <?php
+    }
+    ?>
+</form>
+
+</div>
+
+<h2 class="sub_titulo">Mis Direcciones Guardadas</h2>
+
+<?php if ($direccion_result->num_rows > 0): ?>
+    <table border="1" cellpadding="5" cellspacing="0">
+        <tr>
+            <th>Calle</th>
+            <th>Núm. Ext</th>
+            <th>Colonia</th>
+            <th>Ciudad</th>
+            <th>Estado</th>
+            <th>Código Postal</th>
+            <th colspan="2">Acciones</th>
+        </tr>
+        <?php while ($direccion = $direccion_result->fetch_assoc()): ?>
+            <tr>
+                <td><?= htmlspecialchars($direccion['calle']) ?></td>
+                <td><?= htmlspecialchars($direccion['num_ext']) ?></td>
+                <td><?= htmlspecialchars($direccion['colonia']) ?></td>
+                <td><?= htmlspecialchars($direccion['ciudad']) ?></td>
+                <td><?= htmlspecialchars($direccion['estado']) ?></td>
+                <td><?= htmlspecialchars($direccion['codigo_postal']) ?></td>
+                <td><a class="accion" href="editar_direccion.php?id_direccion=<?= $direccion['id_direccion']?>">Editar</a></td>
+                <td>
+                    <a class="accion" href="eliminar_direccion.php?id_direccion=<?= $direccion['id_direccion'] ?>"
+                       onclick="return confirm('¿Estás seguro de que quieres eliminar esta dirección?');">
+                       Eliminar</a></td>
+            </tr>
+        <?php endwhile; ?>
+    </table>
+<?php else: ?>
+    <p>No tienes direcciones guardadas aún.</p>
+<?php endif; ?>
+
+<h2 class="sub_titulo">Agregar Nueva Dirección</h2>
+<div>
+    
+    <form method="POST" action="guardar_direccion.php" class="form_edi_usuario">
         <input type="hidden" name="id_cliente" value="<?= $id_cliente ?>">
         <label>Calle:
             <input type="text" name="calle" required>
@@ -49,6 +124,9 @@ if ($row = $result->fetch_assoc()) {
         <label>Ciudad:
             <input type="text" name="ciudad" required>
         </label>
+        <label>Estado:
+            <input type="text" name="estado" required>
+        </label>
         <label>Código Postal:
             <input type="text" name="codigo_postal" maxlength="5" required>
         </label>
@@ -59,37 +137,8 @@ if ($row = $result->fetch_assoc()) {
 
 
 
-<h2>Mis Direcciones Guardadas</h2>
-
-<?php if ($direccion_result->num_rows > 0): ?>
-    <table border="1" cellpadding="5" cellspacing="0">
-        <tr>
-            <th>Calle</th>
-            <th>Núm. Ext</th>
-            <th>Colonia</th>
-            <th>Ciudad</th>
-            <th>Código Postal</th>
-            <th colspan="2">Acciones</th>
-        </tr>
-        <?php while ($direccion = $direccion_result->fetch_assoc()): ?>
-            <tr>
-                <td><?= htmlspecialchars($direccion['calle']) ?></td>
-                <td><?= htmlspecialchars($direccion['num_ext']) ?></td>
-                <td><?= htmlspecialchars($direccion['colonia']) ?></td>
-                <td><?= htmlspecialchars($direccion['ciudad']) ?></td>
-                <td><?= htmlspecialchars($direccion['codigo_postal']) ?></td>
-                <td><a href="editar_direccion.php?id_direccion=<?= $direccion['id_direccion'] ?>">Editar</a></td>
-                <td>
-                    <a href="eliminar_direccion.php?id_direccion=<?= $direccion['id_direccion'] ?>"
-                       onclick="return confirm('¿Estás seguro de que quieres eliminar esta dirección?');">
-                       Eliminar
-                    </a>
-                </td>
-            </tr>
-        <?php endwhile; ?>
-    </table>
-<?php else: ?>
-    <p>No tienes direcciones guardadas aún.</p>
-<?php endif; ?>
 </body>
+<?php
+include('../Nav/footer.php');
+?>
 </html>

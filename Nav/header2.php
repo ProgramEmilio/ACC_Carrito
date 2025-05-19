@@ -43,6 +43,9 @@ include('CerrarSesion.php');
     <link rel="stylesheet" href="../../CSS/cabecera2.css" type="text/css">
     <link rel="stylesheet" href="../../CSS/Detalle_Producto.css" type="text/css">
     <link rel="stylesheet" href="../../CSS/eliminar.css" type="text/css">
+    <link rel="stylesheet" href="../../CSS/Carrito.css" type="text/css">
+    <link rel="stylesheet" href="../../CSS/direccion.css" type="text/css">
+    <link rel="stylesheet" href="../../CSS/confirmar_pedido.css.css" type="text/css">
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
 

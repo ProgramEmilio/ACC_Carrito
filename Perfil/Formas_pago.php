@@ -1,6 +1,6 @@
 <?php
 include '../BD/ConexionBD.php';     // $conn  -> Base principal (cliente)
-
+include('../Nav/header.php');
 
 // Procesar eliminación si se recibe eliminar_id
 if (isset($_GET['eliminar_id'])) {
@@ -80,9 +80,6 @@ while ($row = $clientes_result->fetch_assoc()) {
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-<?php include('../Nav/header.php'); ?>
-
 <title>Registrar Tarjeta</title>
 <!-- Incluir CSS externo -->
 
@@ -159,133 +156,8 @@ while ($row = $clientes_result->fetch_assoc()) {
 </table>
 
 </body>
+<?php
+include('../Nav/footer.php');
+?>
 
-<style>
-/* estilos_tarjeta.css */
-
-.form-container {
-  max-width: 500px;
-  margin: 20px auto 40px auto;
-  padding: 20px 30px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  font-family: Arial, sans-serif;
-}
-.form-container h2 {
-  text-align: center;
-  margin-bottom: 25px;
-  color: #333;
-}
-.form-container label {
-  display: block;
-  margin-bottom: 6px;
-  font-weight: 600;
-  color: #444;
-}
-.form-container input[type="text"],
-.form-container input[type="month"],
-.form-container input[type="number"],
-.form-container select {
-  width: 100%;
-  padding: 10px 12px;
-  margin-bottom: 18px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
-  box-sizing: border-box;
-  transition: border-color 0.3s;
-}
-.form-container input[type="text"]:focus,
-.form-container input[type="month"]:focus,
-.form-container input[type="number"]:focus,
-.form-container select:focus {
-  border-color: #007bff;
-  outline: none;
-}
-.form-container button {
-  width: 100%;
-  padding: 12px 0;
-  background-color: #007bff;
-  border: none;
-  color: white;
-  font-size: 1.1rem;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s;
-}
-.form-container button:hover {
-  background-color: #0056b3;
-}
-/* Mensajes */
-.form-container p {
-  text-align: center;
-  font-weight: 600;
-}
-
-/* Tabla */
-table {
-  width: 95%;
-  margin: 0 auto 40px auto;
-  border-collapse: collapse;
-  font-family: Arial, sans-serif;
-}
-table thead {
-  background-color: #007bff;
-  color: white;
-}
-table th, table td {
-  padding: 8px 10px;
-  border: 1px solid #ddd;
-  text-align: center;
-  font-size: 0.9rem;
-}
-table tbody tr:nth-child(even) {
-  background-color: #f2f2f2;
-}
-table a {
-  color: #d9534f;
-  text-decoration: none;
-  font-weight: bold;
-}
-table a:hover {
-  text-decoration: underline;
-}
-
-/* Responsive tabla */
-@media (max-width: 600px) {
-  table, thead, tbody, th, td, tr {
-    display: block;
-  }
-  table thead tr {
-    display: none;
-  }
-  table tbody tr {
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 10px;
-  }
-  table tbody td {
-    border: none;
-    padding: 6px 10px;
-    text-align: right;
-    position: relative;
-    padding-left: 50%;
-    font-size: 0.9rem;
-  }
-  table tbody td::before {
-    content: attr(data-label);
-    position: absolute;
-    left: 15px;
-    width: 45%;
-    padding-left: 5px;
-    font-weight: 700;
-    text-align: left;
-    color: #333;
-  }
-}
-
-</style>
 </html>

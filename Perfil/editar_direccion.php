@@ -1,5 +1,4 @@
 <?php
-session_start();
 include '../BD/ConexionBD.php';
 include '../Nav/header.php';
 

@@ -1,6 +1,7 @@
 <?php
 include('../BD/ConexionBD.php');
 include('../Nav/header.php');
+
 $id_usuario = $_SESSION['id_usuario'] ?? null;
 if (!$id_usuario) {
     echo "Usuario no autenticado.";
@@ -8,7 +9,8 @@ if (!$id_usuario) {
 }
 
 // Obtener cliente
-$queryCliente = "SELECT id_cliente, nom_persona, apellido_paterno, apellido_materno, telefono FROM cliente WHERE id_usuario = ?";
+$queryCliente = "SELECT id_cliente, nom_persona, apellido_paterno, apellido_materno, telefono 
+FROM cliente WHERE id_usuario = ?";
 $stmtCliente = $conn->prepare($queryCliente);
 $stmtCliente->bind_param('i', $id_usuario);
 $stmtCliente->execute();
