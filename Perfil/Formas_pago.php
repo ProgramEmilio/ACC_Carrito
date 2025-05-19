@@ -159,7 +159,6 @@ while ($row = $clientes_result->fetch_assoc()) {
 </table>
 
 </body>
-<?php include ('../Nav/footer.php'); ?>
 
 <style>
 /* estilos_tarjeta.css */

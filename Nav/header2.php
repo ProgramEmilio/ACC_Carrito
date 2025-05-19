@@ -1,5 +1,6 @@
 <?php
 include('../../BD/ConexionBD.php');
+include('../../BD/ConexionBDB.php');
 
 session_start(); // Asegura que se mantenga la sesión
 if (!isset($_SESSION['id_rol'])) {
@@ -22,6 +23,10 @@ $menus = [
         "Nomina" =>[
             "Nomina" => "../../Nomina/Nomina.php",
             "Registro" => "../../Nomina/Registro_N/Registro_Nomina.php"
+        ],
+        "Banco" => [
+            "Clientes" => "../../Banco_Usuarios\Usuarios_B.php",
+            "Bancos" => "../../Bancos\Bancos.php"
         ]
     ]
 ];
@@ -42,6 +47,7 @@ include('CerrarSesion.php');
     <link rel="stylesheet" href="../../CSS/cabecera2.css" type="text/css">
     <link rel="stylesheet" href="../../CSS/Detalle_Producto.css" type="text/css">
     <link rel="stylesheet" href="../../CSS/eliminar.css" type="text/css">
+    <link rel="stylesheet" href="../../CSS/Recursos.css" type="text/css">
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
 
@@ -49,10 +55,14 @@ include('CerrarSesion.php');
 <body>
 <header class="cabecera_p">
     <div class="cabecera">
-        <h1 class="nom_sis">Aplica Central Creativa</h1>
-        <a href="../../Inicio/inicio.php">
-            <img src="../../Imagenes/acc_logo.png" class="img-logo" alt="Logo">
-        </a>
+        <!-- Logo + Nombre del sistema -->
+        <div class="logo-nombre">
+            <a href="../../Home/Home.php">
+                <img src="../../Imagenes/acc_logo.png" class="img-logo" alt="Logo">
+            </a>
+            <h1 class="nom_sis">Aplica Central Creativa</h1>
+        </div>
+
 
         <!-- Contenedor para alinear el botón de cierre de sesión -->
         <div class="logout-container">

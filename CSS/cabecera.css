@@ -52,17 +52,14 @@ html {
 }
 
 .carrito-img {
-    max-height: 24px;
-    max-width: 24px;  /* Limita ambas dimensiones */
-    object-fit: contain;
+    height: 24px;
 }
-
 
 #contador-carrito {
     position: absolute;
     top: -8px;
     right: -10px;
-    background: rgb(0, 255, 21);
+    background: red;
     color: white;
     font-size: 12px;
     border-radius: 50%;

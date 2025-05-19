@@ -1,9 +1,8 @@
 <?php
-include('../BD/ConexionBDB.php');
-include('../Nav/header_Banco.php');
+include('../Nav/header.php');
 
 $query = "SELECT * FROM banco";
-$resultado = $conn->query($query);
+$resultado = $conn2->query($query);
 ?>
 <h1 class="titulo">Lista de Bancos</h1>
 <a href="Registro_B/Registro_Banco.php" class="button">Agregar Banco</a>

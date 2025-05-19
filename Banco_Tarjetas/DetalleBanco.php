@@ -1,6 +1,5 @@
 <?php
-include('../BD/ConexionBDB.php');
-include('../Nav/header_Banco.php');
+include('../Nav/header.php');
 
 $id_banco = $_GET['id'];
 
@@ -8,7 +7,7 @@ $query = "SELECT t.*, c.nombre_cliente, c.apellido_paterno, c.apellido_materno
           FROM tarjeta t
           JOIN cliente c ON t.titular = c.id_cliente
           WHERE t.id_banco = ?";
-$stmt = $conn->prepare($query);
+$stmt = $conn2->prepare($query);
 $stmt->bind_param("i", $id_banco);
 $stmt->execute();
 $resultado = $stmt->get_result();

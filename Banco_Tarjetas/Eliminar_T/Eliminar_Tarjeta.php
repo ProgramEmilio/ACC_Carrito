@@ -11,7 +11,7 @@ if (isset($_GET['id_tarjeta']) && isset($_GET['id_banco'])) {
     
     // Preparar consulta para eliminar la tarjeta
     $query = "DELETE FROM tarjeta WHERE id_tarjeta = ?";
-    $stmt = $conn->prepare($query);
+    $stmt = $conn2->prepare($query);
     $stmt->bind_param('i', $id_tarjeta);
     
     // Ejecutar la consulta
