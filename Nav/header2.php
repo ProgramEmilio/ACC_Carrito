@@ -1,6 +1,6 @@
 <?php
 include('../../BD/ConexionBD.php');
-include('../BD/ConexionBDB.php');
+include('../../BD/ConexionBDB.php');
 
 session_start(); // Asegura que se mantenga la sesión
 if (!isset($_SESSION['id_rol'])) {
@@ -43,6 +43,7 @@ include('CerrarSesion.php');
     <link rel="stylesheet" href="../../CSS/cabecera2.css" type="text/css">
     <link rel="stylesheet" href="../../CSS/Detalle_Producto.css" type="text/css">
     <link rel="stylesheet" href="../../CSS/eliminar.css" type="text/css">
+    <link rel="stylesheet" href="../../CSS/Recursos.css" type="text/css">
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
 
