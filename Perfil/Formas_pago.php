@@ -85,11 +85,12 @@ while ($row = $clientes_result->fetch_assoc()) {
 
 </head>
 <body>
+<h1 class="titulo">Información Tarjetas</h1>
 
 <br></br>
-<h2>Registrar nueva tarjeta</h2>
-<div class="form-container">
-<form method="POST" action="">
+<h2 class="sub_titulo">Registrar nueva tarjeta</h2>
+<div class="form_edi_usuario">
+<form method="POST" action="" class="form_reg_usuario">
     <label>Número de tarjeta (16 dígitos):</label>
     <input type="text" name="numero_tarjeta" maxlength="16" pattern="\d{16}" required>
 
@@ -114,11 +115,11 @@ while ($row = $clientes_result->fetch_assoc()) {
     <label>Nombre del titular (exacto como está registrado):</label>
     <input type="text" name="titular" placeholder="Ej. Juan Pérez López" required>
 
-    <button type="submit">Registrar Tarjeta</button>
+    <input class="btn" type="submit" value="Registrar Tarjeta">
 </form>
 </div>
 
-<h2>Tarjetas Registradas</h2>
+<h2 class="sub_titulo">Tarjetas Registradas</h2>
 <table>
     <thead>
         <tr>
@@ -154,6 +155,7 @@ while ($row = $clientes_result->fetch_assoc()) {
         ?>
     </tbody>
 </table>
+       <a href="Perfil.php" class="regresar">Regresar</a>
 
 </body>
 <?php

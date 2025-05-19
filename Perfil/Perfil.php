@@ -34,7 +34,7 @@ if ($row = $result->fetch_assoc()) {
 <head>
     <meta charset="UTF-8">
     <title>Perfil</title>
-    <link rel="stylesheet" href="Perfil.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
 <div class="datos_perfil_container">
@@ -73,68 +73,16 @@ if ($row = $result->fetch_assoc()) {
 </form>
 
 </div>
-
-<h2 class="sub_titulo">Mis Direcciones Guardadas</h2>
-
-<?php if ($direccion_result->num_rows > 0): ?>
-    <table border="1" cellpadding="5" cellspacing="0">
-        <tr>
-            <th>Calle</th>
-            <th>Núm. Ext</th>
-            <th>Colonia</th>
-            <th>Ciudad</th>
-            <th>Estado</th>
-            <th>Código Postal</th>
-            <th colspan="2">Acciones</th>
-        </tr>
-        <?php while ($direccion = $direccion_result->fetch_assoc()): ?>
-            <tr>
-                <td><?= htmlspecialchars($direccion['calle']) ?></td>
-                <td><?= htmlspecialchars($direccion['num_ext']) ?></td>
-                <td><?= htmlspecialchars($direccion['colonia']) ?></td>
-                <td><?= htmlspecialchars($direccion['ciudad']) ?></td>
-                <td><?= htmlspecialchars($direccion['estado']) ?></td>
-                <td><?= htmlspecialchars($direccion['codigo_postal']) ?></td>
-                <td><a class="accion" href="editar_direccion.php?id_direccion=<?= $direccion['id_direccion']?>">Editar</a></td>
-                <td>
-                    <a class="accion" href="eliminar_direccion.php?id_direccion=<?= $direccion['id_direccion'] ?>"
-                       onclick="return confirm('¿Estás seguro de que quieres eliminar esta dirección?');">
-                       Eliminar</a></td>
-            </tr>
-        <?php endwhile; ?>
-    </table>
-<?php else: ?>
-    <p>No tienes direcciones guardadas aún.</p>
-<?php endif; ?>
-
-<h2 class="sub_titulo">Agregar Nueva Dirección</h2>
-<div>
-    
-    <form method="POST" action="guardar_direccion.php" class="form_edi_usuario">
-        <input type="hidden" name="id_cliente" value="<?= $id_cliente ?>">
-        <label>Calle:
-            <input type="text" name="calle" required>
-        </label>
-        <label>Número ext:
-            <input type="number" name="num_ext" required>
-        </label>
-        <label>Colonia:
-            <input type="text" name="colonia" required>
-        </label>
-        <label>Ciudad:
-            <input type="text" name="ciudad" required>
-        </label>
-        <label>Estado:
-            <input type="text" name="estado" required>
-        </label>
-        <label>Código Postal:
-            <input type="text" name="codigo_postal" maxlength="5" required>
-        </label>
-        <input class="btn" type="submit" value="Guardar Dirección">
-    </form>
-
+        <div class="paneles-container">
+    <a href="direccion_usuario.php" class="panel">
+        <i class="fas fa-map-marker-alt icono"></i>
+        <span>Dirección</span>
+    </a>
+    <a href="Formas_pago.php" class="panel">
+        <i class="fas fa-credit-card icono"></i>
+        <span>Tarjetas</span>
+    </a>
 </div>
-
 
 
 </body>

@@ -123,9 +123,21 @@
 .form_reg_usuario input[type="password"],
 .form_reg_usuario input[type="date"],
 .form_reg_usuario input[type="email"],
-.form_reg_usuario textarea,
-.form_reg_usuario select {
+.form_reg_usuario textarea {
     width: calc(100% - 20px); 
+    padding: 15px;
+    margin-bottom: 5px;
+    border: 1px solid #5492cc; /* Bordes azul medio */
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+}
+
+.form_reg_usuario input[type="month"],
+.form_reg_usuario input[type="number"],
+.form_reg_usuario select {
+  width: calc(100% - 20px); 
     padding: 15px;
     margin-bottom: 5px;
     border: 1px solid #5492cc; /* Bordes azul medio */
