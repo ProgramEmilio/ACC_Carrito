@@ -76,7 +76,7 @@ CONSTRAINT fk_deta_art FOREIGN KEY (id_detalle_articulo) REFERENCES detalle_arti
 );
 
 CREATE TABLE articulo_completo (
-id_articulo_completo VARCHAR(5) NOT NULL PRIMARY KEY AUTO_INCREMENT,    
+id_articulo_completo INT NOT NULL PRIMARY KEY AUTO_INCREMENT,    
 id_articulo VARCHAR(5) NOT NULL,
 id_atributo INT NOT NULL,
 valor VARCHAR(100),
