@@ -153,7 +153,8 @@ try {
         
         // 3. Verificar saldo suficiente
         if ($tarjeta_banco['saldo'] < $monto_total) {
-            throw new Exception("Saldo insuficiente. Saldo actual: $" . number_format($tarjeta_banco['saldo'], 2) . ", Requerido: $" . number_format($monto_total, 2));
+            //throw new Exception("Saldo insuficiente. Saldo actual: $" . number_format($tarjeta_banco['saldo'], 2) . ", Requerido: $" . number_format($monto_total, 2));
+            throw new Exception("Transaccion rechazada, Falta de fondos");
         }
         
         // 4. Descontar el monto del saldo en la BD del banco

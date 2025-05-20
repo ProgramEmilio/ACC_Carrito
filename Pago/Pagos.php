@@ -1,17 +1,12 @@
 <?php 
 include('../BD/ConexionBD.php'); 
 include('../Nav/header.php');
-echo "<pre>";
-print_r($_GET);
-echo "</pre>";
+
 $id_usuario = $_SESSION['id_usuario'];
 $id_pedido = $_GET['id_pedido'] ?? null;
 $precio_total_pedido = $_GET['precio_total_pedido'] ?? null;
 
-if (!$id_pedido || !$precio_total_pedido) {
-    echo "Datos incompletos.";
-    exit;
-}
+
 // Obtener ID del cliente
 $sql = "SELECT id_cliente FROM cliente WHERE id_usuario = ?";
 $stmt = $conn->prepare($sql);
