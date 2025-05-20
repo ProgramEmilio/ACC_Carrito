@@ -122,7 +122,7 @@ fecha_estimada DATETIME NOT NULL
 CREATE TABLE formas_pago(
 id_forma_pago INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 forma ENUM('Tarjeta','Sucursal','Monedero','Otro') NOT NULL,
-folio VARCHAR(5),
+folio VARCHAR(35),
 estado ENUM('Activo','Usado') 
 );
 
@@ -146,6 +146,7 @@ CREATE TABLE pago(
 id_pago INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 id_forma_pago INT NOT NULL,
 id_pedido INT NOT NULL,
+monto DECIMAL(6,2) NOT NULL,
 fecha_pago DATETIME NOT NULL,
 CONSTRAINT fk_forma_pago FOREIGN KEY (id_forma_pago) REFERENCES formas_pago(id_forma_pago),
 CONSTRAINT fk_pedido_pago FOREIGN KEY (id_pedido) REFERENCES pedido(id_pedido)
@@ -159,6 +160,15 @@ id_paqueteria INT NOT NULL,
 CONSTRAINT fk_compra_cli FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente),
 CONSTRAINT fk_compra_pago FOREIGN KEY (id_pago) REFERENCES pago(id_pago),
 CONSTRAINT fk_compra_paq FOREIGN KEY (id_paqueteria) REFERENCES paqueteria(id_paqueteria)
+);
+
+CREATE TABLE seguimiento_pedido(
+id_seguimiento_pedido INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+id_pedido INT NOT NULL,
+id_cliente INT NOT NULL,
+Estado ENUM('Enviado','En camino','Entregado','Otro') NOT NULL,
+CONSTRAINT fk_pedido_envio FOREIGN KEY (id_pedido) REFERENCES pedido(id_pedido),
+CONSTRAINT fk_pedido_carrito FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente)
 );
 
 
