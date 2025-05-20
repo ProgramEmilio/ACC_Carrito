@@ -176,7 +176,8 @@ INSERT INTO usuario (nombre_usuario, correo, contraseña, id_rol) VALUES
 
 -- Cliente
 INSERT INTO cliente (id_usuario, nom_persona, apellido_paterno, apellido_materno, telefono, monedero) VALUES
-(2, 'Juan', 'Pérez', 'Gómez', '6123456789', 50.00);
+(2, 'Juan', 'Pérez', 'Gómez', '6123456789', 50.00),
+(1, 'Emilio', 'Palma', 'Jimenez', '6123456789', 0.00);
 
 -- Dirección del cliente
 INSERT INTO direccion(codigo_postal, calle, num_ext, colonia, ciudad, estado, id_cliente) VALUES
@@ -184,7 +185,8 @@ INSERT INTO direccion(codigo_postal, calle, num_ext, colonia, ciudad, estado, id
 
 -- Tarjeta del cliente
 INSERT INTO tarjeta (numero_tarjeta, cvv, fecha_vencimiento, tipo_tarjeta, red_pago, titular) VALUES
-('1234567890123456', '123', '2026-12-31', 'Credito', 'VISA', 1);
+('1234567890123456', '123', '2026-12-31', 'Credito', 'VISA', 1),
+('1111111111111111', '111', '2025-05-01 00:00:00', 'Debito', 'VISA', 1);;
 
 -- Detalle de artículos
 INSERT INTO detalle_articulos (existencia, costo, precio, id_proveedor, estatus) VALUES
@@ -212,6 +214,7 @@ INSERT INTO articulo_completo (id_articulo, id_atributo, valor) VALUES
 ('P001', 1, 'Negro'),
 ('P001', 2, 'M'),
 ('P001', 3, 'playera2.png'),
+('P001', 3, 'termo3.png'),
 ('P002', 1, 'Azul'),
 ('P002', 2, '750ml'),
 ('P002', 3, 'termo3.png'),
