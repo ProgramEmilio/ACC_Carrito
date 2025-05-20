@@ -42,3 +42,7 @@ CONSTRAINT fk_usuario_tarjeta FOREIGN KEY (titular) REFERENCES cliente(id_client
 CONSTRAINT fk_usuario_banco FOREIGN KEY (id_banco) REFERENCES banco(id_banco) ON DELETE CASCADE
 );
 
+
+INSERT INTO `tarjeta` (`id_tarjeta`, `numero_tarjeta`, `cvv`, `fecha_vencimiento`, `tipo_tarjeta`, `red_pago`, `titular`) VALUES
+(1, '1234567890123456', '123', '2026-12-31 00:00:00', 'Credito', 'VISA', 1),
+(2, '1111111111111111', '111', '2025-05-01 00:00:00', 'Debito', 'VISA', 1);
