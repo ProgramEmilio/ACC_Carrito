@@ -131,16 +131,15 @@ id_pedido INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 id_envio INT NOT NULL,
 id_paqueteria INT,
 id_carrito INT NOT NULL,
+iva DECIMAL(6,2) NOT NULL,
+ieps DECIMAL(2),
+id_direccion INT,
 precio_total_pedido DECIMAL(6,2) NOT NULL,
 CONSTRAINT fk_pedido_envio FOREIGN KEY (id_envio) REFERENCES envio(id_envio),
 CONSTRAINT fk_pedido_paqueteria FOREIGN KEY (id_paqueteria) REFERENCES paqueteria(id_paqueteria),
-CONSTRAINT fk_pedido_carrito FOREIGN KEY (id_carrito) REFERENCES carrito(id_carrito)
+CONSTRAINT fk_pedido_carrito FOREIGN KEY (id_carrito) REFERENCES carrito(id_carrito),
+CONSTRAINT fk_pedido_direccion FOREIGN KEY (id_direccion) REFERENCES direccion(id_direccion)
 );
-
-ALTER TABLE pedido
-ADD COLUMN iva DECIMAL(6,2) NOT NULL,
-ADD COLUMN ieps DECIMAL(2),
-ADD COLUMN id_direccion INT;
 
 CREATE TABLE pago(
 id_pago INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -160,7 +159,6 @@ CONSTRAINT fk_compra_cli FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente)
 CONSTRAINT fk_compra_pago FOREIGN KEY (id_pago) REFERENCES pago(id_pago),
 CONSTRAINT fk_compra_paq FOREIGN KEY (id_paqueteria) REFERENCES paqueteria(id_paqueteria)
 );
-
 
 -- Roles
 INSERT INTO roles (roles) VALUES
