@@ -142,7 +142,7 @@ CONSTRAINT fk_pedido_direccion FOREIGN KEY (id_direccion) REFERENCES direccion(i
 );
 
 CREATE TABLE pago(
-id_pago INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+id_pago VARCHAR(35) NOT NULL PRIMARY KEY,
 id_forma_pago INT NOT NULL,
 id_pedido INT NOT NULL,
 monto DECIMAL(6,2) NOT NULL,
@@ -162,7 +162,7 @@ CONSTRAINT fk_compra_paq FOREIGN KEY (id_paqueteria) REFERENCES paqueteria(id_pa
 );
 
 CREATE TABLE seguimiento_pedido(
-id_seguimiento_pedido INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+id_seguimiento_pedido VARCHAR(35) NOT NULL PRIMARY KEY,
 id_pedido INT NOT NULL,
 id_cliente INT NOT NULL,
 Estado ENUM('Enviado','En camino','Entregado','Otro') NOT NULL,
