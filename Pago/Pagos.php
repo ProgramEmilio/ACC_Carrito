@@ -39,333 +39,16 @@ $tarjetas = $stmt_tarjetas->get_result();
 $mensaje_resultado = $_GET['resultado'] ?? '';
 $tipo_resultado = $_GET['tipo'] ?? '';
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../CSS/pagos.css" type="text/css">
 
-<style>
-.payment-container {
-    display: flex;
-    gap: 20px;
-    padding: 20px;
-}
-
-.payment-section {
-    flex: 1;
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-.payment-method {
-    background: #f8f9fa;
-    border: 2px solid #e9ecef;
-    border-radius: 8px;
-    padding: 15px;
-    margin: 10px 0;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.payment-method:hover {
-    border-color: #007bff;
-    background: #f0f8ff;
-}
-
-.payment-method.selected {
-    border-color: #007bff;
-    background: #e7f3ff;
-}
-
-.card-item {
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 10px;
-    margin: 5px 0;
-    cursor: pointer;
-}
-
-.card-item:hover {
-    background: #f5f5f5;
-}
-
-.card-item.selected {
-    border-color: #007bff;
-    background: #e7f3ff;
-}
-
-.loading-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.7);
-    z-index: 900000;
-    backdrop-filter: blur(5px);
-    animation: fadeIn 0.3s ease-in-out;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.loading-content {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    padding: 40px;
-    border-radius: 15px;
-    text-align: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    animation: slideUp 0.4s ease-out;
-    max-width: 400px;
-    width: 90%;
-}
-
-@keyframes slideUp {
-    from { transform: translate(-50%, -30%); opacity: 0; }
-    to { transform: translate(-50%, -50%); opacity: 1; }
-}
-
-.spinner {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #007bff;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 20px;
-    transition: transform 0.3s ease;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.loading-content h3 {
-    color: #333;
-    margin-bottom: 15px;
-    font-size: 24px;
-}
-
-.loading-content p {
-    color: #666;
-    font-size: 16px;
-    line-height: 1.5;
-    margin: 0;
-}
-
-/* Progreso visual opcional */
-.loading-progress {
-    width: 100%;
-    height: 4px;
-    background: #f0f0f0;
-    border-radius: 2px;
-    margin-top: 20px;
-    overflow: hidden;
-}
-
-.loading-progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, #007bff, #0056b3);
-    border-radius: 2px;
-    animation: progressBar 5s linear forwards;
-    width: 0%;
-}
-
-@keyframes progressBar {
-    from { width: 0%; }
-    to { width: 100%; }
-}
-
-/* Estados del botón mejorados */
-.btn-pagar:disabled {
-    background: #6c757d;
-    cursor: not-allowed;
-    position: relative;
-    overflow: hidden;
-}
-
-.btn-pagar:disabled::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    animation: shimmer 2s infinite;
-}
-
-@keyframes shimmer {
-    0% { left: -100%; }
-    100% { left: 100%; }
-}
-
-.right-section {
-    flex: 0 0 300px;
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    height: fit-content;
-}
-
-.resumen-titulo {
-    font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 15px;
-    color: #333;
-}
-
-.resumen-compra {
-    border-top: 1px solid #eee;
-    padding-top: 15px;
-}
-
-.resumen-linea {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-    color: #666;
-}
-
-.resumen-linea.total-final {
-    font-weight: bold;
-    font-size: 18px;
-    color: #333;
-    border-top: 1px solid #eee;
-    padding-top: 10px;
-    margin-top: 15px;
-}
-
-.estado-pago {
-    margin-top: 15px;
-    padding: 10px;
-    border-radius: 5px;
-    text-align: center;
-    font-weight: bold;
-}
-
-.estado-pago.pendiente {
-    background: #fff3cd;
-    color: #856404;
-    border: 1px solid #ffeaa7;
-}
-
-.estado-pago.autorizado {
-    background: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-}
-
-.estado-pago.rechazado {
-    background: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-}
-
-.btn-pagar {
-    width: 100%;
-    padding: 12px;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    margin-top: 15px;
-}
-
-.btn-pagar:hover {
-    background: #0056b3;
-}
-
-.btn-pagar:disabled {
-    background: #6c757d;
-    cursor: not-allowed;
-}
-
-.btn-nuevo-tarjeta {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    background: #28a745;
-    color: white;
-    text-decoration: none;
-    text-align: center;
-    border-radius: 5px;
-    margin-top: 10px;
-}
-
-.btn-nuevo-tarjeta:hover {
-    background: #218838;
-    color: white;
-    text-decoration: none;
-}
-
-.mensaje-resultado {
-    padding: 15px;
-    margin: 10px 0;
-    border-radius: 5px;
-    font-weight: bold;
-}
-
-.mensaje-resultado.success {
-    background: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-}
-
-.mensaje-resultado.error {
-    background: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-}
-
-/* Estilos para monedero */
-.wallet-checkbox {
-    margin-top: 15px;
-    padding: 15px;
-    background: #e7f4ff;
-    border-radius: 8px;
-    border: 1px solid #b8daff;
-}
-
-.wallet-amount {
-    display: flex;
-    align-items: center;
-    margin-top: 10px;
-}
-
-.wallet-slider {
-    flex: 1;
-    margin-right: 10px;
-}
-
-.wallet-value {
-    width: 80px;
-    text-align: right;
-    font-weight: bold;
-}
-
-.wallet-balance {
-    margin-top: 5px;
-    font-size: 14px;
-    color: #0056b3;
-}
-
-.wallet-error {
-    color: #721c24;
-    font-size: 13px;
-    margin-top: 5px;
-}
-</style>
+    <title>Pagos</title>
+</head>
+<body>
 
 <div class="payment-container">
     <div class="payment-section">
@@ -384,15 +67,7 @@ $tipo_resultado = $_GET['tipo'] ?? '';
             <input type="hidden" name="id_pedido" value="<?= htmlspecialchars($id_pedido, ENT_QUOTES, 'UTF-8') ?>">
             <input type="hidden" name="monedero_usado" id="monedero_usado_input" value="0">
             
-            <!-- Debug: mostrar valores -->
-            <div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; font-size: 12px;">
-                <strong>Información del pedido:</strong><br>
-                Monto: $<?= number_format($monto, 2) ?><br>
-                ID Cliente: <?= $id_cliente ?><br>
-                ID Pedido: <?= $id_pedido ?><br>
-                Monedero disponible: $<?= number_format($monedero_disponible, 2) ?><br>
-            </div>
-            
+        
             <!-- Pago con Tarjeta -->
             <div class="payment-method" onclick="selectPaymentMethod('tarjeta')">
                 <input type="radio" name="metodo_pago" value="tarjeta" id="tarjeta">
@@ -421,7 +96,7 @@ $tipo_resultado = $_GET['tipo'] ?? '';
                     <p>No tienes tarjetas registradas.</p>
                 <?php endif; ?>
                 
-                <a href="Nueva_Tarjeta.php?return=pago&monto=<?= urlencode($monto) ?>&id_pedido=<?= urlencode($id_pedido) ?>" class="btn-nuevo-tarjeta">
+                <a href="../Perfil/Formas_pago.php" class="btn-nuevo-tarjeta">
                     + Agregar nueva tarjeta
                 </a>
             </div>
@@ -439,8 +114,8 @@ $tipo_resultado = $_GET['tipo'] ?? '';
             
             <!-- Opción Monedero -->
             <div class="wallet-checkbox">
-                <input type="checkbox" id="usar_monedero" name="usar_monedero" onchange="toggleMonedero()" <?= $monedero_disponible <= 0 ? 'disabled' : '' ?>>
-                <label for="usar_monedero">Usar puntos de monedero</label>
+                <input type="radio" class="checkbox_monedero" id="usar_monedero" name="usar_monedero" onchange="toggleMonedero()" <?= $monedero_disponible <= 0 ? 'disabled' : '' ?>>
+                <label for="usar_monedero">👛 Usar puntos de monedero</label>
                 
                 <div id="monedero-options" style="display: none; margin-top: 10px;">
                     <div class="wallet-balance">
@@ -699,5 +374,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-
+</body>
 <?php include('../Nav/footer.php'); ?>
+
+</html>

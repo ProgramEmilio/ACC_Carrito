@@ -77,12 +77,14 @@ body {
     }
 
     .total_carr {
-        text-align: right;
         font-size: 30px;
         margin-right: 60px;
         margin-top: 20px;
         font-weight: bold;
         color: #000000;
+    }
+     .precio_carr {
+        margin-left: 900px;
     }
 
     .continuar-compra {

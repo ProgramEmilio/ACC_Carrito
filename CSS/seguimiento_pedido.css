@@ -43,7 +43,7 @@
     color: #333;
 }
 
-form {
+.form_s {
     margin-top: 20px;
     display: flex;
     gap: 10px;

@@ -135,7 +135,7 @@ if ($res_articulos && $res_articulos->num_rows > 0) {
 
 // Botones de cambio de estado
 if ($id_rol != 2) {
-    echo "<form method='POST'>";
+    echo "<form method='POST' class='form_s'>";
     echo "<input type='hidden' name='id_seguimiento' value='{$row['id_seguimiento_pedido']}'>";
     echo "<button type='submit' name='nuevo_estado' value='Enviado' class='btn-estado btn-enviado'>Enviado</button>";
     echo "<button type='submit' name='nuevo_estado' value='En camino' class='btn-estado btn-en-camino'>En camino</button>";

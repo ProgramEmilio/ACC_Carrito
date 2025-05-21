@@ -102,7 +102,7 @@ while ($row = $result_paqueterias->fetch_assoc()) {
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>
-                    <p>No tienes direcciones registradas. <a href="nuevo_domicilio.php" class="boton">Agregar nuevo</a></p>
+                    <p>No tienes direcciones registradas. <a href="../Perfil/direccion_usuario.php" class="boton">Agregar nuevo</a></p>
                 <?php endif; ?>
             </div>
 

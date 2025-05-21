@@ -523,7 +523,7 @@ $numero_seguimiento = 'TRK' . date('YmdHis') . $id_pedido;
             </a>
         <?php endif; ?>
         
-        <a href="../pedidos/mis_pedidos.php" class="btn btn-secondary">
+        <a href="../Pedido/seguimiento_pedido.php" class="btn btn-secondary">
             Mis Pedidos
         </a>
         

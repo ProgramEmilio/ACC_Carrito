@@ -96,11 +96,11 @@ $resultDetalles = $conn->query($queryDetalles);
             <?php endwhile; ?>
             </tbody>
         </table>
-
+        <div class="precio_carr">
         <div class="total_carr">
             Total del Carrito: $<span id="total">0.00</span>
         </div>
-
+        </div>
         <div class="continuar-compra">
             <button type="submit" id="continuarCompra">Continuar con la compra</button>
         </div>

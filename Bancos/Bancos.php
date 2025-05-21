@@ -5,7 +5,7 @@ $query = "SELECT * FROM banco";
 $resultado = $conn2->query($query);
 ?>
 <h1 class="titulo">Lista de Bancos</h1>
-<a href="Registro_B/Registro_Banco.php" class="button">Agregar Banco</a>
+<a href="Registro_B/Registro_Banco.php" class="regresar">Agregar Banco</a>
 <table class='tabla'>
   <tr>
     <th>ID Banco</th>

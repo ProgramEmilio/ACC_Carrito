@@ -69,7 +69,7 @@ if ($row = $result->fetch_assoc()) {
         <?php endwhile; ?>
     </table>
 <?php else: ?>
-    <p>No tienes direcciones guardadas aún.</p>
+    <p class="parrafo_pedi">No tienes direcciones guardadas aún.</p>
 <?php endif; ?>
 
 <h2 class="sub_titulo">Agregar Nueva Dirección</h2>
