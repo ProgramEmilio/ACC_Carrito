@@ -27,13 +27,13 @@ $menus = [
         ],
 
         "Registros" => "../Ventas/Resumen_detalle.php",
-        "Seguimiento Pedidos" => "../Pedido/seguimiento_pedido.php"
+        "Compras" => "../Pedido/seguimiento_pedido.php"
     
     ],
 
     // Rol 2: CLIENTE
     2 => [
-        "Mis pedidos" => "#",
+        "Mis pedidos" => "../Pedido/seguimiento_pedido.php",
 
         "" => [
             "" => "",
@@ -137,6 +137,7 @@ include('CerrarSesion.php');
     <link rel="stylesheet" href="../CSS/Tarjetas.css" type="text/css">
     <link rel="stylesheet" href="../CSS/Confirmar_pedido.css" type="text/css">
     <link rel="stylesheet" href="../CSS/reporte_ventas.css" type="text/css">
+    <link rel="stylesheet" href="../CSS/seguimiento_pedido.css" type="text/css">
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>

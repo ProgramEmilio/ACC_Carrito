@@ -1,114 +1,166 @@
-<?php
+<?php 
 include('../BD/ConexionBD.php');
 include('../Nav/header.php');
-?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Reporte de Pedidos</title>
-    <script>
-        function toggleDetalle(id) {
-            var detalle = document.getElementById("detalle_" + id);
-            detalle.style.display = (detalle.style.display === "none") ? "block" : "none";
+
+$id_rol = $_SESSION['id_rol']; // 1=Administrador, 2=Cliente, 3=Proveedor
+$id_usuario = $_SESSION['id_usuario']; // Solo si es cliente
+
+$queryCliente = "SELECT id_cliente, nom_persona, apellido_paterno, apellido_materno, telefono 
+FROM cliente WHERE id_usuario = ?";
+$stmtCliente = $conn->prepare($queryCliente);
+$stmtCliente->bind_param('i', $id_usuario);
+$stmtCliente->execute();
+$resultCliente = $stmtCliente->get_result();
+$cliente = $resultCliente->fetch_assoc();
+$id_cliente = $cliente['id_cliente'] ?? null;
+
+if (!$id_cliente) {
+    echo "Cliente no encontrado.";
+    exit;
+}
+
+// Manejo de actualización de estado
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_seguimiento']) && isset($_POST['nuevo_estado'])) {
+    $id_seguimiento = $conn->real_escape_string($_POST['id_seguimiento']);
+    $nuevo_estado = $conn->real_escape_string($_POST['nuevo_estado']);
+    $estados_validos = ['Enviado', 'En camino', 'Entregado', 'Otro'];
+
+    if (in_array($nuevo_estado, $estados_validos)) {
+        $sql_update = "UPDATE seguimiento_pedido SET Estado = '$nuevo_estado' WHERE id_seguimiento_pedido = '$id_seguimiento'";
+        if ($conn->query($sql_update) === TRUE) {
+            
+        } else {
+            
         }
-    </script>
+    } else {
+        echo "<p style='color:red;'>Estado no válido.</p>";
+    }
+}
+// Consulta principal
+$sql = "SELECT 
+    sp.id_seguimiento_pedido,
+    sp.id_pedido,
+    sp.Estado,
+    CONCAT(c.nom_persona, ' ', c.apellido_paterno, ' ', c.apellido_materno) AS cliente,
+    p.fecha_pedido,
+    p.precio_total_pedido,
+    p.id_carrito,
+    paq.nombre_paqueteria,
+    d.calle,
+    d.num_ext,
+    d.colonia,
+    d.ciudad,
+    d.estado
+FROM seguimiento_pedido sp
+INNER JOIN cliente c ON sp.id_cliente = c.id_cliente
+INNER JOIN pedido p ON sp.id_pedido = p.id_pedido
+LEFT JOIN paqueteria paq ON p.id_paqueteria = paq.id_paqueteria
+LEFT JOIN direccion d ON p.id_direccion = d.id_direccion";
+
+// Si es cliente, solo mostrar sus pedidos
+if ($id_rol == 2) {
+    $sql .= " WHERE sp.id_cliente = '$id_cliente'";
+}
+
+$sql .= " ORDER BY sp.id_seguimiento_pedido DESC";
+
+$result = $conn->query($sql);
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Seguimiento de Pedidos</title>
 </head>
 <body>
-    <h1 class="titulo">Reporte de Pedidos</h1>
-<h3 class="sub_titulo">Filtrado por fechas</h3>
-<form method="GET" action="" class="form_reg_usuario">
-    <label for="fecha_inicio">Fecha de inicio:</label>
-    <input type="date" name="fecha_inicio" required value="<?php echo isset($_GET['fecha_inicio']) ? $_GET['fecha_inicio'] : ''; ?>">
 
-    <label for="fecha_fin">Fecha de fin:</label>
-    <input type="date" name="fecha_fin" required value="<?php echo isset($_GET['fecha_fin']) ? $_GET['fecha_fin'] : ''; ?>">
+<h1 class="titulo">Seguimiento de Pedidos</h1>
 
-    <button type="submit" class="regresar">Filtrar</button>
-
-    <?php if (!empty($_GET['fecha_inicio']) || !empty($_GET['fecha_fin'])): ?>
-        <a href="resumen_detalle.php" class="regresar" style="margin-left: 10px;">Mostrar todos</a>
-    <?php endif; ?>
-</form>
-<h3 class="sub_titulo">Reportes</h3>
 <?php
-$sql = "SELECT * FROM tabla_reporte";
+if ($result && $result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        echo "<div class='card'>";
+echo "<h3>Pedido #{$row['id_pedido']} - Estado: {$row['Estado']}</h3>";
+echo "<h3>Folio seguimiento: {$row['id_seguimiento_pedido']}</h3>";
 
-$where_clauses = [];
+// Aquí mantenemos el nombre completo del cliente unido
+echo "<p><strong>Cliente:</strong> {$row['cliente']}</p>";
 
-if (!empty($_GET['fecha_inicio']) && !empty($_GET['fecha_fin'])) {
-    $fecha_inicio = $_GET['fecha_inicio'];
-    $fecha_fin = $_GET['fecha_fin'];
-    $where_clauses[] = "fecha_pedido BETWEEN '$fecha_inicio' AND '$fecha_fin'";
+// Mostrar la información separada
+echo "<p><strong>Fecha del pedido:</strong> {$row['fecha_pedido']}</p>";
+echo "<p><strong>Total:</strong> $ {$row['precio_total_pedido']}</p>";
+
+if (!empty($row['nombre_paqueteria'])) {
+    echo "<p><strong>Paquetería:</strong> {$row['nombre_paqueteria']}</p>";
+} else {
+    echo "<p><strong>Envío a domicilio:</strong></p>";
+    echo "<ul style='margin-top: 0;'>";
+    echo "<li><strong>Calle:</strong> {$row['calle']}</li>";
+    echo "<li><strong>Número:</strong> {$row['num_ext']}</li>";
+    echo "<li><strong>Colonia:</strong> {$row['colonia']}</li>";
+    echo "<li><strong>Ciudad:</strong> {$row['ciudad']}</li>";
+    echo "<li><strong>Estado:</strong> {$row['estado']}</li>";
+    echo "</ul>";
 }
 
-if (!empty($where_clauses)) {
-    $sql .= " WHERE " . implode(' AND ', $where_clauses);
-}
+// Mostrar los artículos
+$id_carrito = (int)$row['id_carrito'];
+$sql_articulos = "SELECT dc.cantidad, dc.precio, dc.personalizacion, a.descripcion 
+                  FROM detalle_carrito dc
+                  INNER JOIN articulos a ON dc.id_articulo = a.id_articulo
+                  WHERE dc.id_carrito = $id_carrito";
 
-$sql .= " ORDER BY id_pedido";
+$res_articulos = $conn->query($sql_articulos);
 
-$resultado = mysqli_query($conn, $sql);
-
-$pedidos = [];
-while ($fila = mysqli_fetch_assoc($resultado)) {
-    $id = $fila['id_pedido'];
-    if (!isset($pedidos[$id])) {
-        $pedidos[$id] = [
-            'cliente' => "{$fila['nom_persona']} {$fila['apellido_paterno']} {$fila['apellido_materno']}",
-            'total' => $fila['precio_total_pedido'],
-            'iva' => $fila['iva'],
-            'ieps' => $fila['ieps'],
-            'tipo_envio' => $fila['tipo_envio'],
-            'fecha_pedido' => $fila['fecha_pedido'],
-            'detalles' => [],
-        ];
+echo "<p><strong>Artículos del pedido:</strong></p>";
+if ($res_articulos && $res_articulos->num_rows > 0) {
+    echo "<table class='tabla_forma_pago'>";
+    echo "<tr>
+            <th>Descripción</th>
+            <th>Cantidad</th>
+            <th>Precio Unitario</th>
+            <th>Personalización</th>
+          </tr>";
+    while ($art = $res_articulos->fetch_assoc()) {
+        echo "<td>{$art['descripcion']}</td>";
+        echo "<td>{$art['cantidad']}</td>";
+        echo "<td>$ {$art['precio']}</td>";
+        echo "<td>" . (!empty($art['personalizacion']) ? $art['personalizacion'] : 'N/A') . "</td>";
+        echo "</tr>";
     }
-
-    $pedidos[$id]['detalles'][] = [
-        'id_articulo' => $fila['id_articulo'],
-        'descripcion' => $fila['descripcion'],
-        'cantidad' => $fila['cantidad'],
-        'precio' => $fila['precio'],
-        'importe' => $fila['importe'],
-        'personalizacion' => $fila['personalizacion']
-    ];
+    echo "</table>";
+} else {
+    echo "<p>No hay artículos para este pedido.</p>";
 }
 
-if (!empty($pedidos)) {
-    foreach ($pedidos as $id => $pedido) {
-        echo "<div class='pedido-card'>";
-        echo "<div class='pedido-header' onclick='toggleDetalle($id)'>";
-        echo "<span>Pedido #: $id</span>";
-        echo "<span>Cliente: {$pedido['cliente']}</span>";
-        echo "<span>Total: $" . number_format($pedido['total'], 2) . "</span>";
-        echo "</div>";
+// Botones de cambio de estado
+if ($id_rol != 2) {
+    echo "<form method='POST'>";
+    echo "<input type='hidden' name='id_seguimiento' value='{$row['id_seguimiento_pedido']}'>";
+    echo "<button type='submit' name='nuevo_estado' value='Enviado' class='btn-estado btn-enviado'>Enviado</button>";
+    echo "<button type='submit' name='nuevo_estado' value='En camino' class='btn-estado btn-en-camino'>En camino</button>";
+    echo "<button type='submit' name='nuevo_estado' value='Entregado' class='btn-estado btn-entregado'>Entregado</button>";
+    echo "<button type='submit' name='nuevo_estado' value='Otro' class='btn-estado btn-otro'>Otro</button>";
+    echo "</form>";
+}
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_seguimiento'], $_POST['nuevo_estado']) && $id_rol != 2) {
+    $id_seguimiento = $conn->real_escape_string($_POST['id_seguimiento']);
+    $nuevo_estado = $conn->real_escape_string($_POST['nuevo_estado']);
+    $estados_validos = ['Enviado', 'En camino', 'Entregado', 'Otro'];
 
-        echo "<div class='pedido-detalle' id='detalle_$id'>";
-        echo "<div class='pago-info'>";
-        echo "<span><span class='etiqueta'>IVA:</span> $" . number_format($pedido['iva'], 2) . "</span><br>";
-        echo "<span><span class='etiqueta'>IEPS:</span> $" . number_format($pedido['ieps'], 2) . "</span><br>";
-        echo "<span><span class='etiqueta'>Envío:</span> {$pedido['tipo_envio']}</span><br>";
-        echo "<span><span class='etiqueta'>Fecha pedido:</span> {$pedido['fecha_pedido']}</span><br>";
-        echo "</div>";
-
-        echo "<div class='productos'>";
-        foreach ($pedido['detalles'] as $detalle) {
-            echo "<div class='producto'>";
-            echo "<div><span class='etiqueta'>ID Artículo:</span> {$detalle['id_articulo']}</div>";
-            echo "<div><span class='etiqueta'>Descripción:</span> {$detalle['descripcion']}</div>";
-            echo "<div><span class='etiqueta'>Cantidad:</span> {$detalle['cantidad']}</div>";
-            echo "<div><span class='etiqueta'>Precio:</span> $" . number_format($detalle['precio'], 2) . "</div>";
-            echo "<div><span class='etiqueta'>Importe:</span> $" . number_format($detalle['importe'], 2) . "</div>";
-            echo "<div><span class='etiqueta'>Personalización:</span> {$detalle['personalizacion']}</div>";
-            echo "</div>";
+    if (in_array($nuevo_estado, $estados_validos)) {
+        $sql_update = "UPDATE seguimiento_pedido SET Estado = '$nuevo_estado' WHERE id_seguimiento_pedido = '$id_seguimiento'";
+        if ($conn->query($sql_update) !== TRUE) {
+            echo "<p style='color:red;'>Error al actualizar el estado.</p>";
         }
-        echo "</div>"; // fin productos
-        echo "</div>"; // fin detalle
-        echo "</div>"; // fin pedido-card
+    } else {
+        echo "<p style='color:red;'>Estado no válido.</p>";
+    }
+}
+echo "</div>";
     }
 } else {
-    echo "<p>No se encontraron pedidos.</p>";
+    echo "<p>No hay datos de seguimiento disponibles.</p>";
 }
 ?>
 

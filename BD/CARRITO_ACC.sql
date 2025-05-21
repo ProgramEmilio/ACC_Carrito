@@ -187,7 +187,7 @@ importe DECIMAL(10,2) NOT NULL,
 personalizacion ENUM('Icono','Texto','Imagen'),
 id_pedido INT NOT NULL,
 iva DECIMAL(6,2) NOT NULL,
-ieps DECIMAL(2),
+ieps DECIMAL(2) DEFAULT 0,
 precio_total_pedido DECIMAL(6,2) NOT NULL,
 fecha_pedido DATE NOT NULL
 );

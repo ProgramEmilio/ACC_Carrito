@@ -7,7 +7,6 @@ include('../Nav/header.php');
 <head>
     <meta charset="UTF-8">
     <title>Reporte de Pedidos</title>
-    <link rel="stylesheet" href="reporte_ventas.css">
     <script>
         function toggleDetalle(id) {
             var detalle = document.getElementById("detalle_" + id);
@@ -16,71 +15,38 @@ include('../Nav/header.php');
     </script>
 </head>
 <body>
-
+    <h1 class="titulo">Reporte de Pedidos</h1>
+<h3 class="sub_titulo">Filtrado por fechas</h3>
 <form method="GET" action="" class="form_reg_usuario">
     <label for="fecha_inicio">Fecha de inicio:</label>
     <input type="date" name="fecha_inicio" required value="<?php echo isset($_GET['fecha_inicio']) ? $_GET['fecha_inicio'] : ''; ?>">
-
 
     <label for="fecha_fin">Fecha de fin:</label>
     <input type="date" name="fecha_fin" required value="<?php echo isset($_GET['fecha_fin']) ? $_GET['fecha_fin'] : ''; ?>">
 
     <button type="submit" class="regresar">Filtrar</button>
 
-    
     <?php if (!empty($_GET['fecha_inicio']) || !empty($_GET['fecha_fin'])): ?>
         <a href="resumen_detalle.php" class="regresar" style="margin-left: 10px;">Mostrar todos</a>
     <?php endif; ?>
 </form>
-
-<h2>Reporte de Pedidos</h2>
-
+<h3 class="sub_titulo">Reportes</h3>
 <?php
-$sql = "SELECT 
-            p.id_pedido,
-            p.precio_total_pedido,
-            p.iva,
-            p.ieps,
-            c.id_carrito,
-            cli.nom_persona AS nombre_cliente,
-            e.tipo_envio,
-            e.costo AS costo_envio,
-            paq.nombre_paqueteria,
-            dc.id_articulo,
-            a.descripcion,
-            dc.cantidad,
-            dc.precio,
-            dc.importe,
-            dc.personalizacion,
-            d.calle,
-            d.num_ext,
-            d.colonia,
-            d.ciudad,
-            d.estado,
-            d.codigo_postal,
-            p.fecha_pedido
-        FROM pedido p
-        JOIN carrito c ON p.id_carrito = c.id_carrito
-        JOIN cliente cli ON c.id_cliente = cli.id_cliente
-        JOIN envio e ON p.id_envio = e.id_envio
-        LEFT JOIN paqueteria paq ON p.id_paqueteria = paq.id_paqueteria
-        JOIN detalle_carrito dc ON c.id_carrito = dc.id_carrito
-        JOIN articulos a ON dc.id_articulo = a.id_articulo
-        LEFT JOIN direccion d ON p.id_direccion = d.id_direccion";
+$sql = "SELECT * FROM tabla_reporte";
 
 $where_clauses = [];
 
 if (!empty($_GET['fecha_inicio']) && !empty($_GET['fecha_fin'])) {
     $fecha_inicio = $_GET['fecha_inicio'];
     $fecha_fin = $_GET['fecha_fin'];
-    $where_clauses[] = "p.fecha_pedido BETWEEN '$fecha_inicio' AND '$fecha_fin'";
+    $where_clauses[] = "fecha_pedido BETWEEN '$fecha_inicio' AND '$fecha_fin'";
 }
 
 if (!empty($where_clauses)) {
     $sql .= " WHERE " . implode(' AND ', $where_clauses);
 }
 
-$sql .= " ORDER BY p.id_pedido";
+$sql .= " ORDER BY id_pedido";
 
 $resultado = mysqli_query($conn, $sql);
 
@@ -89,17 +55,16 @@ while ($fila = mysqli_fetch_assoc($resultado)) {
     $id = $fila['id_pedido'];
     if (!isset($pedidos[$id])) {
         $pedidos[$id] = [
-            'cliente' => $fila['nombre_cliente'],
+            'cliente' => "{$fila['nom_persona']} {$fila['apellido_paterno']} {$fila['apellido_materno']}",
             'total' => $fila['precio_total_pedido'],
             'iva' => $fila['iva'],
             'ieps' => $fila['ieps'],
             'tipo_envio' => $fila['tipo_envio'],
-            'costo_envio' => $fila['costo_envio'],
-            'direccion' => "{$fila['calle']} {$fila['num_ext']}, {$fila['colonia']}, {$fila['ciudad']}, {$fila['estado']} C.P. {$fila['codigo_postal']}",
-            'detalles' => [],
             'fecha_pedido' => $fila['fecha_pedido'],
+            'detalles' => [],
         ];
     }
+
     $pedidos[$id]['detalles'][] = [
         'id_articulo' => $fila['id_articulo'],
         'descripcion' => $fila['descripcion'],
@@ -123,8 +88,7 @@ if (!empty($pedidos)) {
         echo "<div class='pago-info'>";
         echo "<span><span class='etiqueta'>IVA:</span> $" . number_format($pedido['iva'], 2) . "</span><br>";
         echo "<span><span class='etiqueta'>IEPS:</span> $" . number_format($pedido['ieps'], 2) . "</span><br>";
-        echo "<span><span class='etiqueta'>Envío:</span> {$pedido['tipo_envio']} - $" . number_format($pedido['costo_envio'], 2) . "</span><br>";
-        //echo "<span><span class='etiqueta'>Dirección:</span> {$pedido['direccion']}</span><br>";
+        echo "<span><span class='etiqueta'>Envío:</span> {$pedido['tipo_envio']}</span><br>";
         echo "<span><span class='etiqueta'>Fecha pedido:</span> {$pedido['fecha_pedido']}</span><br>";
         echo "</div>";
 
