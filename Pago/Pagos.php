@@ -8,11 +8,11 @@ $precio_total_pedido = $_GET['precio_total_pedido'] ?? null;
 
 
 // Obtener ID del cliente
-$sql = "SELECT id_cliente FROM cliente WHERE id_usuario = ?";
+$sql = "SELECT id_cliente, monedero FROM cliente WHERE id_usuario = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $id_usuario);
 $stmt->execute();
-$stmt->bind_result($id_cliente);
+$stmt->bind_result($id_cliente, $monedero_disponible);
 $stmt->fetch();
 $stmt->close();
 
@@ -326,6 +326,44 @@ $tipo_resultado = $_GET['tipo'] ?? '';
     color: #721c24;
     border: 1px solid #f5c6cb;
 }
+
+/* Estilos para monedero */
+.wallet-checkbox {
+    margin-top: 15px;
+    padding: 15px;
+    background: #e7f4ff;
+    border-radius: 8px;
+    border: 1px solid #b8daff;
+}
+
+.wallet-amount {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.wallet-slider {
+    flex: 1;
+    margin-right: 10px;
+}
+
+.wallet-value {
+    width: 80px;
+    text-align: right;
+    font-weight: bold;
+}
+
+.wallet-balance {
+    margin-top: 5px;
+    font-size: 14px;
+    color: #0056b3;
+}
+
+.wallet-error {
+    color: #721c24;
+    font-size: 13px;
+    margin-top: 5px;
+}
 </style>
 
 <div class="payment-container">
@@ -340,9 +378,10 @@ $tipo_resultado = $_GET['tipo'] ?? '';
 
         <form id="paymentForm" action="Comprobar_Banco.php" method="POST">
             <!-- Campos ocultos con valores verificados -->
-            <input type="hidden" name="monto" value="<?= htmlspecialchars($monto, ENT_QUOTES, 'UTF-8') ?>">
+            <input type="hidden" name="monto" id="monto_input" value="<?= htmlspecialchars($monto, ENT_QUOTES, 'UTF-8') ?>">
             <input type="hidden" name="id_cliente" value="<?= htmlspecialchars($id_cliente, ENT_QUOTES, 'UTF-8') ?>">
             <input type="hidden" name="id_pedido" value="<?= htmlspecialchars($id_pedido, ENT_QUOTES, 'UTF-8') ?>">
+            <input type="hidden" name="monedero_usado" id="monedero_usado_input" value="0">
             
             <!-- Debug: mostrar valores -->
             <div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; font-size: 12px;">
@@ -350,6 +389,7 @@ $tipo_resultado = $_GET['tipo'] ?? '';
                 Monto: $<?= number_format($monto, 2) ?><br>
                 ID Cliente: <?= $id_cliente ?><br>
                 ID Pedido: <?= $id_pedido ?><br>
+                Monedero disponible: $<?= number_format($monedero_disponible, 2) ?><br>
             </div>
             
             <!-- Pago con Tarjeta -->
@@ -396,6 +436,28 @@ $tipo_resultado = $_GET['tipo'] ?? '';
                 <p><strong>Tiempo límite:</strong> 3 días</p>
             </div>
             
+            <!-- Opción Monedero -->
+            <div class="wallet-checkbox">
+                <input type="checkbox" id="usar_monedero" name="usar_monedero" onchange="toggleMonedero()" <?= $monedero_disponible <= 0 ? 'disabled' : '' ?>>
+                <label for="usar_monedero">Usar puntos de monedero</label>
+                
+                <div id="monedero-options" style="display: none; margin-top: 10px;">
+                    <div class="wallet-balance">
+                        Saldo disponible: $<span id="monedero_disponible"><?= number_format($monedero_disponible, 2) ?></span>
+                    </div>
+                    
+                    <div class="wallet-amount">
+                        <input type="range" id="monedero_slider" class="wallet-slider" min="0" 
+                               max="<?= min($monedero_disponible, $monto) ?>" 
+                               value="0" step="1" 
+                               oninput="updateMonederoAmount(this.value)">
+                        <div class="wallet-value">$<span id="monedero_amount">0.00</span></div>
+                    </div>
+                    
+                    <div id="monedero_error" class="wallet-error" style="display: none;"></div>
+                </div>
+            </div>
+            
             <button type="submit" class="btn-pagar" id="btn-pagar" disabled>
                 Procesar Pago
             </button>
@@ -410,13 +472,20 @@ $tipo_resultado = $_GET['tipo'] ?? '';
                 <span>Subtotal</span>
                 <span>$<?= number_format($monto, 2) ?></span>
             </div>
+            
+            <div class="resumen-linea" id="monedero-descuento" style="display: none;">
+                <span>Descuento monedero</span>
+                <span id="monedero-descuento-valor">-$0.00</span>
+            </div>
+            
             <div class="resumen-linea">
-                <span>Envío</span>
+                <span>Gastos de envío</span>
                 <span>$50.00</span>
             </div>
+            
             <div class="resumen-linea total-final">
                 <span>Total a pagar</span>
-                <span>$<?= number_format($monto + 50, 2) ?></span>
+                <span id="total-final">$<?= number_format($monto + 50, 2) ?></span>
             </div>
         </div>
         
@@ -441,12 +510,18 @@ $tipo_resultado = $_GET['tipo'] ?? '';
 </div>
 
 <script>
+// Variables globales para mantener los valores
+let montoOriginal = <?= $monto ?>;
+let montoTotal = <?= $monto + 50 ?>; // Incluye envío
+let montoMonedero = 0;
+let monederoDisponible = <?= $monedero_disponible ?>;
+let metodoPagoSeleccionado = '';
 
 function selectPaymentMethod(method) {
     // Ocultar todas las opciones
     document.getElementById('tarjeta-options').style.display = 'none';
     document.getElementById('sucursal-options').style.display = 'none';
-    
+
     // Remover selección visual
     document.querySelectorAll('.payment-method').forEach(el => el.classList.remove('selected'));
     
@@ -459,11 +534,14 @@ function selectPaymentMethod(method) {
     // Marcar radio button
     document.getElementById(method).checked = true;
     
+    // Actualizar variable global
+    metodoPagoSeleccionado = method;
+    
     // Habilitar botón de pago
     checkFormValid();
     
     // Actualizar estado
-    updatePaymentStatus('Método seleccionado');
+    updatePaymentStatus('Método seleccionado: ' + (method === 'tarjeta' ? 'Tarjeta' : 'Sucursal'));
 }
 
 function selectCard(cardId) {
@@ -483,8 +561,59 @@ function selectCard(cardId) {
     updatePaymentStatus('Tarjeta seleccionada');
 }
 
+function toggleMonedero() {
+    const checkbox = document.getElementById('usar_monedero');
+    const optionsDiv = document.getElementById('monedero-options');
+    const descuentoDiv = document.getElementById('monedero-descuento');
+    
+    if (checkbox.checked) {
+        optionsDiv.style.display = 'block';
+        descuentoDiv.style.display = 'flex';
+        // Establecer un valor inicial para el slider
+        const valorInicial = Math.min(monederoDisponible, montoOriginal) / 2;
+        document.getElementById('monedero_slider').value = valorInicial;
+        updateMonederoAmount(valorInicial);
+    } else {
+        optionsDiv.style.display = 'none';
+        descuentoDiv.style.display = 'none';
+        // Resetear el valor del monedero
+        updateMonederoAmount(0);
+    }
+    
+    checkFormValid();
+}
+
+function updateMonederoAmount(amount) {
+    amount = parseFloat(amount);
+    
+    // Validar que no sea mayor que el monto original
+    if (amount > montoOriginal) {
+        amount = montoOriginal;
+        document.getElementById('monedero_error').innerText = "El descuento no puede ser mayor que el monto de la compra";
+        document.getElementById('monedero_error').style.display = "block";
+    } else {
+        document.getElementById('monedero_error').style.display = "none";
+    }
+    
+    // Actualizar variables y UI
+    montoMonedero = amount;
+    document.getElementById('monedero_amount').innerText = amount.toFixed(2);
+    document.getElementById('monedero-descuento-valor').innerText = '-$' + amount.toFixed(2);
+    document.getElementById('monedero_usado_input').value = amount;
+    
+    // Calcular el nuevo total (monto original + envío - descuento monedero)
+    const nuevoTotal = (montoOriginal + 50) - amount;
+    document.getElementById('total-final').innerText = '$' + nuevoTotal.toFixed(2);
+    
+    // Actualizar el campo oculto con el nuevo monto a pagar
+    document.getElementById('monto_input').value = nuevoTotal;
+    
+    checkFormValid();
+}
+
 function checkFormValid() {
     const metodo = document.querySelector('input[name="metodo_pago"]:checked');
+    const usarMonedero = document.getElementById('usar_monedero').checked;
     let valid = false;
     
     if (metodo) {
@@ -494,6 +623,11 @@ function checkFormValid() {
             const tarjeta = document.querySelector('input[name="id_tarjeta"]:checked');
             valid = tarjeta !== null;
         }
+    }
+    
+    // Si se usa monedero como único método de pago, verificar que cubra todo el monto
+    if (usarMonedero && !metodo && montoMonedero >= montoOriginal) {
+        valid = true;
     }
     
     document.getElementById('btn-pagar').disabled = !valid;
@@ -527,7 +661,7 @@ document.getElementById('paymentForm').addEventListener('submit', function(e) {
     // Simular tiempo de procesamiento (3 segundos) antes de enviar
     setTimeout(() => {
         // Actualizar mensaje durante el processing
-        updatePaymentStatus('Verificando información bancaria...');
+        updatePaymentStatus('Verificando información...');
         
         // Después de 2 segundos más, enviar el formulario
         setTimeout(() => {
@@ -541,28 +675,20 @@ document.getElementById('paymentForm').addEventListener('submit', function(e) {
     }, 2000);
 });
 
-// Opcional: Añadir efectos visuales adicionales al spinner
+// Inicializar la página
 document.addEventListener('DOMContentLoaded', function() {
-    const spinner = document.querySelector('.spinner');
-    if (spinner) {
-        // Añadir clase para animación más llamativa cuando esté visible
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if (mutation.target.style.display === 'block') {
-                    spinner.style.transform = 'scale(1.1)';
-                    setTimeout(() => {
-                        if (spinner.style.transform) {
-                            spinner.style.transform = 'scale(1)';
-                        }
-                    }, 200);
-                }
-            });
-        });
-        
-        observer.observe(document.getElementById('loading-overlay'), {
-            attributes: true,
-            attributeFilter: ['style']
-        });
+    // Inicializar variables globales
+    montoOriginal = <?= $monto ?>;
+    montoTotal = <?= $monto + 50 ?>; // Incluye envío
+    monederoDisponible = <?= $monedero_disponible ?>;
+    
+    // Configurar el rango máximo del slider de monedero
+    const monederoSlider = document.getElementById('monedero_slider');
+    monederoSlider.max = Math.min(monederoDisponible, montoOriginal);
+    
+    // Deshabilitar checkbox de monedero si no hay saldo
+    if (monederoDisponible <= 0) {
+        document.getElementById('usar_monedero').disabled = true;
     }
 });
 </script>

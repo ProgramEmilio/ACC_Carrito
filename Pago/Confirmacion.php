@@ -527,7 +527,7 @@ $numero_seguimiento = 'TRK' . date('YmdHis') . $id_pedido;
             Mis Pedidos
         </a>
         
-        <a href="../catalogo/" class="btn btn-success">
+        <a href="../Home\Home.php" class="btn btn-success">
             Seguir Comprando
         </a>
     </div>
