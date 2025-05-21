@@ -8,61 +8,107 @@ if (!$id_usuario) {
     exit;
 }
 
-// Obtener id_cliente
-$sqlCliente = "SELECT id_cliente FROM cliente WHERE id_usuario = ?";
+// Obtener datos del cliente
+$sqlCliente = "SELECT id_cliente, nom_persona, apellido_paterno, apellido_materno FROM cliente WHERE id_usuario = ?";
 $stmt = $conn->prepare($sqlCliente);
 $stmt->bind_param('i', $id_usuario);
 $stmt->execute();
 $res = $stmt->get_result();
 $cliente = $res->fetch_assoc();
 $id_cliente = $cliente['id_cliente'] ?? null;
+
 if (!$id_cliente) {
     echo "Cliente no encontrado.";
     exit;
 }
 
-// Variables del formulario
-$forma_entrega = $_POST['id_envio'] ?? ''; 
+$nom_persona = $cliente['nom_persona'];
+$apellido_paterno = $cliente['apellido_paterno'];
+$apellido_materno = $cliente['apellido_materno'];
+
+// Datos del formulario
 $id_carrito = $_POST['id_carrito'] ?? null;
-$direccion_id = $_POST['id_direccion'] ?? null; 
-$paqueteria_id = $_POST['id_paqueteria'] ?? null; 
-$total = $_POST['total'] ?? 0.0;
-$iva = $_POST['iva'] ?? null; 
-$id_envio = (int) ($_POST['id_envio'] ?? 0);
+$id_direccion = $_POST['id_direccion'] ?? null;
+$id_paqueteria = $_POST['id_paqueteria'] ?? null;
+$total = floatval($_POST['total'] ?? 0);
+$iva = floatval($_POST['iva'] ?? 0);
+$id_envio = intval($_POST['id_envio'] ?? 0);
 
+$direccion_final = ($id_envio === 1) ? $id_direccion : null;
+$paqueteria_final = ($id_envio === 2) ? $id_paqueteria : null;
 
-// Ajustar valores nulos correctamente
-$direccion_final = ($forma_entrega === 'Domicilio') ? (int)$direccion_id : null;
-$paqueteria_final = ($forma_entrega === 'Punto de Entrega') ? (int)$paqueteria_id : null;
-
-// Preparar e insertar pedido
-$queryPedido = "INSERT INTO pedido (id_envio, id_paqueteria, id_direccion, id_carrito, precio_total_pedido,iva) 
-                VALUES (?, ?, ?, ?, ?,?)";
+// Insertar pedido
+$queryPedido = "INSERT INTO pedido (id_envio, id_paqueteria, id_direccion, id_carrito, precio_total_pedido, iva, fecha_pedido) 
+                VALUES (?, ?, ?, ?, ?, ?, NOW())";
 $stmtPedido = $conn->prepare($queryPedido);
+$stmtPedido->bind_param('iiiidd', $id_envio, $paqueteria_final, $direccion_final, $id_carrito, $total, $iva);
+$stmtPedido->execute();
 
-
-// Asegurar que valores null se pasen como tipo esperado
-$stmtPedido->bind_param(
-    "iiiidd",
-    $id_envio,
-    $paqueteria_final,
-    $direccion_final,
-    $id_carrito,
-    $total,
-    $iva
-);
-
-$success = $stmtPedido->execute();
-
-if ($success) {
-    // Obtener el ID del pedido recién insertado
-    $id_pedido = $conn->insert_id;
-
-    // Redirigir a la página de pagos con los parámetros necesarios
-    header("Location: ../Pago/pagos.php?id_pedido=$id_pedido&precio_total_pedido=$total");
+if ($stmtPedido->affected_rows <= 0) {
+    echo "❌ Error al insertar pedido: " . $stmtPedido->error;
     exit;
-} else {
-    echo "❌ Error al guardar el pedido: " . $stmtPedido->error;
-    echo "<br><br><a href='javascript:history.back()'>Volver e intentar de nuevo</a>";
 }
+
+$id_pedido = $conn->insert_id;
+$fecha_pedido = date('Y-m-d');
+$id_seguimiento_pedido = 'SP' . str_pad($id_pedido, 8, '0', STR_PAD_LEFT);
+$tipo_envio = ($id_envio === 1) ? 'Domicilio' : 'Punto de Entrega';
+$ieps = null; // Ajusta si tu sistema usa IEPS
+
+// Obtener detalles del carrito
+$sqlDetalles = "SELECT dc.id_articulo, a.descripcion, dc.cantidad, dc.precio, dc.personalizacion 
+                FROM detalle_carrito dc
+                JOIN articulos a ON dc.id_articulo = a.id_articulo
+                WHERE dc.id_carrito = ?";
+$stmtDetalles = $conn->prepare($sqlDetalles);
+$stmtDetalles->bind_param('i', $id_carrito);
+$stmtDetalles->execute();
+$resDetalles = $stmtDetalles->get_result();
+
+// Insertar en tabla_reporte por cada artículo
+$queryInsertReporte = "INSERT INTO tabla_reporte (
+    id_seguimiento_pedido, nom_persona, apellido_paterno, apellido_materno,
+    id_envio, tipo_envio, id_articulo, descripcion, cantidad, precio,
+    importe, personalizacion, id_pedido, iva, ieps, precio_total_pedido, fecha_pedido
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+
+$stmtInsertReporte = $conn->prepare($queryInsertReporte);
+
+while ($detalle = $resDetalles->fetch_assoc()) {
+    $id_articulo = $detalle['id_articulo'];
+    $descripcion = $detalle['descripcion'];
+    $cantidad = floatval($detalle['cantidad']);
+    $precio = floatval($detalle['precio']);
+    $importe = $cantidad * $precio;
+    $personalizacion = $detalle['personalizacion'] ?? null;
+
+    $stmtInsertReporte = $conn->prepare($queryInsertReporte);
+    $stmtInsertReporte->bind_param(
+        'sssssisssddsdidd',
+        $id_seguimiento_pedido,
+        $nom_persona,
+        $apellido_paterno,
+        $apellido_materno,
+        $id_envio,
+        $tipo_envio,
+        $id_articulo,
+        $descripcion,
+        $cantidad,
+        $precio,
+        $importe,
+        $personalizacion,
+        $id_pedido,
+        $iva,
+        $ieps,
+        $total
+    );
+
+    $stmtInsertReporte->execute();
+}
+
+echo "✅ Pedido y reporte guardados correctamente.";
+
+// Redirigir a pagos
+header("Location: ../Pago/pagos.php?id_pedido=$id_pedido&precio_total_pedido=$total");
+exit;
 ?>

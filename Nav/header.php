@@ -19,18 +19,16 @@ $menus = [
     1 => [
         "Usuarios" => "../Usuarios\Usuarios.php",
 
-        "Catálogo" => [
-            "Incapacidades" => "../Incapacidad/incapacidades.php",
-            "Registrar Incapacidad" => "../Incapacidad/Registro/Registro_Incapacidades.php"
-        ],
-        "Nómina" => [
-            "Ver Nómina" => "../Carrito/carrito.php",
-            "Registrar Nómina" => "../Nomina/Registro_N/Registro_Nomina.php"
-        ],
+        "Catálogo" => "../Home/Home.php",
+        
         "Banco" => [
             "Clientes" => "../Banco_Usuarios\Usuarios_B.php",
             "Bancos" => "../Bancos\Bancos.php"
-        ]
+        ],
+
+        "Registros" => "../Ventas/Resumen_detalle.php",
+        "Seguimiento Pedidos" => "../Pedido/seguimiento_pedido.php"
+    
     ],
 
     // Rol 2: CLIENTE
@@ -138,6 +136,7 @@ include('CerrarSesion.php');
     <link rel="stylesheet" href="../CSS/Perfil.css" type="text/css">
     <link rel="stylesheet" href="../CSS/Tarjetas.css" type="text/css">
     <link rel="stylesheet" href="../CSS/Confirmar_pedido.css" type="text/css">
+    <link rel="stylesheet" href="../CSS/reporte_ventas.css" type="text/css">
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>

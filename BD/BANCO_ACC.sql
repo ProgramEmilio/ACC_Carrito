@@ -45,6 +45,11 @@ CONSTRAINT fk_usuario_banco FOREIGN KEY (id_banco) REFERENCES banco(id_banco) ON
 INSERT INTO `banco` (`id_banco`, `nombre_banco`) VALUES
 (2, 'BBVA'),
 (5, 'Banorte 2');
+
+INSERT INTO `usuario` (`id_usuario`, `nombre_usuario`, `correo`, `contraseña`) VALUES
+(2, 'Emilio', 'emiliopalma@gmail.com', '12'),
+(3, 'Cliente', 'cliente@ACC.com', '12');
+
 INSERT INTO `cliente` (`id_cliente`, `id_usuario`, `nombre_cliente`, `apellido_paterno`, `apellido_materno`, `codigo_postal`, `calle`, `num_ext`, `colonia`, `ciudad`, `telefono`) VALUES
 (2, 2, 'Emilio', 'Palma', 'Jimenez', '15632', 'rios de lobos', 127, 'Centro', 'CDMX', '3232321323'),
 (3, 3, 'Juan', 'Pérez', 'Gómez', '15632', 'Av Reforma', 127, 'Centro', 'saddeeeeea', '5512345678');
@@ -55,6 +60,3 @@ INSERT INTO `tarjeta` (`id_tarjeta`, `numero_tarjeta`, `cvv`, `fecha_vencimiento
 (5, '1243345465431233', '234', '2025-05-22 00:00:00', 2412443.00, 'Debito', 'MASTERCARD', 2, 5),
 (6, '1111111111111111', '111', '2025-05-17 00:00:00', 999113.00, 'Debito', 'VISA', 3, 2);
 
-INSERT INTO `usuario` (`id_usuario`, `nombre_usuario`, `correo`, `contraseña`) VALUES
-(2, 'Emilio', 'emiliopalma@gmail.com', '12'),
-(3, 'Cliente', 'cliente@ACC.com', '12');

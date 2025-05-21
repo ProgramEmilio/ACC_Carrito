@@ -70,6 +70,19 @@ $stmt->execute();
 $result = $stmt->get_result();
 $row = $result->fetch_assoc();
 $id_carrito = $row['id_carrito'] ?? null;
+
+if (is_array($articulos) && is_array($cantidades)) {
+    foreach ($articulos as $articulo_id) {
+        if (!isset($cantidades[$articulo_id])) continue;
+
+        $cantidad = intval($cantidades[$articulo_id]);
+
+        // Actualizar cantidad en detalle_carrito
+        $updateStmt = $conn->prepare("UPDATE detalle_carrito SET cantidad = ? WHERE id_carrito = ? AND id_articulo = ?");
+        $updateStmt->bind_param('iis', $cantidad, $id_carrito, $articulo_id);
+        $updateStmt->execute();
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -110,7 +123,7 @@ if ($forma_entrega === 'Punto de Entrega' && $id_paqueteria) {
     $resDir = $stmtDir->get_result();
     if ($direccion_info = $resDir->fetch_assoc()) {
         echo "<h2>Dirección seleccionada</h2>";
-        echo "<p>" . htmlspecialchars($direccion_info['calle']) . " #" . htmlspecialchars($direccion_info['num_ext']) . ", " .
+        echo "<p class='parrafo_pedi'>" . htmlspecialchars($direccion_info['calle']) . " #" . htmlspecialchars($direccion_info['num_ext']) . ", " .
             htmlspecialchars($direccion_info['colonia']) . ", " . htmlspecialchars($direccion_info['ciudad']) . ", " .
             htmlspecialchars($direccion_info['estado']) . " CP " . htmlspecialchars($direccion_info['codigo_postal']) . "</p>";
     }
@@ -179,8 +192,9 @@ if ($forma_entrega === 'Punto de Entrega' && $id_paqueteria) {
     <?php elseif ($forma_entrega === 'Punto de Entrega') : ?>
         <input type="hidden" name="id_paqueteria" value="<?= htmlspecialchars($id_paqueteria) ?>">
     <?php endif; ?>
-
+    <div class="contenedor_boton">
     <button type="submit" class="boton_pago">Proceder al pago</button>
+    </div>
 </form>
 
 </body>

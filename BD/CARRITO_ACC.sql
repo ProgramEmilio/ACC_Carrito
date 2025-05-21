@@ -140,6 +140,7 @@ CONSTRAINT fk_pedido_paqueteria FOREIGN KEY (id_paqueteria) REFERENCES paqueteri
 CONSTRAINT fk_pedido_carrito FOREIGN KEY (id_carrito) REFERENCES carrito(id_carrito),
 CONSTRAINT fk_pedido_direccion FOREIGN KEY (id_direccion) REFERENCES direccion(id_direccion)
 );
+ALTER TABLE pedido ADD fecha_pedido DATE NOT NULL;
 
 CREATE TABLE pago(
 id_pago VARCHAR(35) NOT NULL PRIMARY KEY,
@@ -154,7 +155,7 @@ CONSTRAINT fk_pedido_pago FOREIGN KEY (id_pedido) REFERENCES pedido(id_pedido)
 CREATE TABLE compra(
 id_compra INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 id_cliente INT NOT NULL,
-id_pago INT NOT NULL,
+id_pago VARCHAR(35) NOT NULL,
 id_paqueteria INT NOT NULL,
 CONSTRAINT fk_compra_cli FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente),
 CONSTRAINT fk_compra_pago FOREIGN KEY (id_pago) REFERENCES pago(id_pago),
@@ -166,9 +167,32 @@ id_seguimiento_pedido VARCHAR(35) NOT NULL PRIMARY KEY,
 id_pedido INT NOT NULL,
 id_cliente INT NOT NULL,
 Estado ENUM('Enviado','En camino','Entregado','Otro') NOT NULL,
-CONSTRAINT fk_pedido_envio FOREIGN KEY (id_pedido) REFERENCES pedido(id_pedido),
-CONSTRAINT fk_pedido_carrito FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente)
+CONSTRAINT fk_seguimiento_pedido FOREIGN KEY (id_pedido) REFERENCES pedido(id_pedido),
+CONSTRAINT fk_seguimiento_cliente FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente)
 );
+
+CREATE TABLE tabla_reporte(
+id_tabla_reporte INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+id_seguimiento_pedido VARCHAR(35) NOT NULL,
+nom_persona VARCHAR(50) NOT NULL,
+apellido_paterno VARCHAR(20) NOT NULL,
+apellido_materno VARCHAR(20) NOT NULL,
+id_envio INT NOT NULL,
+tipo_envio ENUM('Domicilio','Punto de Entrega') NOT NULL,
+id_articulo VARCHAR(5) NOT NULL,
+descripcion TEXT NOT NULL,
+cantidad DECIMAL(6,2) NOT NULL,
+precio DECIMAL(6,2) NOT NULL,
+importe DECIMAL(10,2) NOT NULL,
+personalizacion ENUM('Icono','Texto','Imagen'),
+id_pedido INT NOT NULL,
+iva DECIMAL(6,2) NOT NULL,
+ieps DECIMAL(2),
+precio_total_pedido DECIMAL(6,2) NOT NULL,
+fecha_pedido DATE NOT NULL
+);
+
+
 -- Roles
 INSERT INTO roles (roles) VALUES
 ('Administrador'),               
