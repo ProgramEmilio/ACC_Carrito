@@ -33,6 +33,8 @@ $id_paqueteria = $_POST['id_paqueteria'] ?? null;
 $total = floatval($_POST['total'] ?? 0);
 $iva = floatval($_POST['iva'] ?? 0);
 $id_envio = intval($_POST['id_envio'] ?? 0);
+$articulos = $_POST['articulos'] ?? [];
+$detalles = $_POST['detalles'] ?? [];
 
 $direccion_final = ($id_envio === 1) ? $id_direccion : null;
 $paqueteria_final = ($id_envio === 2) ? $id_paqueteria : null;
@@ -103,12 +105,27 @@ while ($detalle = $resDetalles->fetch_assoc()) {
         $total
     );
 
-    $stmtInsertReporte->execute();
+    //$stmtInsertReporte->execute();
 }
 
-echo "✅ Pedido y reporte guardados correctamente.";
+//echo "✅ Pedido y reporte guardados correctamente.";
 
 // Redirigir a pagos
-header("Location: ../Pago/pagos.php?id_pedido=$id_pedido&precio_total_pedido=$total");
-exit;
+//header("Location: ../Pago/pagos.php?id_pedido=$id_pedido&precio_total_pedido=$total");
+
 ?>
+
+<form id="formBC" action="../Pago/pagos.php" method="post">
+    <div id="inputsOcultos">
+        <?php foreach ($articulos as $index => $id): ?>
+            <input type="hidden" name="articulos[]" value="<?= htmlspecialchars($id) ?>">
+            <input type="hidden" name="detalles[<?= $id ?>]" value="<?= htmlspecialchars($detalles[$id]) ?>">
+        <?php endforeach; ?>
+        <input type="hidden" name="id_pedido" value="<?= htmlspecialchars($id_pedido) ?>">
+        <input type="hidden" name="precio_total_pedido" value="<?= htmlspecialchars($total) ?>">
+    </div>
+</form>
+
+<script>
+    document.getElementById('formBC').submit(); // También se envía automáticamente
+</script>

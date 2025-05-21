@@ -5,7 +5,8 @@ include('../Nav/header.php');
 $id_usuario = $_SESSION['id_usuario'];
 $id_pedido = $_GET['id_pedido'] ?? null;
 $precio_total_pedido = $_GET['precio_total_pedido'] ?? null;
-
+$articulos = $_POST['articulos'] ?? [];
+$detalles = $_POST['detalles'] ?? [];
 
 // Obtener ID del cliente
 $sql = "SELECT id_cliente, monedero FROM cliente WHERE id_usuario = ?";
@@ -461,6 +462,13 @@ $tipo_resultado = $_GET['tipo'] ?? '';
             <button type="submit" class="btn-pagar" id="btn-pagar" disabled>
                 Procesar Pago
             </button>
+
+            <div id="inputsOcultos">
+                <?php foreach ($articulos as $index => $id): ?>
+                    <input type="hidden" name="articulos[]" value="<?= htmlspecialchars($id) ?>">
+                    <input type="hidden" name="detalles[<?= $id ?>]" value="<?= htmlspecialchars($detalles[$id]) ?>">
+                <?php endforeach; ?>
+            </div>
         </form>
     </div>
     
@@ -479,13 +487,12 @@ $tipo_resultado = $_GET['tipo'] ?? '';
             </div>
             
             <div class="resumen-linea">
-                <span>Gastos de envío</span>
-                <span>$50.00</span>
+                
             </div>
             
             <div class="resumen-linea total-final">
                 <span>Total a pagar</span>
-                <span id="total-final">$<?= number_format($monto + 50, 2) ?></span>
+                <span id="total-final">$<?= number_format($monto) ?></span>
             </div>
         </div>
         
@@ -679,7 +686,7 @@ document.getElementById('paymentForm').addEventListener('submit', function(e) {
 document.addEventListener('DOMContentLoaded', function() {
     // Inicializar variables globales
     montoOriginal = <?= $monto ?>;
-    montoTotal = <?= $monto + 50 ?>; // Incluye envío
+    montoTotal = <?= $monto?>; // Incluye envío
     monederoDisponible = <?= $monedero_disponible ?>;
     
     // Configurar el rango máximo del slider de monedero

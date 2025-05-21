@@ -85,6 +85,7 @@ $resultDetalles = $conn->query($queryDetalles);
                     <td><?= htmlspecialchars($row['personalizacion']) ?></td>
                     <td>
                         <input type="number" name="cantidades[<?= $row['id_articulo'] ?>]" value="<?= $row['cantidad'] ?>" min="1" class="cantidad-input">
+                        <input type="hidden" name="detalles[<?= $row['id_articulo'] ?>]" value="<?= $row['id_detalle_carrito'] ?>">
                     </td>
                     <td>$<?= number_format($row['precio'], 2) ?></td>
                     <td class="importe">$<?= number_format($row['importe'], 2) ?></td>

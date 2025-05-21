@@ -4,9 +4,11 @@ include('../Nav/header.php');
 
 $id_articulo = $_POST['articulos'] ?? [];
 $cantidades = $_POST['cantidades'] ?? [];
+$detalles = $_POST['detalles'] ?? [];
 $total_carrito = $_POST['total'] ?? '';
 $id_carrito = $_POST['id_carrito'] ?? '';
 $id_usuario = $_SESSION['id_usuario'] ?? null;
+
 
 if (!$id_usuario) {
     echo "Usuario no autenticado.";
@@ -130,7 +132,7 @@ while ($row = $result_paqueterias->fetch_assoc()) {
                 <?php foreach ($id_articulo as $index => $id): ?>
                     <input type="hidden" name="articulos[]" value="<?= htmlspecialchars($id) ?>">
                     <input type="hidden" name="cantidades[<?= $id ?>]" value="<?= htmlspecialchars($cantidades[$id]) ?>">
-                    
+                    <input type="hidden" name="detalles[<?= $id ?>]" value="<?= htmlspecialchars($detalles[$id]) ?>">
                 <?php endforeach; ?>
             </div>
         </form>

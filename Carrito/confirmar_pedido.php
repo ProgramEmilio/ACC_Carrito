@@ -29,9 +29,12 @@ $direccion_id = $_POST['domicilio_seleccionado'] ?? null;
 $paqueteria_id = $_POST['paqueteria'] ?? null;
 $articulos = $_POST['articulos'] ?? [];
 $cantidades = $_POST['cantidades'] ?? [];
+$detalles = $_POST['detalles'] ?? [];
 $id_paqueteria = $_POST['id_paqueteria'] ?? null;
 $id_direccion = $_POST['id_direccion'] ?? null;
 $subtotal = 0;
+
+
 if (is_array($articulos) && is_array($cantidades)) {
     foreach ($articulos as $articulo_id) {
         if (!isset($cantidades[$articulo_id])) continue;
@@ -182,6 +185,12 @@ if ($forma_entrega === 'Punto de Entrega' && $id_paqueteria) {
 
 <!-- FORMULARIO PARA CONFIRMAR PEDIDO -->
 <form action="pedido.php" method="POST">
+    <div id="inputsOcultos">
+        <?php foreach ($articulos as $index => $id): ?>
+            <input type="hidden" name="articulos[]" value="<?= htmlspecialchars($id) ?>">
+            <input type="hidden" name="detalles[<?= $id ?>]" value="<?= htmlspecialchars($detalles[$id]) ?>">
+        <?php endforeach; ?>
+    </div>
 <input type="hidden" name="id_envio" value="<?= ($forma_entrega === 'Domicilio') ? 1 : 2 ?>">
     <input type="hidden" name="id_carrito" value="<?= htmlspecialchars($id_carrito) ?>">
     <input type="hidden" name="total" value="<?= htmlspecialchars($total) ?>">
