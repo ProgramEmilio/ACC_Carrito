@@ -28,15 +28,20 @@ $result = $stmt->get_result();
 $cliente = $result->fetch_assoc();
 $stmt->close();
 
-$sql = "SELECT id_seguimiento_pedido FROM seguimiento_pedido WHERE id_pedido = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $id_pedido);
-$stmt->execute();
-$result = $stmt->get_result();
-$seguimiento = $result->fetch_assoc();
-$id_seguimiento_pedido = $seguimiento['id_seguimiento_pedido'];
-$stmt->close();
+if ($tipo_pago !== 'sucursal'){
+    $sql = "SELECT id_seguimiento_pedido FROM seguimiento_pedido WHERE id_pedido = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $id_pedido);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $seguimiento = $result->fetch_assoc();
+    $id_seguimiento_pedido = $seguimiento['id_seguimiento_pedido'];
+    $stmt->close();
 
+
+    // Generar número de seguimiento
+    $numero_seguimiento = $id_seguimiento_pedido;
+}
 
 
 
@@ -57,8 +62,6 @@ if ($id_pedido) {
     $stmt_pedido->close();
 }
 
-// Generar número de seguimiento
-$numero_seguimiento = $id_seguimiento_pedido;
 ?>
 
 <style>
@@ -640,9 +643,11 @@ $numero_seguimiento = $id_seguimiento_pedido;
     <!-- Botones de acción -->
     <div class="action-buttons">
         <?php if ($tipo_pago === 'sucursal'): ?>
-            <button type="submit" form="formBC" class="btn btn-primary">
+
+            <button type="submit" name="pagarSucursal" form="formBC" class="btn btn-primary">
                 Pagar
             </button>
+
         <?php endif; ?>
         <a href="../Home/Home.php" class="btn btn-success">
             Seguir Comprando
@@ -652,20 +657,6 @@ $numero_seguimiento = $id_seguimiento_pedido;
 </div>
 
 
-<form id="formBC" action="../Pago/ConfirmacionSucursal.php" method="post">
-    <div id="inputsOcultos">
-        <?php foreach ($articulos as $index => $id): ?>
-            <input type="hidden" name="articulos[]" value="<?= htmlspecialchars($id) ?>">
-            <input type="hidden" name="detalles[<?= $id ?>]" value="<?= htmlspecialchars($detalles[$id]) ?>">
-        <?php endforeach; ?>
-        <input type="hidden" name="id_pedido" value="<?= htmlspecialchars($id_pedido) ?>">
-        <input type="hidden" name="precio_total_pedido" value="<?= htmlspecialchars($total) ?>">
-        <input type="hidden" name="tipo" value="sucursal">
-        <input type="hidden" name="bonus" value="<?= htmlspecialchars(number_format($bonus, 2)) ?>">
-        <input type="hidden" name="monedero_usado" value="<?= htmlspecialchars(number_format($monedero_usado, 2)) ?>">
-        <input type="hidden" name="folio" value="<?= htmlspecialchars($folio) ?>">
-    </div>
-</form>
 
 <script>
 // Auto-scroll hacia arriba
@@ -835,8 +826,8 @@ document.addEventListener('DOMContentLoaded', function() {
 <?php include('../Nav/footer.php'); 
 
 
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' ) {
+    // Acción del botón "Pagar" del formulario formBC
     procesarDetallesCompra($conn, $detalles, $id_cliente, $id_pedido);
     try {
         // Recuperar datos del formulario
@@ -1028,3 +1019,17 @@ foreach ($detalles as $id_articulo => $id_detalle_carrito) {
 }
 
 ?>
+<form id="formBC" action="../Pago/ConfirmacionSucursal.php" method="post">
+    <div id="inputsOcultos">
+        <?php foreach ($articulos as $index => $id): ?>
+            <input type="hidden" name="articulos[]" value="<?= htmlspecialchars($id) ?>">
+            <input type="hidden" name="detalles[<?= $id ?>]" value="<?= htmlspecialchars($detalles[$id]) ?>">
+        <?php endforeach; ?>
+        <input type="hidden" name="id_pedido" value="<?= htmlspecialchars($id_pedido) ?>">
+        <input type="hidden" name="precio_total_pedido" value="<?= htmlspecialchars($total) ?>">
+        <input type="hidden" name="tipo" value="sucursal">
+        <input type="hidden" name="bonus" value="<?= htmlspecialchars(number_format($bonus, 2)) ?>">
+        <input type="hidden" name="monedero_usado" value="<?= htmlspecialchars(number_format($monedero_usado, 2)) ?>">
+        <input type="hidden" name="folio" value="<?= htmlspecialchars($folio) ?>">
+    </div>
+</form>

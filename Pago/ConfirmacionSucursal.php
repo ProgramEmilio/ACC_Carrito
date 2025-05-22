@@ -13,6 +13,8 @@ $id_pedido = $_GET['id_pedido'] ?? ($_POST['id_pedido'] ?? '');
 $articulos = $_POST['articulos'] ?? [];
 $detalles = $_POST['detalles'] ?? [];
 
+
+
 // Obtener información del cliente
 $sql = "SELECT id_cliente, nom_persona, apellido_paterno, apellido_materno FROM cliente WHERE id_usuario = ?";
 $stmt = $conn->prepare($sql);

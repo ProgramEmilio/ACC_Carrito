@@ -3,7 +3,6 @@ include('../BD/ConexionBD.php');
 include('../Nav/header.php');
 
 $id_usuario = $_SESSION['id_usuario'];
-$id_pedido = $_GET['id_pedido'] ?? null;
 $precio_total_pedido = $_GET['precio_total_pedido'] ?? null;
 $articulos = $_POST['articulos'] ?? [];
 $detalles = $_POST['detalles'] ?? [];
