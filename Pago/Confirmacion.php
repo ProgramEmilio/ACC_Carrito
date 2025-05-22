@@ -15,6 +15,7 @@ $id_forma = $_GET['id_forma'] ?? ($_POST['id_forma'] ?? '');
 $mon = $_GET['mon'] ?? ($_POST['mon'] ?? '');
 $articulos = $_POST['articulos'] ?? [];
 $detalles = $_POST['detalles'] ?? [];
+$id_p = $_GET['id_p'] ?? ($_POST['id_p'] ?? '');
 
 
 
@@ -26,6 +27,18 @@ $stmt->execute();
 $result = $stmt->get_result();
 $cliente = $result->fetch_assoc();
 $stmt->close();
+
+$sql = "SELECT id_seguimiento_pedido FROM seguimiento_pedido WHERE id_pedido = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $id_pedido);
+$stmt->execute();
+$result = $stmt->get_result();
+$seguimiento = $result->fetch_assoc();
+$id_seguimiento_pedido = $seguimiento['id_seguimiento_pedido'];
+$stmt->close();
+
+
+
 
 // Obtener información del pedido si existe
 $pedido_info = null;
@@ -45,7 +58,7 @@ if ($id_pedido) {
 }
 
 // Generar número de seguimiento
-$numero_seguimiento = 'TRK' . date('YmdHis') . $id_pedido;
+$numero_seguimiento = $id_seguimiento_pedido;
 ?>
 
 <style>
@@ -243,11 +256,44 @@ $numero_seguimiento = 'TRK' . date('YmdHis') . $id_pedido;
 }
 
 .folio-number {
-    font-size: 28px;
+    font-size: 32px;
     font-weight: bold;
     color: #856404;
-    letter-spacing: 2px;
-    margin: 10px 0;
+    letter-spacing: 3px;
+    margin: 15px 0;
+    padding: 15px;
+    background: white;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 2px dashed #ffc107;
+    position: relative;
+    display: inline-block;
+    min-width: 280px;
+}
+
+.folio-number:hover {
+    transform: scale(1.02);
+    box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4);
+}
+
+.copy-button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    margin-left: 10px;
+    transition: all 0.3s;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.copy-button:hover {
+    background: #0056b3;
+    transform: scale(1.05);
 }
 
 .instructions {
@@ -335,6 +381,41 @@ $numero_seguimiento = 'TRK' . date('YmdHis') . $id_pedido;
     font-size: 14px;
 }
 
+.transaction-folio-container {
+    background: #e7f3ff;
+    border: 2px solid #007bff;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.transaction-folio-container h3 {
+    color: #007bff;
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+.folio-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.folio-text {
+    font-size: 28px;
+    font-weight: bold;
+    color: #007bff;
+    letter-spacing: 2px;
+    padding: 10px 15px;
+    background: white;
+    border-radius: 8px;
+    border: 2px solid #007bff;
+    min-width: 200px;
+}
+
 @media (max-width: 768px) {
     .confirmation-container {
         margin: 20px;
@@ -354,6 +435,22 @@ $numero_seguimiento = 'TRK' . date('YmdHis') . $id_pedido;
     .btn {
         width: 100%;
         max-width: 300px;
+    }
+    
+    .folio-display {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .folio-text {
+        font-size: 24px;
+        min-width: auto;
+        width: 100%;
+    }
+    
+    .copy-button {
+        margin-left: 0;
+        margin-top: 10px;
     }
 }
 </style>
@@ -408,6 +505,17 @@ $numero_seguimiento = 'TRK' . date('YmdHis') . $id_pedido;
             <div class="detail-item">
                 <span class="detail-label">Fecha de transacción:</span>
                 <span class="detail-value"><?= date('d/m/Y H:i:s') ?></span>
+            </div>
+        </div>
+        
+        <!-- Folio de Transacción corregido -->
+        <div class="transaction-folio-container">
+            <h3>💳 Folio de Transacción</h3>
+            <div class="folio-display">
+                <div class="folio-text" id="transactionFolio">
+                    <?= htmlspecialchars($id_p) ?>
+                </div>
+                <button class="copy-button" onclick="copyTransactionFolio()">📋 Copiar</button>
             </div>
         </div>
     <?php endif; ?>
@@ -531,9 +639,14 @@ $numero_seguimiento = 'TRK' . date('YmdHis') . $id_pedido;
 
     <!-- Botones de acción -->
     <div class="action-buttons">
-        <button type="submit" form="formBC" class="btn btn-primary">
-            Pagar
-        </button>
+        <?php if ($tipo_pago === 'sucursal'): ?>
+            <button type="submit" form="formBC" class="btn btn-primary">
+                Pagar
+            </button>
+        <?php endif; ?>
+        <a href="../Home/Home.php" class="btn btn-success">
+            Seguir Comprando
+        </a>
 
     </div>
 </div>
@@ -553,8 +666,6 @@ $numero_seguimiento = 'TRK' . date('YmdHis') . $id_pedido;
         <input type="hidden" name="folio" value="<?= htmlspecialchars($folio) ?>">
     </div>
 </form>
-
-
 
 <script>
 // Auto-scroll hacia arriba
@@ -580,17 +691,99 @@ document.addEventListener('DOMContentLoaded', function() {
 // Función para copiar número de seguimiento
 function copyTracking() {
     const trackingNumber = '<?= $numero_seguimiento ?>';
-    navigator.clipboard.writeText(trackingNumber).then(function() {
-        alert('Número de seguimiento copiado al portapapeles');
-    });
+    copyToClipboard(trackingNumber, 'Número de seguimiento copiado al portapapeles');
 }
 
-// Función para copiar código de folio
+// Función para copiar código de folio (para pagos en sucursal)
 function copyFolio() {
     const folio = '<?= $folio ?>';
-    navigator.clipboard.writeText(folio).then(function() {
-        alert('Código de pago copiado al portapapeles');
-    });
+    copyToClipboard(folio, 'Código de pago copiado al portapapeles');
+}
+
+// Función para copiar folio de transacción (para pagos con tarjeta)
+function copyTransactionFolio() {
+    const transactionFolio = '<?= $id_p ?>';
+    copyToClipboard(transactionFolio, 'Folio de transacción copiado al portapapeles');
+}
+
+// Función generalizada para copiar al portapapeles
+function copyToClipboard(text, message) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function() {
+            showCopyMessage(message);
+        }).catch(function() {
+            fallbackCopyText(text, message);
+        });
+    } else {
+        fallbackCopyText(text, message);
+    }
+}
+
+// Función fallback para copiar texto
+function fallbackCopyText(text, message) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+        document.execCommand('copy');
+        showCopyMessage(message);
+    } catch (err) {
+        console.error('Error al copiar:', err);
+        showCopyMessage('Error al copiar. Intenta seleccionar y copiar manualmente.');
+    }
+    
+    document.body.removeChild(textArea);
+}
+
+// Función para mostrar mensaje de copia
+function showCopyMessage(message) {
+    // Crear elemento de notificación
+    const notification = document.createElement('div');
+    notification.textContent = message;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #28a745;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 5px;
+        font-weight: bold;
+        z-index: 9999;
+        animation: slideIn 0.3s ease-out;
+    `;
+    
+    // Agregar animación CSS
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    document.body.appendChild(notification);
+    
+    // Remover después de 3 segundos
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
 }
 
 // Agregar funcionalidad de copia al hacer clic en los números
@@ -604,9 +797,37 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const folioElement = document.querySelector('.folio-number');
     if (folioElement) {
-        folioElement.style.cursor = 'pointer';
-        folioElement.title = 'Clic para copiar';
-        folioElement.addEventListener('click', copyFolio);
+        folioElement.addEventListener('click', function(e) {
+            // Prevenir que se ejecute si se hace clic en el botón
+            if (e.target.classList.contains('copy-button')) {
+                return;
+            }
+            copyFolio();
+        });
+    }
+    
+    const transactionFolioElement = document.querySelector('#transactionFolio');
+    if (transactionFolioElement) {
+        transactionFolioElement.style.cursor = 'pointer';
+        transactionFolioElement.title = 'Clic para copiar';
+        transactionFolioElement.addEventListener('click', copyTransactionFolio);
+    }
+});
+
+// Función para imprimir la página
+function printConfirmation() {
+    window.print();
+}
+
+// Agregar botón de imprimir
+document.addEventListener('DOMContentLoaded', function() {
+    const actionButtons = document.querySelector('.action-buttons');
+    if (actionButtons) {
+        const printButton = document.createElement('button');
+        printButton.className = 'btn btn-secondary';
+        printButton.innerHTML = '🖨️ Imprimir Confirmación';
+        printButton.onclick = printConfirmation;
+        actionButtons.appendChild(printButton);
     }
 });
 </script>

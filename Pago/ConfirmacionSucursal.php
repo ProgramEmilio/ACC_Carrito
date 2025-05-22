@@ -22,6 +22,34 @@ $result = $stmt->get_result();
 $cliente = $result->fetch_assoc();
 $stmt->close();
 
+$sql = "SELECT id_seguimiento_pedido FROM seguimiento_pedido WHERE id_pedido = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $id_pedido);
+$stmt->execute();
+$result = $stmt->get_result();
+$seguimiento = $result->fetch_assoc();
+$id_seguimiento_pedido = $seguimiento['id_seguimiento_pedido'];
+$stmt->close();
+
+$sql = "SELECT id_forma_pago FROM formas_pago WHERE folio = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $folio);
+$stmt->execute();
+$result = $stmt->get_result();
+$forma_pago = $result->fetch_assoc();
+$id_forma_pago = $forma_pago['id_forma_pago'];
+$stmt->close();
+
+$sql = "SELECT id_pago FROM pago WHERE id_forma_pago = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $id_forma_pago);
+$stmt->execute();
+$result = $stmt->get_result();
+$pago = $result->fetch_assoc();
+$id_pago = $pago['id_pago'];
+$stmt->close();
+
+
 // Obtener información del pedido si existe
 $pedido_info = null;
 if ($id_pedido) {
@@ -40,7 +68,7 @@ if ($id_pedido) {
 }
 
 // Generar número de seguimiento
-$numero_seguimiento = 'TRK' . date('YmdHis') . $id_pedido;
+$numero_seguimiento = $id_seguimiento_pedido;
 ?>
 
 <style>
@@ -533,7 +561,7 @@ $numero_seguimiento = 'TRK' . date('YmdHis') . $id_pedido;
             <p class="success-subtitle">Tu pago con tarjeta ha sido autorizado y procesado</p>
         <?php else: ?>
             <div class="success-icon sucursal">📋</div>
-            <h1 class="success-title sucursal">¡Código de Pago Generado!</h1>
+            <h1 class="success-title sucursal">¡Pago Realizado!</h1>
             <p class="success-subtitle">Tu pedido está reservado. Completa el pago en sucursal para procesarlo</p>
         <?php endif; ?>
     </div>
@@ -546,52 +574,15 @@ $numero_seguimiento = 'TRK' . date('YmdHis') . $id_pedido;
                 <?= htmlspecialchars($folio) ?>
                 <button class="copy-button" onclick="copyFolio()">📋 Copiar</button>
             </div>
-            <p class="folio-info">Presenta este código en cualquier sucursal autorizada</p>
-            <div class="time-limit">⏰ Válido por 3 días</div>
-            
-            <div class="alert-warning">
-                <strong>⚠️ Importante:</strong> Tu pedido será cancelado automáticamente si no realizas el pago dentro del tiempo límite
-            </div>
         </div>
         
         <!-- Guía de sucursales autorizadas -->
         <div class="sucursal-guide">
-            <h4>🏪 Sucursales Autorizadas</h4>
-            <div class="sucursal-stores">
-                <div class="store-item">
-                    <div class="store-logo">🟢</div>
-                    <strong>OXXO</strong>
-                    <p>Más de 20,000 tiendas</p>
-                </div>
-                <div class="store-item">
-                    <div class="store-logo">🔵</div>
-                    <strong>7-Eleven</strong>
-                    <p>Disponible 24/7</p>
-                </div>
-                <div class="store-item">
-                    <div class="store-logo">🟡</div>
-                    <strong>Farmacias del Ahorro</strong>
-                    <p>Red nacional</p>
-                </div>
-                <div class="store-item">
-                    <div class="store-logo">🔴</div>
-                    <strong>Circle K</strong>
-                    <p>Servicio rápido</p>
-                </div>
+            <h3>💳 Folio de Transaccion</h3>
+            <div class="folio-number" id="folioNumber" title="Clic para copiar">
+                <?= htmlspecialchars($id_pago) ?>
+                <button class="copy-button" onclick="copyFolio()">📋 Copiar</button>
             </div>
-        </div>
-        
-        <div class="instructions">
-            <h4>📝 Instrucciones Paso a Paso</h4>
-            <ol>
-                <li>Dirígete a cualquier <strong>OXXO</strong> o sucursal autorizada</li>
-                <li>Solicita realizar un <strong>"Pago de Servicio"</strong></li>
-                <li>Proporciona tu código: <strong><?= htmlspecialchars($folio) ?></strong></li>
-                <li>Paga el monto total: <strong>$<?= $pedido_info ? number_format($pedido_info['precio_total_pedido'], 2) : '0.00' ?></strong> en efectivo</li>
-                <li><strong>Guarda tu comprobante</strong> de pago como respaldo</li>
-                <li>Tu pedido será procesado <strong>automáticamente</strong> una vez confirmado el pago</li>
-                <li>Recibirás una <strong>notificación por email</strong> cuando el pago sea confirmado</li>
-            </ol>
         </div>
     <?php endif; ?>
 
@@ -647,8 +638,16 @@ $numero_seguimiento = 'TRK' . date('YmdHis') . $id_pedido;
                 <span class="detail-value">$<?= number_format($pedido_info['total'], 2) ?></span>
             </div>
             <div class="detail-item">
+                <span class="detail-label">IVA:</span>
+                <span class="detail-value">$<?= number_format($pedido_info['iva'], 2) ?></span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">IEPS:</span>
+                <span class="detail-value">$0.00</span>
+            </div>
+            <div class="detail-item">
                 <span class="detail-label">Envío:</span>
-                <span class="detail-value">$50.00</span>
+                <span class="detail-value">$<?= number_format($pedido_info['precio_total_pedido'], 2) - number_format($pedido_info['total'], 2) - number_format($pedido_info['iva'], 2) ?></span>
             </div>
             <div class="detail-item">
                 <span class="detail-label">Total <?= $tipo_pago === 'sucursal' ? 'a Pagar' : 'Pagado' ?>:</span>
@@ -738,7 +737,7 @@ $numero_seguimiento = 'TRK' . date('YmdHis') . $id_pedido;
         </div>
         
         <div class="timeline-item">
-            <div class="timeline-icon pending">2</div>
+            <div class="timeline-icon completed">2</div>
             <div class="timeline-content">
                 <div class="timeline-title">⏳ Esperando Pago</div>
                 <div class="timeline-description">
@@ -749,7 +748,7 @@ $numero_seguimiento = 'TRK' . date('YmdHis') . $id_pedido;
         </div>
         
         <div class="timeline-item">
-            <div class="timeline-icon future">3</div>
+            <div class="timeline-icon completed">3</div>
             <div class="timeline-content">
                 <div class="timeline-title">📋 Procesando Pedido</div>
                 <div class="timeline-description">Una vez confirmado el pago, procesaremos tu pedido</div>
@@ -757,7 +756,7 @@ $numero_seguimiento = 'TRK' . date('YmdHis') . $id_pedido;
         </div>
         
         <div class="timeline-item">
-            <div class="timeline-icon future">4</div>
+            <div class="timeline-icon pending">4</div>
             <div class="timeline-content">
                 <div class="timeline-title">🚚 Envío</div>
                 <div class="timeline-description">Tu pedido será enviado en 1-2 días hábiles tras confirmar el pago</div>
@@ -782,22 +781,6 @@ $numero_seguimiento = 'TRK' . date('YmdHis') . $id_pedido;
 
     <!-- Botones de acción -->
     <div class="action-buttons">
-        <?php if ($tipo_pago === 'sucursal'): ?>
-            <button onclick="copyFolio()" class="btn btn-warning">
-                📋 Copiar Código de Pago
-            </button>
-        <?php endif; ?>
-        
-        <?php if ($id_pedido): ?>
-            <a href="../pedidos/detalle.php?id=<?= $id_pedido ?>" class="btn btn-primary">
-                Ver Detalle del Pedido
-            </a>
-        <?php endif; ?>
-        
-        <a href="../Pedido/seguimiento_pedido.php" class="btn btn-secondary">
-            Mis Pedidos
-        </a>
-        
         <a href="../Home/Home.php" class="btn btn-success">
             Seguir Comprando
         </a>

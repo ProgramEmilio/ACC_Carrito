@@ -356,7 +356,7 @@ try {
         
         // Redireccionar con éxito
         $numero_oculto = "**** **** **** " . substr($tarjeta_info['numero_tarjeta'], -4);
-        header("Location: ../pago/confirmacion.php?tipo=tarjeta&tarjeta=" . urlencode($numero_oculto) . "&bonus=" . number_format($bonus_monedero, 2) . "&monedero_usado=" . number_format($monedero_usado, 2) . "&id_pedido=$id_pedido");
+        header("Location: ../pago/confirmacion.php?tipo=tarjeta&tarjeta=" . urlencode($numero_oculto) . "&bonus=" . number_format($bonus_monedero, 2) . "&monedero_usado=" . number_format($monedero_usado, 2) . "&id_pedido=$id_pedido" . "&id_p=$id_pago");
         exit();
         
     } else {
