@@ -6,11 +6,17 @@ include('../Nav/header.php');
 $id_usuario = $_SESSION['id_usuario'];
 
 // Obtener parámetros de la confirmación
-$folio = $_GET['folio'] ?? '';
-$tipo_pago = $_GET['tipo'] ?? '';
-$tarjeta = $_GET['tarjeta'] ?? '';
-$bonus = $_GET['bonus'] ?? '0.00';
-$id_pedido = $_GET['id_pedido'] ?? '';
+$folio = $_GET['folio'] ?? ($_POST['folio'] ?? '');
+$tipo_pago = $_GET['tipo'] ?? ($_POST['tipo'] ?? '');
+$tarjeta = $_GET['tarjeta'] ?? ($_POST['tarjeta'] ?? '');
+$bonus = $_GET['bonus'] ?? ($_POST['bonus'] ?? '0.00');
+$id_pedido = $_GET['id_pedido'] ?? ($_POST['id_pedido'] ?? '');
+$id_forma = $_GET['id_forma'] ?? ($_POST['id_forma'] ?? '');
+$mon = $_GET['mon'] ?? ($_POST['mon'] ?? '');
+$articulos = $_POST['articulos'] ?? [];
+$detalles = $_POST['detalles'] ?? [];
+
+
 
 // Obtener información del cliente
 $sql = "SELECT id_cliente, nom_persona, apellido_paterno, apellido_materno FROM cliente WHERE id_usuario = ?";
@@ -355,13 +361,13 @@ $numero_seguimiento = 'TRK' . date('YmdHis') . $id_pedido;
 <div class="confirmation-container">
     <!-- Header de éxito -->
     <div class="success-header">
-        <div class="success-icon">✓</div>
+    <?php if ($tipo_pago === 'tarjeta'): ?>
+    <div class="success-icon">✓</div>
         <h1 class="success-title">¡Pago Procesado Exitosamente!</h1>
         <p class="success-subtitle">
-            <?php if ($tipo_pago === 'tarjeta'): ?>
                 Tu pago con tarjeta ha sido autorizado y procesado
             <?php else: ?>
-                Tu código de pago ha sido generado
+                <h1 class="success-title">¡Tu código de pago ha sido generado!</h1>
             <?php endif; ?>
         </p>
     </div>
@@ -434,8 +440,16 @@ $numero_seguimiento = 'TRK' . date('YmdHis') . $id_pedido;
                 <span class="detail-value">$<?= number_format($pedido_info['total'], 2) ?></span>
             </div>
             <div class="detail-item">
+                <span class="detail-label">IVA:</span>
+                <span class="detail-value">$<?= number_format($pedido_info['iva'], 2) ?></span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">IEPS:</span>
+                <span class="detail-value">$0.00</span>
+            </div>
+            <div class="detail-item">
                 <span class="detail-label">Envío:</span>
-                <span class="detail-value">$50.00</span>
+                <span class="detail-value">$<?= number_format($pedido_info['precio_total_pedido'], 2) - number_format($pedido_info['total'], 2) - number_format($pedido_info['iva'], 2) ?></span>
             </div>
             <div class="detail-item">
                 <span class="detail-label">Total Pagado:</span>
@@ -443,7 +457,7 @@ $numero_seguimiento = 'TRK' . date('YmdHis') . $id_pedido;
             </div>
         </div>
         <?php endif; ?>
-    </div>
+    </div>  
 
     <!-- Información del monedero bonus -->
     <?php if ($bonus > 0): ?>
@@ -517,21 +531,30 @@ $numero_seguimiento = 'TRK' . date('YmdHis') . $id_pedido;
 
     <!-- Botones de acción -->
     <div class="action-buttons">
-        <?php if ($id_pedido): ?>
-            <a href="../pedidos/detalle.php?id=<?= $id_pedido ?>" class="btn btn-primary">
-                Ver Detalle del Pedido
-            </a>
-        <?php endif; ?>
-        
-        <a href="../Pedido/seguimiento_pedido.php" class="btn btn-secondary">
-            Mis Pedidos
-        </a>
-        
-        <a href="../Home\Home.php" class="btn btn-success">
-            Seguir Comprando
-        </a>
+        <button type="submit" form="formBC" class="btn btn-primary">
+            Pagar
+        </button>
+
     </div>
 </div>
+
+
+<form id="formBC" action="../Pago/ConfirmacionSucursal.php" method="post">
+    <div id="inputsOcultos">
+        <?php foreach ($articulos as $index => $id): ?>
+            <input type="hidden" name="articulos[]" value="<?= htmlspecialchars($id) ?>">
+            <input type="hidden" name="detalles[<?= $id ?>]" value="<?= htmlspecialchars($detalles[$id]) ?>">
+        <?php endforeach; ?>
+        <input type="hidden" name="id_pedido" value="<?= htmlspecialchars($id_pedido) ?>">
+        <input type="hidden" name="precio_total_pedido" value="<?= htmlspecialchars($total) ?>">
+        <input type="hidden" name="tipo" value="sucursal">
+        <input type="hidden" name="bonus" value="<?= htmlspecialchars(number_format($bonus, 2)) ?>">
+        <input type="hidden" name="monedero_usado" value="<?= htmlspecialchars(number_format($monedero_usado, 2)) ?>">
+        <input type="hidden" name="folio" value="<?= htmlspecialchars($folio) ?>">
+    </div>
+</form>
+
+
 
 <script>
 // Auto-scroll hacia arriba
@@ -588,4 +611,199 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<?php include('../Nav/footer.php'); ?>
+<?php include('../Nav/footer.php'); 
+
+
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    procesarDetallesCompra($conn, $detalles, $id_cliente, $id_pedido);
+    try {
+        // Recuperar datos del formulario
+        $id_forma_pago = $_GET['id_forma'] ?? ($_POST['id_forma'] ?? '');
+        $monto = $_GET['mon'] ?? ($_POST['mon'] ?? '');
+
+        // Validar datos básicos
+        if (!$id_forma_pago || !$id_pedido || !$monto) {
+            throw new Exception("Faltan datos requeridos para registrar el pago.");
+        }
+
+        // Generar ID único para el pago
+        $id_pago = 'SUC' . date('YmdHis') . rand(100, 999);
+
+        // Crear registro de pago
+        $query_pago = "INSERT INTO pago (id_pago, id_forma_pago, id_pedido, monto, fecha_pago) VALUES (?, ?, ?, ?, NOW())";
+        $stmt_pago = $conn->prepare($query_pago);
+        $stmt_pago->bind_param('siid', $id_pago, $id_forma_pago, $id_pedido, $monto);
+
+        if (!$stmt_pago->execute()) {
+            throw new Exception("Error insertando pago: " . $stmt_pago->error);
+        }
+
+        $stmt_pago->close();
+
+    } catch (Exception $e) {
+        echo "Error al registrar el pago: " . $e->getMessage();
+    }
+}
+
+
+
+
+
+/**
+ * Procesa los detalles de la compra: actualiza el inventario, elimina registros del carrito y crea reportes
+ * 
+ * @param mysqli $conn Conexión a la base de datos
+ * @param array $detalles Array de detalles de artículos [id_detalle_articulo => id_detalle_carrito]
+ * @param int $id_cliente ID del cliente
+ * @param int $id_pedido ID del pedido
+ * @throws Exception Si ocurre algún error durante el procesamiento
+ */
+function procesarDetallesCompra($conn, $detalles, $id_cliente, $id_pedido) {
+    if (empty($detalles)) {
+        return; // No hay detalles que procesar
+    }
+    
+    // Generar ID único para el seguimiento de pedido
+    $id_seguimiento_pedido = 'SEG' . date('YmdHis') . rand(100, 999);
+    
+    // Crear registro en seguimiento_pedido
+    $query_seguimiento = "INSERT INTO seguimiento_pedido (id_seguimiento_pedido, id_pedido, id_cliente, Estado) 
+                         VALUES (?, ?, ?, 'Enviado')";
+    $stmt_seguimiento = $conn->prepare($query_seguimiento);
+    $stmt_seguimiento->bind_param('sii', $id_seguimiento_pedido, $id_pedido, $id_cliente);
+    
+    if (!$stmt_seguimiento->execute()) {
+        throw new Exception("Error insertando seguimiento de pedido: " . $stmt_seguimiento->error);
+    }
+    $stmt_seguimiento->close();
+    
+    // Obtener información del pedido para el reporte
+    $query_pedido = "SELECT p.iva, p.ieps, p.precio_total_pedido, p.fecha_pedido, p.id_carrito, p.id_envio 
+                    FROM pedido p WHERE p.id_pedido = ?";
+    $stmt_pedido = $conn->prepare($query_pedido);
+    $stmt_pedido->bind_param('i', $id_pedido);
+    $stmt_pedido->execute();
+    $result_pedido = $stmt_pedido->get_result();
+    
+    if ($result_pedido->num_rows === 0) {
+        throw new Exception("No se encontró el pedido con ID: $id_pedido");
+    }
+    
+    $pedido_info = $result_pedido->fetch_assoc();
+    $stmt_pedido->close();
+    
+    // Obtener información del tipo de envío
+    $query_envio = "SELECT tipo_envio FROM envio WHERE id_envio = ?";
+    $stmt_envio = $conn->prepare($query_envio);
+    $stmt_envio->bind_param('i', $pedido_info['id_envio']);
+    $stmt_envio->execute();
+    $stmt_envio->bind_result($tipo_envio);
+    $stmt_envio->fetch();
+    $stmt_envio->close();
+    
+    // Obtener información del cliente
+    $query_cliente = "SELECT nom_persona, apellido_paterno, apellido_materno FROM cliente WHERE id_cliente = ?";
+    $stmt_cliente = $conn->prepare($query_cliente);
+    $stmt_cliente->bind_param('i', $id_cliente);
+    $stmt_cliente->execute();
+    $result_cliente = $stmt_cliente->get_result();
+    
+    if ($result_cliente->num_rows === 0) {
+        throw new Exception("No se encontró el cliente con ID: $id_cliente");
+    }
+    
+    $cliente_info = $result_cliente->fetch_assoc();
+    $stmt_cliente->close();
+    
+    // Procesar cada detalle de artículo
+foreach ($detalles as $id_articulo => $id_detalle_carrito) {
+    // 1. Obtener información del detalle del carrito
+    $query_detalle_carrito = "SELECT id_articulo, cantidad, precio, importe, personalizacion 
+                              FROM detalle_carrito 
+                              WHERE id_detalle_carrito = ?";
+    $stmt_detalle_carrito = $conn->prepare($query_detalle_carrito);
+    $stmt_detalle_carrito->bind_param('i', $id_detalle_carrito);
+    $stmt_detalle_carrito->execute();
+    $result_detalle_carrito = $stmt_detalle_carrito->get_result();
+
+    if ($result_detalle_carrito->num_rows === 0) {
+        throw new Exception("No se encontró el detalle del carrito con ID: $id_detalle_carrito");
+    }
+
+    $detalle_carrito = $result_detalle_carrito->fetch_assoc();
+    $stmt_detalle_carrito->close();
+
+    // 2. Obtener información del artículo (incluye id_detalle_articulo)
+    $query_articulo = "SELECT descripcion, id_detalle_articulo 
+                       FROM articulos 
+                       WHERE id_articulo = ?";
+    $stmt_articulo = $conn->prepare($query_articulo);
+    $stmt_articulo->bind_param('s', $detalle_carrito['id_articulo']);
+    $stmt_articulo->execute();
+    $stmt_articulo->bind_result($descripcion_articulo, $id_detalle_articulo);
+    $stmt_articulo->fetch();
+    $stmt_articulo->close();
+
+    // 3. Actualizar inventario en detalle_articulos
+    $query_actualizar_existencias = "UPDATE detalle_articulos 
+                                     SET existencia = existencia - ? 
+                                     WHERE id_detalle_articulo = ?";
+    $stmt_actualizar = $conn->prepare($query_actualizar_existencias);
+    $stmt_actualizar->bind_param('di', $detalle_carrito['cantidad'], $id_detalle_articulo);
+
+    if (!$stmt_actualizar->execute()) {
+        throw new Exception("Error actualizando inventario: " . $stmt_actualizar->error);
+    }
+    $stmt_actualizar->close();
+
+    // 4. Insertar en tabla_reporte
+    $query_reporte = "INSERT INTO tabla_reporte (
+        id_seguimiento_pedido, nom_persona, apellido_paterno, apellido_materno, 
+        id_envio, tipo_envio, id_articulo, descripcion, cantidad, precio, 
+        importe, personalizacion, id_pedido, iva, ieps, precio_total_pedido, fecha_pedido
+    ) VALUES (
+        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+    )";
+
+    $stmt_reporte = $conn->prepare($query_reporte);
+    $stmt_reporte->bind_param(
+        'ssssisssdddsiidds',
+        $id_seguimiento_pedido,
+        $cliente_info['nom_persona'],
+        $cliente_info['apellido_paterno'],
+        $cliente_info['apellido_materno'],
+        $pedido_info['id_envio'],
+        $tipo_envio,
+        $detalle_carrito['id_articulo'],
+        $descripcion_articulo,
+        $detalle_carrito['cantidad'],
+        $detalle_carrito['precio'],
+        $detalle_carrito['importe'],
+        $detalle_carrito['personalizacion'],
+        $id_pedido,
+        $pedido_info['iva'],
+        $pedido_info['ieps'],
+        $pedido_info['precio_total_pedido'],
+        $pedido_info['fecha_pedido']
+    );
+
+    if (!$stmt_reporte->execute()) {
+        throw new Exception("Error insertando en tabla_reporte: " . $stmt_reporte->error);
+    }
+    $stmt_reporte->close();
+
+    // 5. Eliminar registro del detalle_carrito
+    $query_eliminar = "DELETE FROM detalle_carrito WHERE id_detalle_carrito = ?";
+    $stmt_eliminar = $conn->prepare($query_eliminar);
+    $stmt_eliminar->bind_param('i', $id_detalle_carrito);
+
+    if (!$stmt_eliminar->execute()) {
+        throw new Exception("Error eliminando detalle del carrito: " . $stmt_eliminar->error);
+    }
+    $stmt_eliminar->close();
+}
+
+}
+
+?>

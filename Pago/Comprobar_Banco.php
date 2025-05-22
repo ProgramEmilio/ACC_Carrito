@@ -154,19 +154,6 @@ try {
         $id_forma_pago = $conn->insert_id;
         $stmt_forma_pago->close();
         
-        // Generar ID único para el pago
-        $id_pago = 'SUC' . date('YmdHis') . rand(100, 999);
-        
-        // Crear registro de pago
-        $query_pago = "INSERT INTO pago (id_pago, id_forma_pago, id_pedido, monto, fecha_pago) VALUES (?, ?, ?, ?, NOW())";
-        $stmt_pago = $conn->prepare($query_pago);
-        $stmt_pago->bind_param('siid', $id_pago, $id_forma_pago, $id_pedido, $monto);
-        
-        if (!$stmt_pago->execute()) {
-            throw new Exception("Error insertando pago: " . $stmt_pago->error);
-        }
-        
-        $stmt_pago->close();
         
         // Si se usó parcialmente el monedero, registrarlo como pago adicional
         if ($usar_monedero && $monedero_usado > 0) {
@@ -207,15 +194,39 @@ try {
         $stmt_bonus->close();
         
         // Procesar actualización de inventario y creación de reportes
-        procesarDetallesCompra($conn, $detalles, $id_cliente, $id_pedido);
+        
         
         // Confirmar transacciones
         $conn->commit();
         
         // Redireccionar con éxito
-        header("Location: ../pago/confirmacion.php?folio=$folio&tipo=sucursal&bonus=" . number_format($bonus_monedero, 2) . "&monedero_usado=" . number_format($monedero_usado, 2) . "&id_pedido=$id_pedido");
-        exit();
+        //header("Location: ../pago/confirmacion.php?folio=$folio&tipo=sucursal&bonus=" . number_format($bonus_monedero, 2) . "&monedero_usado=" . number_format($monedero_usado, 2) . "&id_pedido=$id_pedido");
         
+        // Usar setTimeout para esperar a que el DOM esté listo
+        
+        
+        ?>
+        <form id="formBC" action="../Pago/Confirmacion.php" method="post">
+            <div id="inputsOcultos">
+                <?php foreach ($articulos as $index => $id): ?>
+                    <input type="hidden" name="articulos[]" value="<?= htmlspecialchars($id) ?>">
+                    <input type="hidden" name="detalles[<?= $id ?>]" value="<?= htmlspecialchars($detalles[$id]) ?>">
+                <?php endforeach; ?>
+                <input type="hidden" name="id_pedido" value="<?= htmlspecialchars($id_pedido) ?>">
+                <input type="hidden" name="precio_total_pedido" value="<?= htmlspecialchars($total) ?>">
+                <input type="hidden" name="tipo" value="sucursal">
+                <input type="hidden" name="bonus" value="<?= htmlspecialchars(number_format($bonus_monedero, 2)) ?>">
+                <input type="hidden" name="monedero_usado" value="<?= htmlspecialchars(number_format($monedero_usado, 2)) ?>">
+                <input type="hidden" name="folio" value="<?= htmlspecialchars($folio) ?>">
+                <input type="hidden" name="id_forma" value="<?= htmlspecialchars($id_forma_pago) ?>">
+                <input type="hidden" name="mon" value="<?= htmlspecialchars($monto) ?>">
+            </div>
+        </form>
+        <script>
+            document.getElementById('formBC').submit(); // También se envía automáticamente
+        </script>
+
+    <?php
     } elseif ($metodo_pago === 'tarjeta') {
         // PAGO CON TARJETA
         
@@ -530,4 +541,23 @@ foreach ($detalles as $id_articulo => $id_detalle_carrito) {
 }
 
 }
+
 ?>
+
+<form id="formBC" action="../Pago/Confirmacion.php" method="post">
+    <div id="inputsOcultos">
+        <?php foreach ($articulos as $index => $id): ?>
+            <input type="hidden" name="articulos[]" value="<?= htmlspecialchars($id) ?>">
+            <input type="hidden" name="detalles[<?= $id ?>]" value="<?= htmlspecialchars($detalles[$id]) ?>">
+        <?php endforeach; ?>
+        <input type="hidden" name="id_pedido" value="<?= htmlspecialchars($id_pedido) ?>">
+        <input type="hidden" name="precio_total_pedido" value="<?= htmlspecialchars($total) ?>">
+        <input type="hidden" name="tipo" value="sucursal">
+        <input type="hidden" name="bonus" value="<?= htmlspecialchars(number_format($bonus_monedero, 2)) ?>">
+        <input type="hidden" name="monedero_usado" value="<?= htmlspecialchars(number_format($monedero_usado, 2)) ?>">
+        <input type="hidden" name="folio" value="<?= htmlspecialchars($folio) ?>">
+    </div>
+</form>
+<script>
+    document.getElementById('formBC').submit(); // También se envía automáticamente
+</script>
