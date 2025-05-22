@@ -56,9 +56,7 @@ id_detalle_articulo INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 existencia INT NOT NULL,
 costo DECIMAL(6,2) NOT NULL,
 precio DECIMAL(6,2) NOT NULL,
-id_proveedor INT NOT NULL,
-estatus ENUM('Disponible','No Disponible','Descontinuado') DEFAULT 'Disponible',
-CONSTRAINT fk_proveedor FOREIGN KEY (id_proveedor) REFERENCES usuario(id_usuario)
+estatus ENUM('Disponible','No Disponible','Descontinuado') DEFAULT 'Disponible'
 );
 
 -- Tabla de atributos
@@ -131,16 +129,16 @@ id_pedido INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 id_envio INT NOT NULL,
 id_paqueteria INT,
 id_carrito INT NOT NULL,
-iva DECIMAL(6,2) NOT NULL,
+iva DECIMAL(6,2),
 ieps DECIMAL(2),
 id_direccion INT,
 precio_total_pedido DECIMAL(6,2) NOT NULL,
+fecha_pedido DATE NOT NULL,
 CONSTRAINT fk_pedido_envio FOREIGN KEY (id_envio) REFERENCES envio(id_envio),
 CONSTRAINT fk_pedido_paqueteria FOREIGN KEY (id_paqueteria) REFERENCES paqueteria(id_paqueteria),
 CONSTRAINT fk_pedido_carrito FOREIGN KEY (id_carrito) REFERENCES carrito(id_carrito),
 CONSTRAINT fk_pedido_direccion FOREIGN KEY (id_direccion) REFERENCES direccion(id_direccion)
 );
-ALTER TABLE pedido ADD fecha_pedido DATE NOT NULL;
 
 CREATE TABLE pago(
 id_pago VARCHAR(35) NOT NULL PRIMARY KEY,
@@ -150,16 +148,6 @@ monto DECIMAL(6,2) NOT NULL,
 fecha_pago DATETIME NOT NULL,
 CONSTRAINT fk_forma_pago FOREIGN KEY (id_forma_pago) REFERENCES formas_pago(id_forma_pago),
 CONSTRAINT fk_pedido_pago FOREIGN KEY (id_pedido) REFERENCES pedido(id_pedido)
-);
-
-CREATE TABLE compra(
-id_compra INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-id_cliente INT NOT NULL,
-id_pago VARCHAR(35) NOT NULL,
-id_paqueteria INT NOT NULL,
-CONSTRAINT fk_compra_cli FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente),
-CONSTRAINT fk_compra_pago FOREIGN KEY (id_pago) REFERENCES pago(id_pago),
-CONSTRAINT fk_compra_paq FOREIGN KEY (id_paqueteria) REFERENCES paqueteria(id_paqueteria)
 );
 
 CREATE TABLE seguimiento_pedido(
@@ -197,18 +185,19 @@ fecha_pedido DATE NOT NULL
 INSERT INTO roles (roles) VALUES
 ('Administrador'),               
 ('Cliente'),             
-('Proveedor');
+('Repartidor');
 
 -- Usuarios
 INSERT INTO usuario (nombre_usuario, correo, contraseña, id_rol) VALUES
 ('admin', 'admin@ACC.com', '12', 1),
 ('Juans', 'cliente@ACC.com', '12', 2),
-('proveedor', 'proveedor@ACC.com', '12', 3);
+('repartidor', 'repartidor@ACC.com', '12', 3);
 
 -- Cliente
 INSERT INTO cliente (id_usuario, nom_persona, apellido_paterno, apellido_materno, telefono, monedero) VALUES
 (2, 'Juan', 'Pérez', 'Gómez', '6123456789', 50.00),
-(1, 'Emilio', 'Palma', 'Jimenez', '6123456789', 0.00);
+(1, 'Emilio', 'Palma', 'Jimenez', '6123456789', 0.00),
+(3, 'Samuel', 'Castro', 'Soza', '3454567898', 0.00);
 
 -- Dirección del cliente
 INSERT INTO direccion(codigo_postal, calle, num_ext, colonia, ciudad, estado, id_cliente) VALUES
@@ -217,13 +206,13 @@ INSERT INTO direccion(codigo_postal, calle, num_ext, colonia, ciudad, estado, id
 -- Tarjeta del cliente
 INSERT INTO tarjeta (numero_tarjeta, cvv, fecha_vencimiento, tipo_tarjeta, red_pago, titular) VALUES
 ('1234567890123456', '123', '2026-12-31', 'Credito', 'VISA', 1),
-('1111111111111111', '111', '2025-05-01 00:00:00', 'Debito', 'VISA', 1);;
+('1111111111111111', '111', '2025-05-01 00:00:00', 'Debito', 'VISA', 1);
 
 -- Detalle de artículos
-INSERT INTO detalle_articulos (existencia, costo, precio, id_proveedor, estatus) VALUES
-(50, 120.00, 250.00, 3, 'Disponible'),
-(30, 150.00, 300.00, 3, 'Disponible'),
-(40, 100.00, 200.00, 3, 'Disponible');
+INSERT INTO detalle_articulos (id_detalle_articulo ,existencia, costo, precio, estatus) VALUES
+(1,50, 120.00, 250.00, 'Disponible'),
+(2,30, 150.00, 300.00, 'Disponible'),
+(3,40, 100.00, 200.00, 'Disponible');
 
 -- Artículos
 INSERT INTO articulos (id_articulo, descripcion, id_detalle_articulo) VALUES
@@ -244,14 +233,17 @@ INSERT INTO atributos (nombre) VALUES
 INSERT INTO articulo_completo (id_articulo, id_atributo, valor) VALUES 
 ('P001', 1, 'Negro'),
 ('P001', 2, 'M'),
+('P001', 3, 'playera1.png'),
 ('P001', 3, 'playera2.png'),
+('P001', 3, 'playera3.png'),
 ('P001', 3, 'termo3.png'),
 ('P002', 1, 'Azul'),
 ('P002', 2, '750ml'),
 ('P002', 3, 'termo3.png'),
 ('P003', 1, 'Verde'),
 ('P003', 2, 'A5'),
-('P003', 3, 'agenda1.png');
+('P003', 3, 'agenda1.png'),
+('P003', 3, 'agenda2.png');
 
 -- Carrito del cliente
 INSERT INTO carrito (id_cliente, fecha, total) VALUES
@@ -280,9 +272,22 @@ INSERT INTO formas_pago (forma, folio, estado) VALUES
 ('Sucursal', 'A003', 'Activo');
 
 -- Pedido
-INSERT INTO pedido (id_envio, id_paqueteria, id_carrito, precio_total_pedido) VALUES
-(1, 1, 1, 880.00);
+INSERT INTO pedido (id_envio, id_paqueteria, id_carrito, precio_total_pedido,fecha_pedido) VALUES
+(1, 1, 1, 880.00,NOW());
 
 -- Pago
-INSERT INTO pago (id_forma_pago, id_pedido, fecha_pago) VALUES
-(1, 1, NOW());
+INSERT INTO pago (id_pago, id_forma_pago, id_pedido, fecha_pago,monto) VALUES
+(123456,1, 1, NOW(),900);
+
+INSERT INTO seguimiento_pedido (id_seguimiento_pedido, id_pedido, id_cliente, Estado) VALUES
+('SEGU001', 1, 1, 'Enviado');
+
+INSERT INTO tabla_reporte (
+  id_seguimiento_pedido, nom_persona, apellido_paterno, apellido_materno,
+  id_envio, tipo_envio, id_articulo, descripcion, cantidad, precio,
+  importe, personalizacion, id_pedido, iva, ieps, precio_total_pedido, fecha_pedido
+) VALUES (
+  'SEGU001', 'Juan', 'Pérez', 'Gómez',
+  1, 'Domicilio', 'P001', 'Playera personalizada con diseño a elección.', 
+  2, 250.00, 500.00, 'Texto', 1, 80.00, 0.00, 800.00, CURDATE()
+);

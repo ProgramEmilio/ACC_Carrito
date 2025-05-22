@@ -163,7 +163,7 @@
 
 /* Hover para el botón */
 .form_reg_usuario input[type="submit"]:hover {
-    background-color: #417fb3; /* Azul un poco más oscuro al pasar el cursor */
+    background-color: #417fb3;
 }
 
 /* Estilos para las etiquetas */
