@@ -1,7 +1,8 @@
 <?php
+ob_start(); // Inicia el búfer de salida
+
 include '../BD/ConexionBD.php';
 include '../Nav/header.php';
-
 
 if (!isset($_GET['id_direccion'])) {
     die("No se especificó la dirección.");
@@ -22,8 +23,8 @@ if ($resultado->num_rows === 0) {
 
 $direccion = $resultado->fetch_assoc();
 
-// Verifica que la dirección pertenezca al cliente actual
 $id_usuario = $_SESSION['id_usuario'];
+
 $query_cliente = "SELECT id_cliente FROM cliente WHERE id_usuario = ?";
 $stmt2 = $conn->prepare($query_cliente);
 $stmt2->bind_param("i", $id_usuario);
@@ -47,7 +48,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt = $conn->prepare($update_query);
     $stmt->bind_param("sisssi", $calle, $num_ext, $colonia, $ciudad, $codigo_postal, $id_direccion);
 
-
     if ($stmt->execute()) {
         header("Location: perfil.php");
         exit();
@@ -62,14 +62,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <title>Editar Dirección</title>
-    <link rel="stylesheet" href="Perfil.css"> <!-- Asegúrate que este archivo contiene tu estilo .direccion-container -->
 </head>
 <body>
 
 <div class="direccion-container">
-    <h2>Editar Dirección</h2>
+    <h1 class="titulo">Editar Dirección</h1>
 
-    <form method="POST">
+    <form method="POST" class="form_edi_usuario">
         <label>Calle:
             <input type="text" name="calle" value="<?= htmlspecialchars($direccion['calle']) ?>" required>
         </label>
@@ -86,12 +85,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="text" name="codigo_postal" maxlength="5" value="<?= htmlspecialchars($direccion['codigo_postal']) ?>" required>
         </label>
         <input class="btn" type="submit" value="Actualizar Dirección">
-        <a href="perfil.php" class="edit-link">Cancelar</a>
+        <a href="direccion_usuario.php" class="edit-link">Cancelar</a>
     </form>
 </div>
 
 </body>
 <?php
-include ('../Nav/footer.php');
+include('../Nav/footer.php');
+ob_end_flush(); // Envía el búfer de salida
 ?>
 </html>

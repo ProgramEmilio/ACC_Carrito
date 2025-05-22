@@ -65,10 +65,12 @@ $tarjetas = $conn->query("
         t.red_pago, 
         t.titular
     FROM tarjeta t
+    WHERE titular = $id_cliente
 ");
 
 // Obtener clientes para mostrar nombres (base principal)
-$clientes_result = $conn->query("SELECT id_cliente, CONCAT(nom_persona, ' ', apellido_paterno, ' ', apellido_materno) AS nombre FROM cliente");
+$clientes_result = $conn->query("SELECT id_cliente, 
+CONCAT(nom_persona, ' ', apellido_paterno, ' ', apellido_materno) AS nombre FROM cliente");
 $clientes_array = [];
 while ($row = $clientes_result->fetch_assoc()) {
     $clientes_array[$row['id_cliente']] = $row['nombre'];
