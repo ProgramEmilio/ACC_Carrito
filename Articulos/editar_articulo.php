@@ -1,13 +1,14 @@
 <?php
 include('../BD/ConexionBD.php');
 include('../Nav/header.php');
+
 $id_articulo = $_GET['id'] ?? null;
 if (!$id_articulo) {
     echo "ID de artículo no proporcionado.";
     exit;
 }
 
-// Obtener datos actuales del artículo y detalle
+// Obtener datos del artículo
 $sql = "SELECT a.*, d.existencia, d.costo, d.precio, d.estatus
         FROM articulos a
         JOIN detalle_articulos d ON a.id_detalle_articulo = d.id_detalle_articulo
@@ -15,16 +16,24 @@ $sql = "SELECT a.*, d.existencia, d.costo, d.precio, d.estatus
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $id_articulo);
 $stmt->execute();
-$result = $stmt->get_result();
+$articulo = $stmt->get_result()->fetch_assoc();
 
-if ($result->num_rows === 0) {
-    echo "Artículo no encontrado.";
-    exit;
+// Obtener atributos existentes
+$sql_atributos = "SELECT ac.id_articulo_completo, ac.id_atributo, ac.valor, at.nombre 
+                  FROM articulo_completo ac
+                  JOIN atributos at ON ac.id_atributo = at.id_atributo
+                  WHERE ac.id_articulo = ?";
+$stmt_attr = $conn->prepare($sql_atributos);
+$stmt_attr->bind_param("s", $id_articulo);
+$stmt_attr->execute();
+$result_attr = $stmt_attr->get_result();
+
+$atributos = [];
+while ($row = $result_attr->fetch_assoc()) {
+    $atributos[] = $row;
 }
 
-$articulo = $result->fetch_assoc();
-
-// Si se envió el formulario de edición
+// Al enviar formulario
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $descripcion = $_POST['descripcion'];
     $existencia = $_POST['existencia'];
@@ -33,8 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $estatus = $_POST['estatus'];
 
     // Actualizar detalle_articulos
-    $sql_update_detalle = "UPDATE detalle_articulos SET existencia=?, costo=?, precio=?, estatus=?
-                           WHERE id_detalle_articulo=?";
+    $sql_update_detalle = "UPDATE detalle_articulos SET existencia=?, costo=?, precio=?, estatus=? WHERE id_detalle_articulo=?";
     $stmt1 = $conn->prepare($sql_update_detalle);
     $stmt1->bind_param("iddsi", $existencia, $costo, $precio, $estatus, $articulo['id_detalle_articulo']);
     $stmt1->execute();
@@ -45,18 +53,68 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt2->bind_param("ss", $descripcion, $id_articulo);
     $stmt2->execute();
 
-    echo "<script>alert('Artículo actualizado con éxito.'); window.history.back();</script>";
+    // Actualizar atributos existentes
+    if (!empty($_POST['atributos'])) {
+        foreach ($_POST['atributos'] as $id_articulo_completo => $valor) {
+            $sql_update_atributo = "UPDATE articulo_completo SET valor=? WHERE id_articulo_completo=?";
+            $stmt3 = $conn->prepare($sql_update_atributo);
+            $stmt3->bind_param("si", $valor, $id_articulo_completo);
+            $stmt3->execute();
+        }
+    }
+
+    // Insertar nuevos atributos
+    if (!empty($_POST['nuevo_id_atributo']) && !empty($_POST['nuevo_valor_atributo'])) {
+        foreach ($_POST['nuevo_id_atributo'] as $index => $id_atributo) {
+            $valor_atributo = $_POST['nuevo_valor_atributo'][$index];
+
+            // Validar que venga un ID válido
+            if (!empty($id_atributo) && !empty($valor_atributo)) {
+                $sql_insert_ac = "INSERT INTO articulo_completo(id_articulo, id_atributo, valor) VALUES (?, ?, ?)";
+                $stmt6 = $conn->prepare($sql_insert_ac);
+                $stmt6->bind_param("sis", $id_articulo, $id_atributo, $valor_atributo);
+                $stmt6->execute();
+            }
+        }
+    }
+
+    echo "<script>alert('Artículo actualizado con éxito.'); window.location.href='agregar_articulo.php';</script>";
     exit;
 }
+
+// Obtener lista de atributos disponibles
+$sql_lista_atributos = "SELECT id_atributo, nombre FROM atributos ORDER BY nombre";
+$result_lista = $conn->query($sql_lista_atributos);
+$lista_atributos = $result_lista->fetch_all(MYSQLI_ASSOC);
 ?>
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title class="titulo">Editar Artículo</title>
+    <title>Editar Artículo</title>
+    <script>
+    const atributosDisponibles = <?= json_encode($lista_atributos) ?>;
+
+    function agregarCampoAtributo() {
+        const contenedor = document.getElementById("nuevos_atributos");
+        const div = document.createElement("div");
+
+        let options = '<option value="">Selecciona un atributo</option>';
+        atributosDisponibles.forEach(attr => {
+            options += `<option value="${attr.id_atributo}">${attr.nombre}</option>`;
+        });
+
+        div.innerHTML = `
+            <select name="nuevo_id_atributo[]" required>${options}</select>
+            <input type="text" name="nuevo_valor_atributo[]" placeholder="Valor del atributo" required><br>
+        `;
+        contenedor.appendChild(div);
+    }
+    </script>
 </head>
 <body>
+
 <h1 class="titulo">Editar Artículo</h1>
 
 <form method="POST" class="form_reg_usuario">
@@ -76,11 +134,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <input type="number" step="0.01" name="precio" value="<?= htmlspecialchars($articulo['precio']) ?>" required><br>
 
     <label>Estatus:</label><br>
-    <input type="text" name="estatus" value="<?= htmlspecialchars($articulo['estatus']) ?>" required><br><br>
+    <select name="estatus" required>
+        <option value="Disponible" <?= $articulo['estatus'] == 'Disponible' ? 'selected' : '' ?>>Disponible</option>
+        <option value="No Disponible" <?= $articulo['estatus'] == 'No Disponible' ? 'selected' : '' ?>>No Disponible</option>
+        <option value="Descontinuado" <?= $articulo['estatus'] == 'Descontinuado' ? 'selected' : '' ?>>Descontinuado</option>
+    </select><br><br>
 
-    <input type="submit" value="Guardar Cambios">
+    <h3>Atributos actuales:</h3>
+    <?php foreach ($atributos as $atributo): ?>
+        <label><?= htmlspecialchars($atributo['nombre']) ?>:</label><br>
+        <input type="text" name="atributos[<?= $atributo['id_articulo_completo'] ?>]" 
+               value="<?= htmlspecialchars($atributo['valor']) ?>" required><br>
+    <?php endforeach; ?>
+
+    <h3>Agregar nuevos atributos:</h3>
+    <div id="nuevos_atributos"></div>
+    <button type="button" onclick="agregarCampoAtributo()">Agregar Atributo</button><br><br>
+
+    <input type="submit" value="Guardar Cambios" class="regresar">
 </form>
+
 <a href="agregar_articulo.php" class="regresar">Regresar</a>
+
 </body>
 <?php include('../Nav/footer.php'); ?>
 </html>
