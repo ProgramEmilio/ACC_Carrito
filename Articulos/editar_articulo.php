@@ -1,122 +1,86 @@
 <?php
 include('../BD/ConexionBD.php');
-
-if (!isset($_GET['id'])) {
+include('../Nav/header.php');
+$id_articulo = $_GET['id'] ?? null;
+if (!$id_articulo) {
     echo "ID de artículo no proporcionado.";
     exit;
 }
 
-$id_articulo = $_GET['id'];
-
-// Obtener detalles del artículo
-$sql = "SELECT * FROM articulos WHERE id_articulo = ?";
+// Obtener datos actuales del artículo y detalle
+$sql = "SELECT a.*, d.existencia, d.costo, d.precio, d.estatus
+        FROM articulos a
+        JOIN detalle_articulos d ON a.id_detalle_articulo = d.id_detalle_articulo
+        WHERE a.id_articulo = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $id_articulo);
 $stmt->execute();
 $result = $stmt->get_result();
-$articulo = $result->fetch_assoc();
-$stmt->close();
 
-if (!$articulo) {
+if ($result->num_rows === 0) {
     echo "Artículo no encontrado.";
     exit;
 }
 
-// Obtener detalles posibles para el select
-$detalles = [];
-$sql_detalles = "SELECT id_detalle_articulo, existencia, precio, estatus FROM detalle_articulos";
-$result_detalles = $conn->query($sql_detalles);
-while ($row = $result_detalles->fetch_assoc()) {
-    $detalles[] = $row;
-}
+$articulo = $result->fetch_assoc();
 
-// Procesar edición
+// Si se envió el formulario de edición
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $nombre_articulo = $_POST['nombre_articulo'];
     $descripcion = $_POST['descripcion'];
-    $id_detalle_articulo = $_POST['id_detalle_articulo'];
-    $imagen_actual = $_POST['imagen_actual'];
+    $existencia = $_POST['existencia'];
+    $costo = $_POST['costo'];
+    $precio = $_POST['precio'];
+    $estatus = $_POST['estatus'];
 
-    // Si se seleccionó una nueva imagen
-    if (!empty($_FILES['imagen']['name'])) {
-        $nombre_imagen = $_FILES['imagen']['name'];
-        $ruta_temporal = $_FILES['imagen']['tmp_name'];
-        $ruta_destino = "../Imagenes/" . $nombre_imagen;
+    // Actualizar detalle_articulos
+    $sql_update_detalle = "UPDATE detalle_articulos SET existencia=?, costo=?, precio=?, estatus=?
+                           WHERE id_detalle_articulo=?";
+    $stmt1 = $conn->prepare($sql_update_detalle);
+    $stmt1->bind_param("iddsi", $existencia, $costo, $precio, $estatus, $articulo['id_detalle_articulo']);
+    $stmt1->execute();
 
-        if (move_uploaded_file($ruta_temporal, $ruta_destino)) {
-            // Borrar imagen anterior
-            $ruta_anterior = "../Imagenes/" . $imagen_actual;
-            if (file_exists($ruta_anterior)) unlink($ruta_anterior);
-        } else {
-            echo "Error al subir la nueva imagen.";
-            exit;
-        }
-    } else {
-        $nombre_imagen = $imagen_actual;
-    }
+    // Actualizar articulos
+    $sql_update_articulo = "UPDATE articulos SET descripcion=? WHERE id_articulo=?";
+    $stmt2 = $conn->prepare($sql_update_articulo);
+    $stmt2->bind_param("ss", $descripcion, $id_articulo);
+    $stmt2->execute();
 
-    $sql_update = "UPDATE articulos SET nombre_articulo = ?, descripcion = ?, id_detalle_articulo = ?, imagen = ? WHERE id_articulo = ?";
-    $stmt_update = $conn->prepare($sql_update);
-    $stmt_update->bind_param("ssiss", $nombre_articulo, $descripcion, $id_detalle_articulo, $nombre_imagen, $id_articulo);
-
-    if ($stmt_update->execute()) {
-        header("Location: agregar_articulo.php?msg=editado");
-        exit;
-    } else {
-        echo "Error al actualizar el artículo: " . $stmt_update->error;
-    }
-
-    $stmt_update->close();
-    $conn->close();
+    echo "<script>alert('Artículo actualizado con éxito.'); window.history.back();</script>";
+    exit;
 }
 ?>
-
-<?php include ('../Nav/header.php'); ?>
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Editar Artículo</title>
-    <link rel="stylesheet" href="editar.css">
+    <title class="titulo">Editar Artículo</title>
 </head>
 <body>
+<h1 class="titulo">Editar Artículo</h1>
 
-<div class="form-container">
-    <h2>Editar Artículo</h2>
-    <form action="" method="POST" enctype="multipart/form-data">
-        <label>ID Artículo (no editable):</label><br>
-        <input type="text" value="<?= htmlspecialchars($articulo['id_articulo']) ?>" disabled><br><br>
+<form method="POST" class="form_reg_usuario">
+    <label>ID Artículo:</label><br>
+    <input type="text" value="<?= htmlspecialchars($articulo['id_articulo']) ?>" disabled><br>
 
-        <label>Nombre del artículo:</label><br>
-        <input type="text" name="nombre_articulo" value="<?= htmlspecialchars($articulo['nombre_articulo']) ?>" required><br><br>
+    <label>Descripción:</label><br>
+    <textarea name="descripcion" required><?= htmlspecialchars($articulo['descripcion']) ?></textarea><br>
 
-        <label>Descripción:</label><br>
-        <textarea name="descripcion" required><?= htmlspecialchars($articulo['descripcion']) ?></textarea><br><br>
+    <label>Existencia:</label><br>
+    <input type="number" name="existencia" value="<?= htmlspecialchars($articulo['existencia']) ?>" required><br>
 
-        <label>Detalle del artículo:</label><br>
-        <select name="id_detalle_articulo" required>
-            <?php foreach ($detalles as $detalle): ?>
-                <option value="<?= $detalle['id_detalle_articulo'] ?>"
-                    <?= $detalle['id_detalle_articulo'] == $articulo['id_detalle_articulo'] ? 'selected' : '' ?>>
-                    ID <?= $detalle['id_detalle_articulo'] ?> | Existencia: <?= $detalle['existencia'] ?> | Precio: $<?= $detalle['precio'] ?> | <?= $detalle['estatus'] ?>
-                </option>
-            <?php endforeach; ?>
-        </select><br><br>
+    <label>Costo:</label><br>
+    <input type="number" step="0.01" name="costo" value="<?= htmlspecialchars($articulo['costo']) ?>" required><br>
 
-        <label>Imagen actual:</label><br>
-        <img src="../Imagenes/<?= htmlspecialchars($articulo['imagen']) ?>" width="100" alt="Imagen actual"><br>
-        <input type="hidden" name="imagen_actual" value="<?= htmlspecialchars($articulo['imagen']) ?>">
+    <label>Precio:</label><br>
+    <input type="number" step="0.01" name="precio" value="<?= htmlspecialchars($articulo['precio']) ?>" required><br>
 
-        <label>Cambiar imagen (opcional):</label><br>
-        <input type="file" name="imagen" accept="image/*"><br><br>
+    <label>Estatus:</label><br>
+    <input type="text" name="estatus" value="<?= htmlspecialchars($articulo['estatus']) ?>" required><br><br>
 
-        <input type="submit" value="Guardar Cambios">
-        <a href="agregar_articulo.php">Cancelar</a>
-    </form>
-</div>
-
+    <input type="submit" value="Guardar Cambios">
+</form>
+<a href="agregar_articulo.php" class="regresar">Regresar</a>
 </body>
+<?php include('../Nav/footer.php'); ?>
 </html>
-
-<?php include ('../Nav/footer.php'); ?>

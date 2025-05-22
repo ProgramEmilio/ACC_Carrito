@@ -27,7 +27,8 @@ $menus = [
         ],
 
         "Registros" => "../Ventas/Resumen_detalle.php",
-        "Compras" => "../Pedido/seguimiento_pedido.php"
+        "Compras" => "../Pedido/seguimiento_pedido.php",
+        "Articulos" => "../Articulos/agregar_articulo.php"
     
     ],
 
@@ -46,19 +47,7 @@ $menus = [
 
     // Rol 3: PROVEEDOR
     3 => [
-        "Tienda" => [
-            "Ver Productos" => "../Catalogo/catalogo.php",
-            "Promociones" => "../Catalogo/promociones.php"
-        ],
-        "Mis Compras" => [
-            "Historial" => "../Cliente/historial_compras.php"
-        ],
-        "Carrito" => [
-            "Ver Carrito" => "../Carrito/carrito.php"
-        ],
-        "Perfil" => [
-            "Perfil" => "../Perfil/Perfil.php"
-        ]
+         "Pedidos" => "../Pedido/seguimiento_pedido.php",
     ]
 ];
 
@@ -170,12 +159,14 @@ include('CerrarSesion.php');
 
 <!-- Carrito y botón perfil centrados -->
         <div class="centro-cabecera">
+    <?php if ($id_rol != 3): ?>
     <div class="carrito-icono">
         <a href="../Carrito/carrito.php">
             <img src="../Imagenes/carrito.png" alt="Carrito" class="carrito-img">
             <span id="contador-carrito"><?php echo intval($total_cantidad); ?></span>
         </a>
     </div>
+<?php endif; ?>
 </div>
     </div>
 

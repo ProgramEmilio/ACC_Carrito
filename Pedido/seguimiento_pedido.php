@@ -93,14 +93,8 @@ echo "<p><strong>Total:</strong> $ {$row['precio_total_pedido']}</p>";
 if (!empty($row['nombre_paqueteria'])) {
     echo "<p><strong>Paquetería:</strong> {$row['nombre_paqueteria']}</p>";
 } else {
-    echo "<p><strong>Envío a domicilio:</strong></p>";
-    echo "<ul style='margin-top: 0;'>";
-    echo "<li><strong>Calle:</strong> {$row['calle']}</li>";
-    echo "<li><strong>Número:</strong> {$row['num_ext']}</li>";
-    echo "<li><strong>Colonia:</strong> {$row['colonia']}</li>";
-    echo "<li><strong>Ciudad:</strong> {$row['ciudad']}</li>";
-    echo "<li><strong>Estado:</strong> {$row['estado']}</li>";
-    echo "</ul>";
+    echo "<p><strong>Envío a domicilio:</strong> {$row['calle']} {$row['num_ext']}, {$row['colonia']}, {$row['ciudad']}, {$row['estado']}</p>";
+
 }
 
 // Mostrar los artículos
@@ -121,18 +115,32 @@ if ($res_articulos && $res_articulos->num_rows > 0) {
             <th>Precio Unitario</th>
             <th>Personalización</th>
           </tr>";
-    while ($art = $res_articulos->fetch_assoc()) {
-        echo "<td>{$art['descripcion']}</td>";
-        echo "<td>{$art['cantidad']}</td>";
-        echo "<td>$ {$art['precio']}</td>";
-        echo "<td>" . (!empty($art['personalizacion']) ? $art['personalizacion'] : 'N/A') . "</td>";
-        echo "</tr>";
-    }
+   while ($art = $res_articulos->fetch_assoc()) {
+    echo "<tr>";
+    echo "<td>{$art['descripcion']}</td>";
+    echo "<td>{$art['cantidad']}</td>";
+    echo "<td>$ {$art['precio']}</td>";
+    echo "<td>" . (!empty($art['personalizacion']) ? $art['personalizacion'] : 'N/A') . "</td>";
+    echo "</tr>";
+}
     echo "</table>";
+
+    if ($id_rol == 2): // Solo los clientes pueden subir personalización ?>
+    <form action="subir_personalizacion.php" method="POST" enctype="multipart/form-data" class="form_edu_usuario">
+  <input type="hidden" name="id_pedido" value="<?= $row['id_pedido'] ?>">
+  <label>Sube tu diseño personalizado:</label><br>
+  <input type="file" name="personalizacion" accept="image/*" required>
+  <button type="submit" class="regresar">Subir imagen</button>
+</form>
+<?php endif;
 } else {
     echo "<p>No hay artículos para este pedido.</p>";
 }
-
+if (isset($_GET['success'], $_GET['id_pedido']) 
+    && $_GET['success'] == 1 
+    && intval($_GET['id_pedido']) === intval($row['id_pedido'])): ?>
+    <p style="color:green; font-weight: bold;">Imagen subida exitosamente.</p>
+<?php endif;
 // Botones de cambio de estado
 if ($id_rol != 2) {
     echo "<form method='POST' class='form_s'>";

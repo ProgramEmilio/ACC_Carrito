@@ -124,7 +124,6 @@
 .form_reg_usuario input[type="date"],
 .form_reg_usuario input[type="email"],
 .form_reg_usuario input[type="input"],
-
 .form_reg_usuario textarea {
     width: calc(100% - 20px); 
     padding: 15px;

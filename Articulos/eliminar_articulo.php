@@ -4,37 +4,22 @@ include('../BD/ConexionBD.php');
 if (isset($_GET['id'])) {
     $id_articulo = $_GET['id'];
 
-    // Primero obtener el nombre de la imagen para eliminarla del servidor
-    $sql_img = "SELECT imagen FROM articulos WHERE id_articulo = ?";
-    $stmt_img = $conn->prepare($sql_img);
-    $stmt_img->bind_param("s", $id_articulo);
-    $stmt_img->execute();
-    $stmt_img->bind_result($imagen);
-    $stmt_img->fetch();
-    $stmt_img->close();
+    // Eliminar relaciones en otras tablas primero
+    $conn->query("DELETE FROM articulo_completo WHERE id_articulo = '$id_articulo'");
 
-    if (!empty($imagen)) {
-        $ruta = "../Imagenes/" . $imagen;
-        if (file_exists($ruta)) {
-            unlink($ruta); // elimina el archivo de imagen
-        }
+    // Obtener el id_detalle_articulo relacionado para eliminarlo después
+    $result = $conn->query("SELECT id_detalle_articulo FROM articulos WHERE id_articulo = '$id_articulo'");
+    if ($result && $row = $result->fetch_assoc()) {
+        $id_detalle = $row['id_detalle_articulo'];
+
+        // Primero eliminar el artículo (que depende del detalle)
+        $conn->query("DELETE FROM articulos WHERE id_articulo = '$id_articulo'");
+
+        // Luego eliminar el detalle ya que ya no está referenciado
+        $conn->query("DELETE FROM detalle_articulos WHERE id_detalle_articulo = $id_detalle");
     }
 
-    // Eliminar de la base de datos
-    $sql = "DELETE FROM articulos WHERE id_articulo = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $id_articulo);
-
-    if ($stmt->execute()) {
-        header("Location: ../Articulos/agregar_articulo.php?msg=eliminado");
-    } else {
-        echo "Error al eliminar el artículo: " . $stmt->error;
-    }
-
-    $stmt->close();
-} else {
-    echo "ID de artículo no proporcionado.";
+    header("Location: agregar_articulo.php");
+    exit;
 }
-
-$conn->close();
 ?>
