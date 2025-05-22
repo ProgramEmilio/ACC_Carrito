@@ -32,7 +32,14 @@ $atributos = [];
 while ($row = $result_attr->fetch_assoc()) {
     $atributos[] = $row;
 }
-
+if (!empty($_POST['eliminar_atributos'])) {
+    foreach ($_POST['eliminar_atributos'] as $id_articulo_completo) {
+        $sql_delete_attr = "DELETE FROM articulo_completo WHERE id_articulo_completo = ?";
+        $stmt_del = $conn->prepare($sql_delete_attr);
+        $stmt_del->bind_param("i", $id_articulo_completo);
+        $stmt_del->execute();
+    }
+}
 // Al enviar formulario
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $descripcion = $_POST['descripcion'];
@@ -142,10 +149,11 @@ $lista_atributos = $result_lista->fetch_all(MYSQLI_ASSOC);
 
     <h3>Atributos actuales:</h3>
     <?php foreach ($atributos as $atributo): ?>
-        <label><?= htmlspecialchars($atributo['nombre']) ?>:</label><br>
-        <input type="text" name="atributos[<?= $atributo['id_articulo_completo'] ?>]" 
-               value="<?= htmlspecialchars($atributo['valor']) ?>" required><br>
-    <?php endforeach; ?>
+    <label><?= htmlspecialchars($atributo['nombre']) ?>:</label><br>
+    <input type="text" name="atributos[<?= $atributo['id_articulo_completo'] ?>]" 
+           value="<?= htmlspecialchars($atributo['valor']) ?>" required>
+    <label><input type="radio" name="eliminar_atributos[]" value="<?= $atributo['id_articulo_completo'] ?>"> Eliminar</label><br>
+<?php endforeach; ?>
 
     <h3>Agregar nuevos atributos:</h3>
     <div id="nuevos_atributos"></div>
