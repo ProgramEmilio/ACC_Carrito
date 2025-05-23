@@ -141,7 +141,30 @@ echo "<p>Costo de Envío Total: $" . number_format($envio_general, 2) . "</p>";
 echo "<p><strong>Total General: $" . number_format($total_general + $iva_general + $ieps_general + $envio_general, 2) . "</strong></p>";
 echo "</div>";
 ?>
+ <!-- Botones de acción -->
+    <div class="action-buttons">
+        
+    </div>
 
 <?php include('../Nav/footer.php'); ?>
 </body>
 </html>
+
+<script>
+// Función para imprimir la página
+function printConfirmation() {
+    window.print();
+}
+
+// Agregar botón de imprimir
+document.addEventListener('DOMContentLoaded', function() {
+    const actionButtons = document.querySelector('.action-buttons');
+    if (actionButtons) {
+        const printButton = document.createElement('button');
+        printButton.className = 'btn btn-secondary';
+        printButton.innerHTML = '🖨️ Imprimir Confirmación';
+        printButton.onclick = printConfirmation;
+        actionButtons.appendChild(printButton);
+    }
+});
+</script>
