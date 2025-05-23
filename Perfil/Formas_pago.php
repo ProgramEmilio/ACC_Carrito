@@ -89,38 +89,6 @@ while ($row = $clientes_result->fetch_assoc()) {
 <body>
 <h1 class="titulo">Información Tarjetas</h1>
 
-<br></br>
-<h2 class="sub_titulo">Registrar nueva tarjeta</h2>
-<div class="form_edi_usuario">
-<form method="POST" action="" class="form_reg_usuario">
-    <label>Número de tarjeta (16 dígitos):</label>
-    <input type="text" name="numero_tarjeta" maxlength="16" pattern="\d{16}" required>
-
-    <label>CVV (3 dígitos):</label>
-    <input type="text" name="cvv" maxlength="3" pattern="\d{3}" required>
-
-    <label>Fecha de vencimiento:</label>
-    <input type="month" name="fecha_vencimiento" required>
-
-    <label>Tipo de tarjeta:</label>
-    <select name="tipo_tarjeta" required>
-        <option value="Debito">Débito</option>
-        <option value="Credito">Crédito</option>
-    </select>
-
-    <label>Red de pago:</label>
-    <select name="red_pago" required>
-        <option value="VISA">VISA</option>
-        <option value="MASTERCARD">MasterCard</option>
-    </select>
-
-    <label>Nombre del titular (exacto como está registrado):</label>
-    <input type="text" name="titular" placeholder="Ej. Juan Pérez López" required>
-
-    <input class="btn" type="submit" value="Registrar Tarjeta">
-</form>
-</div>
-
 <h2 class="sub_titulo">Tarjetas Registradas</h2>
 <table class="tabla_forma_pago">
     <thead>
@@ -157,6 +125,39 @@ while ($row = $clientes_result->fetch_assoc()) {
         ?>
     </tbody>
 </table>
+
+<br></br>
+<h2 class="sub_titulo">Registrar nueva tarjeta</h2>
+<div class="form_edi_usuario">
+<form method="POST" action="" class="form_reg_usuario">
+    <label>Número de tarjeta (16 dígitos):</label>
+    <input type="text" name="numero_tarjeta" maxlength="16" pattern="\d{16}" required>
+
+    <label>CVV (3 dígitos):</label>
+    <input type="text" name="cvv" maxlength="3" pattern="\d{3}" required>
+
+    <label>Fecha de vencimiento:</label>
+    <input type="month" name="fecha_vencimiento" required>
+
+    <label>Tipo de tarjeta:</label>
+    <select name="tipo_tarjeta" required>
+        <option value="Debito">Débito</option>
+        <option value="Credito">Crédito</option>
+    </select>
+
+    <label>Red de pago:</label>
+    <select name="red_pago" required>
+        <option value="VISA">VISA</option>
+        <option value="MASTERCARD">MasterCard</option>
+    </select>
+
+    <label>Nombre del titular (exacto como está registrado):</label>
+    <input type="text" name="titular" placeholder="Ej. Juan Pérez López" required>
+
+    <input class="btn" type="submit" value="Registrar Tarjeta">
+</form>
+</div>
+
        <a href="Perfil.php" class="regresar">Regresar</a>
 
 </body>
