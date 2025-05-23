@@ -17,10 +17,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $id_proveedor = 1; // Si no estás seleccionando proveedor, pon un ID por defecto
 
     // 1. Insertar en detalle_articulos
-    $sql_detalle = "INSERT INTO detalle_articulos (existencia, costo, precio, id_proveedor, estatus)
-                VALUES (?, ?, ?, ?, ?)";
+    $sql_detalle = "INSERT INTO detalle_articulos (existencia, costo, precio,  estatus)
+                VALUES (?, ?, ?, ?)";
         $stmt_detalle = $conn->prepare($sql_detalle);
-        $stmt_detalle->bind_param("iddis", $existencia, $costo, $precio, $id_proveedor, $estatus);
+        $stmt_detalle->bind_param("idds", $existencia, $costo, $precio, $estatus);
 
 
     if ($stmt_detalle->execute()) {

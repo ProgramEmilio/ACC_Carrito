@@ -74,6 +74,20 @@ while ($fila = mysqli_fetch_assoc($resultado)) {
         'personalizacion' => $fila['personalizacion']
     ];
 }
+$costos_envio = [];
+
+$query_envios = "SELECT tipo_envio, costo FROM envio";
+$result_envios = mysqli_query($conn, $query_envios);
+
+while ($row_envio = mysqli_fetch_assoc($result_envios)) {
+    $tipo = strtolower($row_envio['tipo_envio']); // para asegurar coincidencia
+    $costos_envio[$tipo] = $row_envio['costo'];
+}
+
+$total_general = 0;
+$iva_general = 0;
+$ieps_general = 0;
+$envio_general = 0;
 
 if (!empty($pedidos)) {
     foreach ($pedidos as $id => $pedido) {
@@ -106,10 +120,26 @@ if (!empty($pedidos)) {
         echo "</div>"; // fin productos
         echo "</div>"; // fin detalle
         echo "</div>"; // fin pedido-card
+        $total_general += $pedido['total'];
+        $iva_general += $pedido['iva'];
+        $ieps_general += $pedido['ieps'];
+
+$tipo_envio_lower = strtolower($pedido['tipo_envio']); // convertir a minúsculas
+if (isset($costos_envio[$tipo_envio_lower])) {
+    $envio_general += $costos_envio[$tipo_envio_lower];
+}
     }
 } else {
     echo "<p>No se encontraron pedidos.</p>";
 }
+echo "<h3 class='sub_titulo'>Resumen General:</h3>";
+echo "<div class='totales'>";
+echo "<p>Suma Total: $" . number_format($total_general, 2) . "</p>";
+echo "<p>IVA Total: $" . number_format($iva_general, 2) . "</p>";
+echo "<p>IEPS Total: $" . number_format($ieps_general, 2) . "</p>";
+echo "<p>Costo de Envío Total: $" . number_format($envio_general, 2) . "</p>";
+echo "<p><strong>Total General: $" . number_format($total_general + $iva_general + $ieps_general + $envio_general, 2) . "</strong></p>";
+echo "</div>";
 ?>
 
 <?php include('../Nav/footer.php'); ?>

@@ -44,22 +44,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         header("Location: ../Home/Home.php");
                         break;
                     case 3: // Proveedor
-                        header("Location: ../Compras/Cotizacion/Cotizar.php");
-                        break;
-                    case 4: // Comprador
-                        header("Location: ../Compras/Aprobar/Aprobar_Compra.php");
-                        break;
-                    case 5: // Vendedor
-                        header("Location: ../Venta/Detalle_venta.php");
-                        break;
-                    case 6: // Producción
-                        header("Location: ../Produccion/pro.php");
-                        break;
-                    case 7: // Distribuidor
-                        header("Location: ../Distribucion/Distribucion.php");
-                        break;
-                    case 8: // Responsable stock
-                        header("Location: ../Inventario/Inventario.php");
+                        header("Location: ../Pedido/seguimiento_pedido.php");
                         break;
                     default:
                         header("Location: ../Home/Home.php"); // Si el rol no existe, ir a una página por defecto

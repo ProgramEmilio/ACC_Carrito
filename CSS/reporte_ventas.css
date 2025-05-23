@@ -21,6 +21,7 @@ h2 {
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     width: 95%;
     margin-left: 20px;
+    margin-right: 20px;
 }
 
 .pedido-header, .pedido-info, .pago-info {
@@ -64,4 +65,32 @@ h2 {
 .producto div span.etiqueta {
     font-weight: 600;
     color: #666;
+}
+
+.totales {
+    background-color: #f9f9f9;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 10px;
+    margin-left: 20px;
+    margin-right: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.totales h3 {
+    margin-top: 0;
+    text-align: center;
+    color: #000000;
+}
+
+.totales p {
+    font-size: 20px;
+    margin: 10px 0;
+    color: #000000;
+}
+
+.totales p strong {
+    font-size: 25px;
+    color: #000;
 }

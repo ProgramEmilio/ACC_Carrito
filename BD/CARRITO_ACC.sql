@@ -236,7 +236,6 @@ INSERT INTO articulo_completo (id_articulo, id_atributo, valor) VALUES
 ('P001', 3, 'playera1.png'),
 ('P001', 3, 'playera2.png'),
 ('P001', 3, 'playera3.png'),
-('P001', 3, 'termo3.png'),
 ('P002', 1, 'Azul'),
 ('P002', 2, '750ml'),
 ('P002', 3, 'termo3.png'),
@@ -291,3 +290,7 @@ INSERT INTO tabla_reporte (
   1, 'Domicilio', 'P001', 'Playera personalizada con diseño a elección.', 
   2, 250.00, 500.00, 'Texto', 1, 80.00, 0.00, 800.00, CURDATE()
 );
+
+-- Tarjeta del cliente
+INSERT INTO tarjeta (numero_tarjeta, cvv, fecha_vencimiento, tipo_tarjeta, red_pago, titular) VALUES
+('987654321098', '123', '2026-12-31', 'Credito', 'VISA', 4);
